@@ -106,6 +106,21 @@ if (!evidenceList) {
   }
 }
 
+// 5. Fixture-name lockstep: every eval's `fixture` must name a repo that
+//    setup-fixtures.mjs actually builds — a rename/typo should fail here,
+//    not as a confusing runtime setup error.
+{
+  const setup = readText('evals/setup-fixtures.mjs') ?? '';
+  const built = new Set([...setup.matchAll(/^repo\(\s*\n?\s*'([^']+)'/gm)].map((m) => m[1]));
+  const evals = readJson('evals/evals.json');
+  if (built.size === 0) fail('evals/setup-fixtures.mjs: no repo(...) fixture definitions found');
+  for (const e of evals?.evals ?? []) {
+    if (e.fixture && !built.has(e.fixture)) {
+      fail(`evals/evals.json (${e.name}): fixture "${e.fixture}" is not built by setup-fixtures.mjs (built: ${[...built].join(', ')})`);
+    }
+  }
+}
+
 if (failures > 0) {
   console.error(`\n${failures} check(s) failed`);
   process.exit(1);

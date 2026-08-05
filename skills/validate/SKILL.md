@@ -20,6 +20,9 @@ code. Until then, the work is not done — it is merely written.
 - Green checks alone are not proof the change works — they prove you can run
   CI. Runtime observation (Tier 3) is what proves behavior, which is why it
   is a tier and not an afterthought.
+- Coverage is declared before it is executed: the plan you announce in
+  Step 3 binds the final report — nothing declared may go silently missing,
+  and nothing undeclared may be quietly skipped.
 
 ## Step 0 — reuse what the project already knows
 
@@ -61,7 +64,36 @@ Makefile, CI workflows) over raw tool invocations. Decide, before running
 anything, which commands constitute Tier 1 and Tier 2 for this project and
 which surface Tier 3 must drive.
 
-## Steps 3–5 — the three tiers
+## Step 3 — declare the coverage plan
+
+Before running anything, tell the user what this validation will and will
+not cover — in a compact block, one line per item:
+
+- **Will validate**: per tier, the commands that will run and the surface
+  Tier 3 will drive.
+- **Cannot validate**: each item with its explicit reason — no tooling in
+  this environment, no credentials, not locally executable. An artifact
+  that can't execute locally still gets what IS checkable — parse, syntax,
+  schema, a dry-run — and the rest is declared, not omitted.
+
+Why upfront: on many stacks a large part of the work is not locally
+verifiable. Saying so before spending the run is the honest version of a
+surprising report — the user can stop you, supply what's missing, or accept
+the gap before it costs anything.
+
+The declaration is a contract. Every declared item appears in the final
+report with a verdict; every declared-impossible item appears there as SKIP
+or BLOCKED with the same reason. If the run forces a deviation from the
+plan, the report names it — silent drift between plan and report is a FAIL
+of the report itself.
+
+**Plan-only mode**: only when the FIRST scope argument is exactly the
+standalone token `plan` — consume it (any remaining arguments are the
+scope), print the declaration, and stop here; execute nothing. A path or
+branch that merely contains the word (`src/planner/`, `feature/plan-b`) is
+an ordinary scope and gets the full run.
+
+## Steps 4–6 — the three tiers
 
 Run the tiers in order. A FAIL in an earlier tier does not excuse skipping a
 later one when it can still run meaningfully — a lint error shouldn't hide a
@@ -96,7 +128,7 @@ These hold everywhere, including your final message:
   [reference/evidence.md](reference/evidence.md) applies to every sentence
   you write about the work's correctness.
 
-## Step 6 — record the recipe
+## Step 7 — record the recipe
 
 If this run discovered anything a future run would need — the working build
 command, how to launch the app, the health-check URL — persist it per
@@ -104,12 +136,13 @@ command, how to launch the app, the health-check URL — persist it per
 succeeded this run. First run in a project without `.claude/`? Ask before
 creating it.
 
-## Step 7 — report
+## Step 8 — report
 
 Produce the final report exactly per
 [reference/report.md](reference/report.md): overall verdict first, per-tier
-table, evidence appendix. Print it verbatim — no summary prose above it, no
-hedging below it.
+table, declared-but-not-validated items with their reasons, evidence
+appendix. Print it verbatim — no summary prose above it, no hedging below
+it.
 
 ## Reference index
 
