@@ -17,10 +17,10 @@ lives beneath `~/.copilot/installed-plugins/`:
 ```bash
 SKILL="${CLAUDE_PLUGIN_ROOT}/skills/validate/SKILL.md"
 if [ ! -f "$SKILL" ]; then
-  SKILL=$(find ~/.claude/plugins/cache -name SKILL.md -path '*/validate/*/skills/validate/*' 2>/dev/null | sort | tail -1)
+  SKILL=$(find ~/.claude/plugins/cache -name SKILL.md -path '*/validate/*/skills/validate/*' 2>/dev/null | sort -V | tail -1)
 fi
 if [ -z "$SKILL" ] || [ ! -f "$SKILL" ]; then
-  SKILL=$(find ~/.copilot/installed-plugins -name SKILL.md -path '*/validate/skills/validate/*' 2>/dev/null | sort | tail -1)
+  SKILL=$(find ~/.copilot/installed-plugins -name SKILL.md -path '*/validate/skills/validate/*' 2>/dev/null | sort -V | tail -1)
 fi
 if [ -z "$SKILL" ] || [ ! -f "$SKILL" ]; then
   echo "validate skill not found (checked \${CLAUDE_PLUGIN_ROOT}, ~/.claude/plugins/cache, ~/.copilot/installed-plugins). Is the plugin installed?" >&2
@@ -52,7 +52,8 @@ session scope as the skill describes.
 - Every verdict needs evidence captured THIS run: quoted output, exit codes,
   response bodies, screenshot paths. Memory is not evidence.
 - Your final message may not contain hedging about the work's correctness —
-  no "should work", "probably", "seems to", "appears to", "likely". A claim
+  no "should work", "probably", "seems to", "appears to", "likely", … (the
+  canonical list lives in the skill's reference/evidence.md). A claim
   without evidence is a FAIL.
 - At most 3 fix-and-rerun attempts, then stop and report FAIL with all
   evidence for the human to decide.

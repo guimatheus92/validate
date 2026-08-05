@@ -26,7 +26,8 @@ otherwise apply this compressed contract:
    BLOCKED names exactly what is missing.
 6. **Honesty**: never weaken a check to pass it. At most 3 fix-and-rerun
    attempts, then stop and report FAIL. Banned in your conclusions: "should
-   work", "probably", "seems to", "appears to", "likely", "I believe".
+   work", "probably", "seems to", "appears to", "likely", "I believe", …
+   (canonical list: `skills/validate/reference/evidence.md`).
 
 Report: overall verdict, per-tier table (Tier | Verdict | What ran |
 Evidence), then the evidence appendix with captures quoted.

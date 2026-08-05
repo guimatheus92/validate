@@ -13,7 +13,7 @@ is markdown (a command, a skill, reference docs) plus three JSON manifests.
 The consistency check is the whole local suite:
 
 ```bash
-node scripts/check.mjs   # manifests in lockstep, frontmatter present, no dangling reference links
+node scripts/check.mjs   # manifests in lockstep (real semver), frontmatter present, no dangling reference links, banned-language list in lockstep between evidence.md and evals.json
 ```
 
 ## Architecture
@@ -37,7 +37,7 @@ reference files read on demand.
 - `.github/prompts/validate.prompt.md` — compressed contract for VS Code
   Copilot Chat users, who cannot load CLI plugins.
 - `evals/` — the skill's regression suite: `evals.json` (scenarios +
-  assertions) and `setup-fixtures.mjs` (builds the five fixture repos).
+  assertions) and `setup-fixtures.mjs` (builds the seven fixture repos).
   Re-run the evals after any change to `skills/` content.
 
 ## Key conventions
@@ -79,9 +79,13 @@ reference files read on demand.
 - **Change the report format:** edit `skills/validate/reference/report.md`;
   keep `report-has-per-tier-verdicts` in the evals passing.
 - **Change gating rules:** `skills/validate/reference/evidence.md` is the
-  source of truth; the three inline duplicates in `commands/validate.md` and
-  the compressed list in `.github/prompts/validate.prompt.md` must be kept in
-  sync by hand.
+  source of truth. The banned-language list in the eval assertions is
+  machine-checked against it by `scripts/check.mjs` — edit evidence.md and
+  the check tells you where to sync. The copies in `commands/validate.md`
+  and `.github/prompts/validate.prompt.md` are deliberately COMPRESSED
+  pointers (a few examples + a link to evidence.md), not full lists — keep
+  them pointers; the same goes for the recipe read-order duplicated between
+  `commands/validate.md` and `reference/recipe.md`, which is hand-synced.
 - **Cut a release:** `node scripts/release.mjs <patch|minor|major|x.y.z>` —
   bumps the three manifests, verifies no stale version, rolls CHANGELOG,
   commits and tags (push left to you).

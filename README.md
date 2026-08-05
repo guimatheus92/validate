@@ -91,7 +91,7 @@ Claude Code namespaces plugin commands as `/validate:validate`. If the bare
 description: Prove the session's work is correct before calling it done.
 ---
 Run the validate plugin: read the SKILL.md found by
-`find ~/.claude/plugins/cache -name SKILL.md -path '*/validate/*/skills/validate/*' | sort | tail -1`
+`find ~/.claude/plugins/cache -name SKILL.md -path '*/validate/*/skills/validate/*' | sort -V | tail -1`
 and follow it end to end with "$ARGUMENTS" as the scope override.
 ```
 
@@ -138,11 +138,12 @@ Ruby, PHP, Elixir). Project knowledge enters two ways:
 
 ## Evals
 
-The skill ships with its own regression suite in [`evals/`](evals/): five
+The skill ships with its own regression suite in [`evals/`](evals/): seven
 fixture-backed scenarios, each guarding a specific failure mode of "the work
 is done" (fake regression proof, runtime PASS on a docs-only change, visual
 claims without a browser, environment failures blamed on code, hedged
-verdicts on untested projects). Every run is benchmarked **With Skill**
+verdicts on untested projects, scope truncated to the last commit, and
+weakening a failing test to force a pass). Every run is benchmarked **With Skill**
 against a **Without Skill** baseline — the same model and prompt with no
 skill — so the skill's value is measured, not assumed.
 

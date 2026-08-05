@@ -14,9 +14,10 @@ steps and the impact you believe the issue has.
 
 ## Scope notes
 
-- validate is a prompt-only plugin: it ships no executable code beyond two
-  maintenance scripts that never run at the install site. The attack surface is
-  the instructions themselves.
+- validate is a prompt-only plugin: it ships no executable code beyond three
+  maintenance/eval scripts (`scripts/check.mjs`, `scripts/release.mjs`,
+  `evals/setup-fixtures.mjs`) that never run at the install site. The attack
+  surface is the instructions themselves.
 - The instructions direct an agent to run project build/test/launch commands in
   the user's working directory. Anything that could trick the agent into
   running commands outside that intent (prompt injection via crafted repo

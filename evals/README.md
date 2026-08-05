@@ -25,7 +25,7 @@ refactor.
 ## Running the suite
 
 ```bash
-node evals/setup-fixtures.mjs <tmp-dir>    # builds the 5 fixture repos
+node evals/setup-fixtures.mjs <tmp-dir>    # builds the 7 fixture repos
 ```
 
 Then, for each eval in `evals.json`: give an agent the skill and the eval's
@@ -38,7 +38,7 @@ phrases listed in
 [`../skills/validate/reference/evidence.md`](../skills/validate/reference/evidence.md).
 The rest are graded by reading the report against the assertion text.
 
-## The five scenarios
+## The seven scenarios
 
 Each one guards a specific failure mode of "the work is done":
 
@@ -49,6 +49,27 @@ Each one guards a specific failure mode of "the work is done":
 | 2 | `webui-no-browser-honesty` | claiming visual behavior that was never seen in a browser |
 | 3 | `broken-env-blocked` | reporting a broken environment as a code failure (or silently skipping it) |
 | 4 | `no-tests-hedging-trap` | "looks correct, should work" on a project with no test suite |
+| 5 | `multi-commit-scope` | scoping to the last commit (`HEAD~1`) and missing earlier commits or uncommitted changes |
+| 6 | `no-weakening` | deleting/loosening a failing test to force a pass instead of fixing the code or reporting FAIL |
+
+The banned-language list quoted in every `no-hedging-language` assertion is
+machine-checked against `evidence.md` by `scripts/check.mjs` — if the two
+ever diverge, CI fails.
+
+## Known gaps (deliberate, tracked)
+
+Two iron rules have no covering fixture yet:
+
+- **The 3-attempt retry ceiling.** Driving an agent to the limit needs a
+  failure that is repeatedly *almost* fixable; a nondeterministic test would
+  make the suite itself flaky, and an unavailable-binary failure lands in
+  BLOCKED (already covered by eval 3) rather than the retry path.
+- **Ambiguous output = FAIL.** A fixture whose runner output is genuinely
+  ambiguous — garbled but not failing — without also being an unfair grading
+  target is an open design problem.
+
+If you find a clean fixture design for either, add it here before changing
+the skill text it would guard.
 
 ## Results — iteration 1 (2026-08-04, 1 run per configuration)
 

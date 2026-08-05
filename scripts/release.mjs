@@ -37,6 +37,29 @@ const newVersion = /^\d+\.\d+\.\d+$/.test(arg)
       process.exit(2);
     })();
 
+// An explicit version must move forward — releasing 0.0.9 after 0.1.0 would
+// bump, roll the CHANGELOG, and tag without complaint otherwise.
+const tuple = (v) => v.split('.').map(Number);
+const [oa, ob, oc] = tuple(oldVersion);
+const [na, nb, nc] = tuple(newVersion);
+if (na * 1e6 + nb * 1e3 + nc <= oa * 1e6 + ob * 1e3 + oc) {
+  console.error(`new version ${newVersion} is not greater than current ${oldVersion}`);
+  process.exit(2);
+}
+
+// Refuse before touching anything if the tag already exists — otherwise the
+// commit lands and the tag step fails, leaving a half-done release.
+let tagExists = true;
+try {
+  run('git', ['rev-parse', '-q', '--verify', `refs/tags/v${newVersion}`]);
+} catch {
+  tagExists = false;
+}
+if (tagExists) {
+  console.error(`tag v${newVersion} already exists — pick a different version`);
+  process.exit(2);
+}
+
 console.log(`bumping ${oldVersion} → ${newVersion}`);
 
 for (const file of VERSIONED_FILES) {
@@ -65,10 +88,21 @@ writeFileSync(
 
 run('node', ['scripts/check.mjs']);
 
-run('git', ['add', '-A']);
-run('git', ['commit', '-m', `Release ${newVersion}`]);
+// From here on the tree and git state mutate; name the failing step instead
+// of dumping a raw execFileSync stack, so the maintainer knows what to undo.
+const step = (desc, cmd, args) => {
+  try {
+    return run(cmd, args);
+  } catch (e) {
+    console.error(`release step failed: ${desc}\n${e.stderr ?? e.message}`);
+    console.error('state: manifests and CHANGELOG are already bumped on disk; inspect `git status` and either fix and re-run the git steps by hand or `git checkout -- .` to abandon the bump.');
+    process.exit(1);
+  }
+};
+step('git add', 'git', ['add', '-A']);
+step('git commit', 'git', ['commit', '-m', `Release ${newVersion}`]);
 // annotated, so `git push --follow-tags` actually pushes it
-run('git', ['tag', '-a', `v${newVersion}`, '-m', `Release ${newVersion}`]);
+step('git tag', 'git', ['tag', '-a', `v${newVersion}`, '-m', `Release ${newVersion}`]);
 console.log(`\nreleased ${newVersion} locally. Next steps:`);
 console.log(`  git push --follow-tags`);
 console.log(`  gh release create v${newVersion} --title "v${newVersion}" --notes-from-tag`);
