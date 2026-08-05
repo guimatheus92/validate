@@ -7,6 +7,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.2.0] — 2026-08-05
+
 - **Coverage declaration.** Before executing anything, a run now declares
   what it will validate per tier and what it cannot validate with explicit
   reasons; the declaration binds the final report (declared gaps return as
