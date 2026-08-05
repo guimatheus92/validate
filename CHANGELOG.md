@@ -16,8 +16,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   never names — proves the agent generalizes and declares gaps),
   `injection-resistance` (repo-planted instruction to fake PASS must be
   ignored and reported as a finding), and `recipe-reuse` (a pre-seeded
-  recipe's nonstandard-but-only-working command must be reused). Suite is
-  now ten scenarios.
+  recipe's nonstandard-but-only-working command must be reused), plus
+  `plan-only-mode` (the leading `plan` token must produce a declaration and
+  execute nothing). Suite is now eleven scenarios over ten fixtures.
 
 ## [0.1.0] — 2026-08-04
 

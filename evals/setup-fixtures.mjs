@@ -442,7 +442,7 @@ test('median of an even-length list', () => {
 );
 
 // 8. bi-coverage — a BI-style project whose artifacts mostly cannot execute
-//    locally (semantic model JSON, query definitions, report layout). Tests
+//    locally (semantic model JSON, query definitions). Tests
 //    the coverage declaration: what CAN be checked (JSON parses, measure
 //    present, docs updated) is separated upfront from what cannot (measure
 //    semantics, query execution, report rendering) with reasons. The skill

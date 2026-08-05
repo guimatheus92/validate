@@ -42,7 +42,8 @@ Rules:
   that can't is not PASS — fix the verdict, not the appendix.
 - SKIP and BLOCKED rows carry their reason in the "What ran" column
   ("docs-only change" / "no DATABASE_URL in env — needed to start the app").
-- **The report must match the Step 3 coverage declaration.** Every declared
+- **The report must match the coverage declaration** (the plan announced
+  before execution — see SKILL.md). Every declared
   item has a verdict backed by evidence; every declared gap appears under
   **Not validated** with its original reason; anything the run had to do
   differently from the plan is named as a deviation. A report that silently

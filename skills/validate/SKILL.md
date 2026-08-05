@@ -87,8 +87,11 @@ or BLOCKED with the same reason. If the run forces a deviation from the
 plan, the report names it — silent drift between plan and report is a FAIL
 of the report itself.
 
-**Plan-only mode**: if the scope arguments contain the word `plan`, stop
-here — print the declaration and execute nothing.
+**Plan-only mode**: only when the FIRST scope argument is exactly the
+standalone token `plan` — consume it (any remaining arguments are the
+scope), print the declaration, and stop here; execute nothing. A path or
+branch that merely contains the word (`src/planner/`, `feature/plan-b`) is
+an ordinary scope and gets the full run.
 
 ## Steps 4–6 — the three tiers
 

@@ -45,9 +45,13 @@ verified commands for this project):
 
 Follow the skill end to end. `$ARGUMENTS` (if non-empty) is an explicit scope
 override — a commit range, branch, or list of paths; otherwise detect the
-session scope as the skill describes. If `$ARGUMENTS` contains the word
-`plan`, follow the skill through its coverage declaration and stop there —
-print what would and would not be validated, execute nothing.
+session scope as the skill describes. Plan-only mode is selected ONLY when
+the first whitespace-separated token of `$ARGUMENTS` is exactly `plan`:
+consume that token (the remainder, if any, is the scope), follow the skill
+through its coverage declaration and stop there — print what would and would
+not be validated, execute nothing. A scope path or branch that merely
+contains the word (e.g. `src/planner/`, `feature/plan-b`) is a normal scope
+and gets a full validation.
 
 ## Hard rules (apply even if you read nothing else)
 
