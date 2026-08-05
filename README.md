@@ -76,7 +76,7 @@ Useful follow-ups after a run:
 
 ```
 "Tier 2 is BLOCKED — here's the DATABASE_URL, rerun it."
-"Record the recipe so next time is faster."        # writes .claude/skills/validate-recipe/SKILL.md
+"Record the recipe so next time is faster."        # writes .claude/skills/validate-recipe/SKILL.md by default
 "Validate only the runtime tier for src/api/."
 ```
 
@@ -155,23 +155,11 @@ To run them, ask an agent in this repo:
  skill, and grade the report against that eval's assertions."
 ```
 
-<details>
-<summary><strong>Latest results — iteration 1</strong> (click to expand)</summary>
-
-| Metric | With Skill | Without Skill (baseline) |
-|---|---|---|
-| Assertions passed | **17/17 (100%)** | 14/17 (82%) |
-| Mean time per eval | 179s | 77s |
-| Mean tokens per eval | ~63k | ~45k |
-
-The baseline missed: per-tier verdict structure (eval 0), an explicit
-runtime SKIP on a docs-only change (eval 1), and hedging-free language
-(eval 3). The extra time and tokens are the cost of regression proofs,
-driving the real app, and structured evidence.
-
-Full breakdown, glossary, and grading instructions: [`evals/README.md`](evals/README.md).
-
-</details>
+Results live in one place — [`evals/README.md`](evals/README.md): the
+latest benchmark with its date and sample-size caveats, the per-eval
+breakdown, the glossary, and grading instructions. The figures are
+deliberately not restated here: they come from single-run iterations and
+duplicating them would mean two tables to keep in lockstep by hand.
 
 ## Further reading
 
