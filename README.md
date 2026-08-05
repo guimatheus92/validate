@@ -51,6 +51,35 @@ Scope defaults to the full range of the session's work — every commit on the
 branch plus uncommitted changes, never just the last commit. Pass a range,
 branch, or paths to override.
 
+### What to say to the agent
+
+The slash command is the explicit trigger, but the skill also fires on
+natural language once the plugin is installed. Any of these work:
+
+```
+/validate
+/validate main..HEAD
+/validate src/checkout/
+
+"Validate the work before we call it done."
+"Prove this fix actually works — don't just run the tests."
+"Is this done? Validate it properly: tests, regression proof, and run the app."
+"We just added the export feature — validate it end to end."
+```
+
+What you get back is always the same shape: an overall verdict on line one,
+a per-tier table (static / tests / runtime), and an evidence appendix with
+the captured output. If the agent answers with "should work" instead of a
+verdict, the skill did not run — invoke the slash command explicitly.
+
+Useful follow-ups after a run:
+
+```
+"Tier 2 is BLOCKED — here's the DATABASE_URL, rerun it."
+"Record the recipe so next time is faster."        # writes .claude/skills/validate-recipe/SKILL.md
+"Validate only the runtime tier for src/api/."
+```
+
 ### Command name under Claude Code
 
 Claude Code namespaces plugin commands as `/validate:validate`. If the bare
@@ -106,6 +135,43 @@ Ruby, PHP, Elixir). Project knowledge enters two ways:
 - any skills already in your repo's `.claude/skills/`, `.github/skills/`,
   `.agents/skills/`, or `.copilot/skills/` — the run reads them and they
   outrank the generic playbooks.
+
+## Evals
+
+The skill ships with its own regression suite in [`evals/`](evals/): five
+fixture-backed scenarios, each guarding a specific failure mode of "the work
+is done" (fake regression proof, runtime PASS on a docs-only change, visual
+claims without a browser, environment failures blamed on code, hedged
+verdicts on untested projects). Every run is benchmarked **With Skill**
+against a **Without Skill** baseline — the same model and prompt with no
+skill — so the skill's value is measured, not assumed.
+
+To run them, ask an agent in this repo:
+
+```
+"Run the validate eval suite: build the fixtures with
+ node evals/setup-fixtures.mjs <tmp-dir>, then execute each prompt from
+ evals/evals.json in its fixture (work branch, scope main..HEAD) with the
+ skill, and grade the report against that eval's assertions."
+```
+
+<details>
+<summary><strong>Latest results — iteration 1</strong> (click to expand)</summary>
+
+| Metric | With Skill | Without Skill (baseline) |
+|---|---|---|
+| Assertions passed | **17/17 (100%)** | 14/17 (82%) |
+| Mean time per eval | 179s | 77s |
+| Mean tokens per eval | ~63k | ~45k |
+
+The baseline missed: per-tier verdict structure (eval 0), an explicit
+runtime SKIP on a docs-only change (eval 1), and hedging-free language
+(eval 3). The extra time and tokens are the cost of regression proofs,
+driving the real app, and structured evidence.
+
+Full breakdown, glossary, and grading instructions: [`evals/README.md`](evals/README.md).
+
+</details>
 
 ## Further reading
 
