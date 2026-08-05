@@ -1,0 +1,23 @@
+{
+  "$schema": "https://json.schemastore.org/claude-code-marketplace.json",
+  "name": "validate",
+  "version": "0.1.0",
+  "description": "Post-work validation for AI coding sessions (single-plugin marketplace; works on Copilot CLI and Claude Code)",
+  "owner": {
+    "name": "Guilherme Matheus",
+    "email": "guilherme_matheus12@hotmail.com"
+  },
+  "plugins": [
+    {
+      "name": "validate",
+      "description": "Prove an AI coding session's work is correct before calling it done. One command runs static checks, tests with regression proof, and live runtime verification (CLI, API, browser) with captured evidence and PASS/FAIL/BLOCKED/SKIP verdicts. Works on Copilot CLI and Claude Code.",
+      "version": "0.1.0",
+      "author": {
+        "name": "Guilherme Matheus",
+        "email": "guilherme_matheus12@hotmail.com"
+      },
+      "source": ".",
+      "category": "productivity"
+    }
+  ]
+}
