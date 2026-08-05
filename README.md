@@ -60,6 +60,7 @@ natural language once the plugin is installed. Any of these work:
 /validate
 /validate main..HEAD
 /validate src/checkout/
+/validate plan          # dry-run: declare what would (and would not) be validated, run nothing
 
 "Validate the work before we call it done."
 "Prove this fix actually works — don't just run the tests."
@@ -79,6 +80,18 @@ Useful follow-ups after a run:
 "Record the recipe so next time is faster."        # writes .claude/skills/validate-recipe/SKILL.md by default
 "Validate only the runtime tier for src/api/."
 ```
+
+### The coverage plan (and `/validate plan`)
+
+Before executing anything, the run declares its coverage: what it WILL
+validate per tier, and what it canNOT validate with the reason (no tooling
+in the environment, no credentials, artifact not locally executable — think
+BI models, IaC applies, CI workflows). That declaration binds the final
+report: declared gaps come back as SKIP/BLOCKED with the same reasons, and
+nothing declared goes silently missing.
+
+`/validate plan` stops right after the declaration — a cheap dry-run that
+shows what a full run would and would not cover, without executing anything.
 
 ### Command name under Claude Code
 
@@ -138,12 +151,13 @@ Ruby, PHP, Elixir). Project knowledge enters two ways:
 
 ## Evals
 
-The skill ships with its own regression suite in [`evals/`](evals/): seven
+The skill ships with its own regression suite in [`evals/`](evals/): ten
 fixture-backed scenarios, each guarding a specific failure mode of "the work
 is done" (fake regression proof, runtime PASS on a docs-only change, visual
 claims without a browser, environment failures blamed on code, hedged
-verdicts on untested projects, scope truncated to the last commit, and
-weakening a failing test to force a pass). Every run is benchmarked **With Skill**
+verdicts on untested projects, scope truncated to the last commit, weakening
+a failing test to force a pass, undeclared coverage gaps, obeying repo-planted
+fake-PASS instructions, and ignoring the project recipe). Every run is benchmarked **With Skill**
 against a **Without Skill** baseline — the same model and prompt with no
 skill — so the skill's value is measured, not assumed.
 

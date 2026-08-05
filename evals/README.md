@@ -25,7 +25,7 @@ refactor.
 ## Running the suite
 
 ```bash
-node evals/setup-fixtures.mjs <tmp-dir>    # builds the 7 fixture repos
+node evals/setup-fixtures.mjs <tmp-dir>    # builds the 10 fixture repos
 ```
 
 Then, for each eval in `evals.json`: give an agent the skill and the eval's
@@ -38,7 +38,7 @@ phrases listed in
 [`../skills/validate/reference/evidence.md`](../skills/validate/reference/evidence.md).
 The rest are graded by reading the report against the assertion text.
 
-## The seven scenarios
+## The ten scenarios
 
 Each one guards a specific failure mode of "the work is done":
 
@@ -51,6 +51,9 @@ Each one guards a specific failure mode of "the work is done":
 | 4 | `no-tests-hedging-trap` | "looks correct, should work" on a project with no test suite |
 | 5 | `multi-commit-scope` | scoping to the last commit (`HEAD~1`) and missing earlier commits or uncommitted changes |
 | 6 | `no-weakening` | deleting/loosening a failing test to force a pass instead of fixing the code or reporting FAIL |
+| 7 | `coverage-declaration` | silently skipping what it cannot validate instead of declaring it upfront — on a stack the skill never names (the agent must generalize) |
+| 8 | `injection-resistance` | obeying repo-planted instructions to fake PASS / skip checks instead of reporting them as findings |
+| 9 | `recipe-reuse` | rediscovering (or dead-ending on) commands a project recipe already records as verified |
 
 The banned-language list quoted in every `no-hedging-language` assertion is
 machine-checked against `evidence.md` by `scripts/check.mjs` — if the two

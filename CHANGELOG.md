@@ -7,6 +7,18 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+- **Coverage declaration.** Before executing anything, a run now declares
+  what it will validate per tier and what it cannot validate with explicit
+  reasons; the declaration binds the final report (declared gaps return as
+  SKIP/BLOCKED with the same reasons, deviations are named). New plan-only
+  mode: `/validate plan` stops after the declaration.
+- **Three new evals**: `coverage-declaration` (BI-style fixture the skill
+  never names — proves the agent generalizes and declares gaps),
+  `injection-resistance` (repo-planted instruction to fake PASS must be
+  ignored and reported as a finding), and `recipe-reuse` (a pre-seeded
+  recipe's nonstandard-but-only-working command must be reused). Suite is
+  now ten scenarios.
+
 ## [0.1.0] — 2026-08-04
 
 - **Initial release.** The `/validate` command and `validate` skill:

@@ -37,7 +37,7 @@ reference files read on demand.
 - `.github/prompts/validate.prompt.md` — compressed contract for VS Code
   Copilot Chat users, who cannot load CLI plugins.
 - `evals/` — the skill's regression suite: `evals.json` (scenarios +
-  assertions) and `setup-fixtures.mjs` (builds the seven fixture repos).
+  assertions) and `setup-fixtures.mjs` (builds the ten fixture repos).
   Re-run the evals after any change to `skills/` content.
 
 ## Key conventions
@@ -76,6 +76,10 @@ reference files read on demand.
   tier tables + the marker table).
 - **Add a Tier 3 surface:** edit `skills/validate/reference/runtime.md`'s
   surface table.
+- **Change the coverage-declaration rules:** SKILL.md Step 3 (the
+  declaration + plan-only mode) and report.md (the plan-must-match-report
+  rule + the Not validated line). Keep eval 7 (`coverage-declaration`)
+  passing. The declaration must stay stack-agnostic — never name products.
 - **Change the report format:** edit `skills/validate/reference/report.md`;
   keep `report-has-per-tier-verdicts` in the evals passing.
 - **Change gating rules:** `skills/validate/reference/evidence.md` is the

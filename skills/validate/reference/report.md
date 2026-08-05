@@ -15,6 +15,9 @@ above it, no hedged commentary below it. The report IS the answer.
 | 2 — tests | PASS | `npm test` (142 passed) + regression proof | see appendix |
 | 3 — runtime | PASS | drove /checkout flow, 3 screenshots | see appendix |
 
+**Not validated**: <each gap declared in the coverage plan, with its reason —
+omit the line only when the plan declared no gaps>
+
 ## Evidence
 
 ### Tier 1
@@ -39,6 +42,11 @@ Rules:
   that can't is not PASS — fix the verdict, not the appendix.
 - SKIP and BLOCKED rows carry their reason in the "What ran" column
   ("docs-only change" / "no DATABASE_URL in env — needed to start the app").
+- **The report must match the Step 3 coverage declaration.** Every declared
+  item has a verdict backed by evidence; every declared gap appears under
+  **Not validated** with its original reason; anything the run had to do
+  differently from the plan is named as a deviation. A report that silently
+  drops or adds coverage relative to the declaration is itself wrong.
 - On FAIL or BLOCKED, end with a short **Next step** line: the exact failing
   command or missing prerequisite, and the decision the human needs to make.
 - The banned-language list from [evidence.md](evidence.md) applies to every

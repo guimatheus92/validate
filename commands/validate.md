@@ -1,6 +1,6 @@
 ---
 description: Prove the session's work is correct — static checks, tests, and live runtime evidence — before calling it done.
-argument-hint: "[commit-range | branch | paths...]"
+argument-hint: "[plan] [commit-range | branch | paths...]"
 allowed-tools: ["Bash", "Read", "Glob", "Grep", "Write", "Edit"]
 ---
 
@@ -45,7 +45,9 @@ verified commands for this project):
 
 Follow the skill end to end. `$ARGUMENTS` (if non-empty) is an explicit scope
 override — a commit range, branch, or list of paths; otherwise detect the
-session scope as the skill describes.
+session scope as the skill describes. If `$ARGUMENTS` contains the word
+`plan`, follow the skill through its coverage declaration and stop there —
+print what would and would not be validated, execute nothing.
 
 ## Hard rules (apply even if you read nothing else)
 
