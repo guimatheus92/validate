@@ -62,6 +62,13 @@ change calls for. A missing or failed proof caps the tier: Tier 2 is
 **FAIL**, with the reason stated (covering test does not detect the bug /
 new test survived tampering), no matter how green the suite is.
 
+Mode selection follows the claim, not the observed state. Work presented
+as a bug fix — or that modifies the covered source — always takes the
+bug-fix proof: when the behavior looks already present at base, that is
+exactly what the pre-fix run exposes. The tamper check is for pure test
+additions — the session added or modified tests and claims no behavioral
+change. New-feature tests follow the feature rule.
+
 ### Bug fix — prove the test detects the bug
 
 1. Identify (or write) the test that covers the fixed behavior.
@@ -84,20 +91,24 @@ present at base, the baseline comparison proves nothing — the test passes
 on both sides. Prove the test is not vacuous with a **tamper check**:
 
 1. Create a throwaway worktree of the current branch
-   (`git worktree add <tmp-dir> HEAD`).
+   (`git worktree add <tmp-dir> HEAD`), and make sure the new test is
+   present in it — copy the test file in if it is not yet committed
+   (`git worktree add` carries only committed state).
 2. In the worktree, deliberately break the covered code path — alter its
    behavior (flip a comparison, change a returned value), never its syntax:
    a tree that cannot build fails every test and proves nothing about this
    one.
 3. Run the new test there. It must **fail**. Run it on the intact tree. It
    must **pass**.
-4. Both captures go in the report; remove the worktree.
+4. Both captures go in the report; remove the worktree
+   (`git worktree remove <tmp-dir> --force`).
 
 A new test that survives tampering is vacuous — it guards nothing — and
 Tier 2 is FAIL with that reason. When the tamper check is genuinely
 infeasible (the test depends on an external service or environment a
 worktree cannot have), mark it SKIP with the reason stated — never
-silently.
+silently. A SKIP'd tamper check caps the tier at SKIP — never PASS: a
+green suite cannot stand in for the proof it was exempted from.
 
 ### New feature
 

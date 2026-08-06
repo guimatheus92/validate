@@ -25,7 +25,7 @@ refactor.
 ## Running the suite
 
 ```bash
-node evals/setup-fixtures.mjs <tmp-dir>    # builds the 12 fixture repos
+node evals/setup-fixtures.mjs <tmp-dir>    # builds the 14 fixture repos
 ```
 
 Then, for each eval in `evals.json`: give an agent the skill and the eval's
@@ -38,10 +38,10 @@ phrases listed in
 [`../skills/validate/reference/evidence.md`](../skills/validate/reference/evidence.md).
 The rest are graded by reading the report against the assertion text.
 
-## The thirteen scenarios
+## The fifteen scenarios
 
-Each one guards a specific failure mode of "the work is done" (thirteen
-scenarios over twelve fixtures — `plan-only-mode` reuses `bi-coverage`):
+Each one guards a specific failure mode of "the work is done" (fifteen
+scenarios over fourteen fixtures — `plan-only-mode` reuses `bi-coverage`):
 
 | # | Eval | Guards against |
 |---|---|---|
@@ -58,6 +58,8 @@ scenarios over twelve fixtures — `plan-only-mode` reuses `bi-coverage`):
 | 10 | `plan-only-mode` | executing anything at all when the leading `plan` token asked for a declaration-only dry run |
 | 11 | `tamper-check-vacuous-test` | shipping a new test for pre-existing behavior that can never fail (vacuous coverage) |
 | 12 | `unproven-fix-hard-fail` | calling a fix proven when its covering test also passes on the pre-fix code |
+| 13 | `tamper-check-genuine-test` | rejecting (or skipping proof for) a genuine new test over pre-existing behavior — the positive half of the tamper check |
+| 14 | `tamper-check-infeasible-skip` | letting a green-but-skipped suite carry Tier 2 to PASS when the tamper check cannot run, or inventing credentials to force it |
 
 The banned-language list quoted in every `no-hedging-language` assertion is
 machine-checked against `evidence.md` by `scripts/check.mjs` — if the two
@@ -85,7 +87,7 @@ the skill text it would guard.
 
 ## Results — iteration 1 (2026-08-04, 1 run per configuration, **evals 0–4 only**)
 
-Evals 5–12 were added after this benchmark; each was validated live on its
+Evals 5–14 were added after this benchmark; each was validated live on its
 fixture when introduced, but they have not been through a benchmarked
 with/without-skill iteration yet. The table below is NOT a whole-suite
 claim.

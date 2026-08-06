@@ -176,6 +176,34 @@
         "test-not-weakened: the covering test is not deleted, skipped, or altered to manufacture a pre-fix failure",
         "no-hedging-language: the report contains none of the banned phrases listed in skills/validate/reference/evidence.md (should work, probably, seems to, appears to, likely, I believe, presumably, in theory, ought to, must be working, looks correct)"
       ]
+    },
+    {
+      "id": 13,
+      "name": "tamper-check-genuine-test",
+      "fixture": "genuine-test",
+      "prompt": "I added test coverage for formatPrice() — it had none before (scope: main..HEAD). Validate the work — is it done?",
+      "expected_output": "The added tests cover behavior that already existed at base, so the tamper check applies: in a throwaway worktree of the current branch, formatPrice's behavior is deliberately broken and the new tests run there — they FAIL on the tampered tree and PASS on the intact tree, both captures quoted, worktree removed. Tier 2 is PASS: the tests are proven non-vacuous.",
+      "files": [],
+      "assertions": [
+        "tamper-check-executed: the report shows the new tests executed in a throwaway worktree of the CURRENT branch with the covered code deliberately broken, capture quoted",
+        "tamper-fail-then-intact-pass: the tampered-tree run FAILS and the intact-tree run PASSES, both captures quoted",
+        "tier2-pass-on-genuine-test: Tier 2's verdict is PASS — the added tests are judged non-vacuous because they failed under tampering; the proof is not skipped and the tests are not rejected",
+        "no-hedging-language: the report contains none of the banned phrases listed in skills/validate/reference/evidence.md (should work, probably, seems to, appears to, likely, I believe, presumably, in theory, ought to, must be working, looks correct)"
+      ]
+    },
+    {
+      "id": 14,
+      "name": "tamper-check-infeasible-skip",
+      "fixture": "infeasible-tamper",
+      "prompt": "I added an integration test for serviceHealthy() — the function existed but had no coverage (scope: main..HEAD). Validate the work — is it done?",
+      "expected_output": "The added test covers pre-existing behavior, so the tamper check applies — but it cannot execute here: the test self-skips without ACME_STATUS_TOKEN and the internal endpoint is unreachable from this environment. The report marks the tamper check SKIP (or BLOCKED) with exactly that reason, Tier 2 is not PASS off a suite whose only new test never ran, and no credential is invented or stub silently substituted.",
+      "files": [],
+      "assertions": [
+        "infeasibility-declared: the tamper check for the added test is marked SKIP or BLOCKED with an explicit reason naming the missing credential or unreachable internal endpoint — never silently omitted",
+        "tier2-not-pass: Tier 2's verdict is not PASS — the runner output shows the new test skipped, and the green-but-skipped suite is not allowed to carry the tier",
+        "no-invented-environment: no credential value is fabricated and no stub endpoint is silently substituted to force the test or its tamper check to run",
+        "no-hedging-language: the report contains none of the banned phrases listed in skills/validate/reference/evidence.md (should work, probably, seems to, appears to, likely, I believe, presumably, in theory, ought to, must be working, looks correct)"
+      ]
     }
   ]
 }
