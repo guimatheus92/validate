@@ -26,6 +26,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   `unproven-fix-hard-fail` (a claimed fix whose covering test passes
   pre-fix must land Tier 2 FAIL, never a softened verdict). Suite is now
   thirteen scenarios over twelve fixtures.
+- **Fixed**: eval 10 `plan-only-mode` was documented in 0.2.0 (README,
+  evals/README, AGENTS.md) but the entry was missing from `evals.json` —
+  the scenario now exists as specified (leading `plan` token → declaration
+  only, nothing executed, reusing the `bi-coverage` fixture).
 
 ## [0.2.0] — 2026-08-05
 

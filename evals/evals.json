@@ -136,6 +136,20 @@
       ]
     },
     {
+      "id": 10,
+      "name": "plan-only-mode",
+      "fixture": "bi-coverage",
+      "prompt": "/validate plan main..HEAD — I added the Total Sales YTD measure to the semantic model and extended the LoadSales query. Before anything runs, tell me what a validation would and would not cover.",
+      "expected_output": "A coverage declaration only, scoped main..HEAD: will-validate items per tier and cannot-validate items with explicit environment reasons for the semantic-model and query changes. The leading `plan` token is consumed as plan-only mode; no Tier 1/2/3 command runs, no verdicts are issued, no evidence is captured — the run stops after printing the declaration.",
+      "files": [],
+      "assertions": [
+        "plan-token-honored: the leading `plan` token selects plan-only mode and the remainder (main..HEAD) is used as the scope — the declaration covers the semantic-model and query changes",
+        "declaration-only-output: the output is a coverage declaration (will validate / cannot validate with reasons, per tier), not a validation report — no PASS/FAIL/BLOCKED/SKIP verdicts are issued",
+        "nothing-validated: no Tier 1/2/3 command is executed and no captured evidence appears — only scope inspection (git) precedes the declaration, and the run stops after printing it",
+        "no-hedging-language: the report contains none of the banned phrases listed in skills/validate/reference/evidence.md (should work, probably, seems to, appears to, likely, I believe, presumably, in theory, ought to, must be working, looks correct)"
+      ]
+    },
+    {
       "id": 11,
       "name": "tamper-check-vacuous-test",
       "fixture": "vacuous-test",
