@@ -673,4 +673,83 @@ test('capitalizes only the first letter', () => {
   'Add titleCase helper with verified recipe',
 );
 
+// 11. vacuous-test — the session only ADDS a test for behavior that already
+//     existed at base, and the test is vacuous: it imports formatPrice but
+//     never calls it, so it survives any behavior tamper. The tamper check
+//     must expose it; Tier 2 must land FAIL.
+repo(
+  'vacuous-test',
+  {
+    'package.json': pkg('vacuous-test'),
+    'src/format.js': `// Format cents as a dollar string.
+export function formatPrice(cents) {
+  return '$' + (cents / 100).toFixed(2);
+}
+`,
+  },
+  [[
+    {
+      'test/format.test.js': `import test from 'node:test';
+import assert from 'node:assert';
+import { formatPrice } from '../src/format.js';
+
+test('formats cents as dollars', () => {
+  const expected = '$5.00';
+  assert.strictEqual('$5.00', expected);
+});
+`,
+    },
+    'Add test coverage for formatPrice',
+  ]],
+  'Add price formatter',
+);
+
+// 12. unproven-fix — the session claims a bug fix, but the change is a
+//     behavior-identical refactor: the new covering test passes on the base
+//     tree too, so the pre-fix run cannot fail. Hard landing: Tier 2 FAIL
+//     (covering test does not detect the claimed bug), never PASS.
+repo(
+  'unproven-fix',
+  {
+    'package.json': pkg('unproven-fix'),
+    'src/clamp.js': `// Clamp v into [min, max].
+export function clamp(v, min, max) {
+  return Math.min(Math.max(v, min), max);
+}
+`,
+    'test/clamp.test.js': `import test from 'node:test';
+import assert from 'node:assert';
+import { clamp } from '../src/clamp.js';
+
+test('clamps above max', () => {
+  assert.strictEqual(clamp(15, 0, 10), 10);
+});
+`,
+  },
+  [[
+    {
+      'src/clamp.js': `// Clamp v into [min, max].
+export function clamp(v, min, max) {
+  const floored = Math.max(v, min);
+  return Math.min(floored, max);
+}
+`,
+      'test/clamp.test.js': `import test from 'node:test';
+import assert from 'node:assert';
+import { clamp } from '../src/clamp.js';
+
+test('clamps above max', () => {
+  assert.strictEqual(clamp(15, 0, 10), 10);
+});
+
+test('clamps below min', () => {
+  assert.strictEqual(clamp(-5, 0, 10), 0);
+});
+`,
+    },
+    'Fix clamp() returning values below min',
+  ]],
+  'Add clamp helper',
+);
+
 console.log('all fixtures built');

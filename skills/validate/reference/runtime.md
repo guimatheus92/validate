@@ -55,3 +55,17 @@ Never claim visual behavior you did not see. When the change is a web UI:
 The same principle generalizes: each surface has its best evidence, and when
 you can't get it, degrade explicitly and say so — don't quietly substitute
 weaker evidence and call it PASS.
+
+## Optional: the before/after runtime capture
+
+When the change's effect is directly observable and the baseline app can
+feasibly run, a worktree at base lets you capture the "before" next to the
+"after" — the gold-standard version of Tier 3 evidence. The capture takes
+whatever tangible form the surface offers: a screenshot pair, two log
+excerpts, two HTTP responses, two CLI outputs, a diff of generated files.
+No screenshot or log available? Improvise the form — any artifact captured
+this run that shows the two states side by side counts; what may never be
+improvised is the artifact itself. This rung is never required, and its
+absence never downgrades a verdict: running the baseline app is often
+infeasible (databases, env vars, migrations), and the tiers stand on their
+own without it.

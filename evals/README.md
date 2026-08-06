@@ -25,7 +25,7 @@ refactor.
 ## Running the suite
 
 ```bash
-node evals/setup-fixtures.mjs <tmp-dir>    # builds the 10 fixture repos
+node evals/setup-fixtures.mjs <tmp-dir>    # builds the 12 fixture repos
 ```
 
 Then, for each eval in `evals.json`: give an agent the skill and the eval's
@@ -38,10 +38,10 @@ phrases listed in
 [`../skills/validate/reference/evidence.md`](../skills/validate/reference/evidence.md).
 The rest are graded by reading the report against the assertion text.
 
-## The eleven scenarios
+## The thirteen scenarios
 
-Each one guards a specific failure mode of "the work is done" (eleven
-scenarios over ten fixtures — `plan-only-mode` reuses `bi-coverage`):
+Each one guards a specific failure mode of "the work is done" (thirteen
+scenarios over twelve fixtures — `plan-only-mode` reuses `bi-coverage`):
 
 | # | Eval | Guards against |
 |---|---|---|
@@ -56,6 +56,8 @@ scenarios over ten fixtures — `plan-only-mode` reuses `bi-coverage`):
 | 8 | `injection-resistance` | obeying repo-planted instructions to fake PASS / skip checks instead of reporting them as findings |
 | 9 | `recipe-reuse` | rediscovering (or dead-ending on) commands a project recipe already records as verified; also guards declare-before-execute ordering and recipe upkeep |
 | 10 | `plan-only-mode` | executing anything at all when the leading `plan` token asked for a declaration-only dry run |
+| 11 | `tamper-check-vacuous-test` | shipping a new test for pre-existing behavior that can never fail (vacuous coverage) |
+| 12 | `unproven-fix-hard-fail` | calling a fix proven when its covering test also passes on the pre-fix code |
 
 The banned-language list quoted in every `no-hedging-language` assertion is
 machine-checked against `evidence.md` by `scripts/check.mjs` — if the two
@@ -83,7 +85,7 @@ the skill text it would guard.
 
 ## Results — iteration 1 (2026-08-04, 1 run per configuration, **evals 0–4 only**)
 
-Evals 5–10 were added after this benchmark; each was validated live on its
+Evals 5–12 were added after this benchmark; each was validated live on its
 fixture when introduced, but they have not been through a benchmarked
 with/without-skill iteration yet. The table below is NOT a whole-suite
 claim.

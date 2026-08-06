@@ -7,6 +7,26 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+- **Regression proof widened beyond bug fixes.** Tests added for behavior
+  that already existed at base now require a tamper check: the new test
+  must fail when the covered code's behavior is deliberately broken in a
+  throwaway worktree of HEAD, and pass intact — a test that survives
+  tampering is vacuous. Bug fixes keep the pre-fix/post-fix worktree proof.
+- **Hard landing for unproven work.** A missing or failed regression proof
+  now caps Tier 2 at FAIL (previously the skill only had to "say so" when
+  the covering test passed pre-fix). The rule is duplicated as a fourth
+  hard rule in the dispatcher.
+- **Evidence form freed.** The evidence list in evidence.md is explicitly
+  non-exhaustive: improvise the capture form when the standard ones don't
+  fit — never the conclusion. Tier 3 gains an optional gold-standard rung:
+  a before/after runtime capture (screenshot pair, log excerpts, output
+  diffs) from a worktree at base, never required, absence never downgrades.
+- **Two new evals**: `tamper-check-vacuous-test` (a new test that can never
+  fail must be exposed by the tamper check, Tier 2 FAIL) and
+  `unproven-fix-hard-fail` (a claimed fix whose covering test passes
+  pre-fix must land Tier 2 FAIL, never a softened verdict). Suite is now
+  thirteen scenarios over twelve fixtures.
+
 ## [0.2.0] — 2026-08-05
 
 - **Coverage declaration.** Before executing anything, a run now declares

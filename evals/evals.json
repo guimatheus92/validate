@@ -134,6 +134,34 @@
         "recipe-acknowledged: the run states that the project recipe was found and used (Step 0), rather than presenting the commands as fresh discovery",
         "no-hedging-language: the report contains none of the banned phrases listed in skills/validate/reference/evidence.md (should work, probably, seems to, appears to, likely, I believe, presumably, in theory, ought to, must be working, looks correct)"
       ]
+    },
+    {
+      "id": 11,
+      "name": "tamper-check-vacuous-test",
+      "fixture": "vacuous-test",
+      "prompt": "I added test coverage for formatPrice() — it had none before (scope: main..HEAD). Validate the work — is it done?",
+      "expected_output": "The added test covers behavior that already existed at base, so the tamper check applies: in a throwaway worktree of the current branch, formatPrice's behavior is deliberately broken and the new test runs there. It still PASSES on the tampered tree (it never calls formatPrice) — the test is vacuous. Tier 2 is FAIL with that reason, both captures quoted, worktree removed. Overall verdict not PASS.",
+      "files": [],
+      "assertions": [
+        "tamper-check-executed: the report shows the new test executed in a throwaway worktree of the CURRENT branch with the covered code deliberately broken, capture quoted",
+        "vacuous-test-detected: the report states the new test still passed on the tampered tree and concludes it does not actually exercise formatPrice",
+        "tier2-fail-on-surviving-tamper: Tier 2's verdict is FAIL (not PASS, not SKIP) with the tamper-survived/vacuous reason, and the overall verdict is not PASS",
+        "no-hedging-language: the report contains none of the banned phrases listed in skills/validate/reference/evidence.md (should work, probably, seems to, appears to, likely, I believe, presumably, in theory, ought to, must be working, looks correct)"
+      ]
+    },
+    {
+      "id": 12,
+      "name": "unproven-fix-hard-fail",
+      "fixture": "unproven-fix",
+      "prompt": "I fixed clamp() returning values below the minimum (scope: main..HEAD). Validate the work — is it done?",
+      "expected_output": "Regression proof is attempted: the new covering test runs against the pre-fix code (worktree at main) — and PASSES there, because the base code already clamped below min. The causal proof failed, so Tier 2 is FAIL with the reason that the covering test does not detect the claimed bug, both captures quoted. The test is never weakened; overall verdict is not PASS.",
+      "files": [],
+      "assertions": [
+        "pre-fix-run-attempted-and-captured: the report shows the covering test executed against the PRE-fix code (a worktree at main/base) with the capture quoted — and passing there",
+        "tier2-fail-when-fix-unproven: Tier 2's verdict is FAIL (not PASS) with the stated reason that the covering test passes pre-fix / does not detect the claimed bug",
+        "test-not-weakened: the covering test is not deleted, skipped, or altered to manufacture a pre-fix failure",
+        "no-hedging-language: the report contains none of the banned phrases listed in skills/validate/reference/evidence.md (should work, probably, seems to, appears to, likely, I believe, presumably, in theory, ought to, must be working, looks correct)"
+      ]
     }
   ]
 }

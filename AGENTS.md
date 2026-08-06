@@ -24,7 +24,7 @@ reference files read on demand.
 - `commands/validate.md` — the dispatcher both hosts load whole. Locates the
   skill via the path ladder (`$CLAUDE_PLUGIN_ROOT` → `~/.claude/plugins/cache`
   → `~/.copilot/installed-plugins`), loads a project recipe if present, and
-  duplicates the three hard gating rules so they survive even if the skill
+  duplicates the four hard gating rules so they survive even if the skill
   body is truncated from context.
 - `skills/validate/SKILL.md` — the methodology core: contract, step order,
   iron rules, and the reference index. Kept small; depth lives in
@@ -37,7 +37,7 @@ reference files read on demand.
 - `.github/prompts/validate.prompt.md` — compressed contract for VS Code
   Copilot Chat users, who cannot load CLI plugins.
 - `evals/` — the skill's regression suite: `evals.json` (scenarios +
-  assertions) and `setup-fixtures.mjs` (builds the ten fixture repos).
+  assertions) and `setup-fixtures.mjs` (builds the twelve fixture repos).
   Re-run the evals after any change to `skills/` content.
 
 ## Key conventions
@@ -94,6 +94,14 @@ reference files read on demand.
   pointers (a few examples + a link to evidence.md), not full lists — keep
   them pointers; the same goes for the recipe read-order duplicated between
   `commands/validate.md` and `reference/recipe.md`, which is hand-synced.
+- **Change the regression-proof rules:** the "Regression proof" section of
+  `skills/validate/reference/evidence.md` is the source of truth (three
+  modes — bug-fix baseline proof, tamper check, new-feature relaxation —
+  plus the hard Tier 2 cap). Compressed carriers that must move in the same
+  commit: SKILL.md's Tier 2 bullet, stacks.md's post-suite pointer,
+  report.md's Tier 2 appendix placeholder, commands/validate.md's
+  hard-rules line, and .github/prompts/validate.prompt.md item 4. Keep
+  evals 0, 11, and 12 passing.
 - **Cut a release:** `node scripts/release.mjs <patch|minor|major|x.y.z>` —
   bumps the three manifests, verifies no stale version, rolls CHANGELOG,
   commits and tags (push left to you).

@@ -61,5 +61,9 @@ and gets a full validation.
   no "should work", "probably", "seems to", "appears to", "likely", … (the
   canonical list lives in the skill's reference/evidence.md). A claim
   without evidence is a FAIL.
+- A green suite alone proves neither a bug fix nor a new test. Regression
+  proof is required (pre-fix run fails, or tampered run fails — procedure
+  in the skill's reference/evidence.md); missing or failed proof makes
+  Tier 2 FAIL.
 - At most 3 fix-and-rerun attempts, then stop and report FAIL with all
   evidence for the human to decide.
