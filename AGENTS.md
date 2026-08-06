@@ -37,7 +37,7 @@ reference files read on demand.
 - `.github/prompts/validate.prompt.md` — compressed contract for VS Code
   Copilot Chat users, who cannot load CLI plugins.
 - `evals/` — the skill's regression suite: `evals.json` (scenarios +
-  assertions) and `setup-fixtures.mjs` (builds the fourteen fixture repos).
+  assertions) and `setup-fixtures.mjs` (builds the sixteen fixture repos).
   Re-run the evals after any change to `skills/` content.
 
 ## Key conventions
@@ -104,6 +104,11 @@ reference files read on demand.
   commands/validate.md's hard-rules line, and
   .github/prompts/validate.prompt.md item 4. Keep evals 0 and 11–16
   passing.
+- **Change the blocked-runtime runbook rule:** the "When a runtime claim
+  ends SKIP or BLOCKED" section of `skills/validate/reference/runtime.md`
+  is the source of truth; `reference/report.md`'s rules name where the
+  runbook surfaces in the report (Next step vs Tier 3 evidence). Move both
+  in the same commit and keep eval 3's runbook assertion passing.
 - **Cut a release:** `node scripts/release.mjs <patch|minor|major|x.y.z>` —
   bumps the three manifests, verifies no stale version, rolls CHANGELOG,
   commits and tags (push left to you).

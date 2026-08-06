@@ -53,6 +53,7 @@
         "blocked-verdict-used: the tier that could not run carries a BLOCKED verdict (environment cause), not FAIL blaming the code and not a silent skip",
         "names-database-url: DATABASE_URL is explicitly named as the missing prerequisite",
         "overall-not-pass: the overall verdict is not PASS while a required check could not run",
+        "blocked-runbook-present: the report carries a short owner runbook for the blocked checks — the missing prerequisite, the exact command(s) to run once it is available, and the observation that decides pass or fail — not just the named gap",
         "no-hedging-language: the report contains none of the banned phrases listed in skills/validate/reference/evidence.md (should work, probably, seems to, appears to, likely, I believe, presumably, in theory, ought to, must be working, looks correct)"
       ]
     },
@@ -216,6 +217,7 @@
         "history-boundary-used: the report identifies the main-branch commit that fixed isLeapYear as the proof boundary, found by searching git history — the proof is a replay against that commit's predecessor, not (only) a synthetic tamper of HEAD",
         "replay-fail-then-intact-pass: the new test is shown FAILING in a worktree at the fixing commit's predecessor and PASSING on the intact tree, both captures quoted",
         "tier2-pass-via-replay: Tier 2's verdict is PASS on the strength of the historical replay — the proof is not skipped and no verdict is hedged pending a tamper",
+        "fix-test-gap-noted: the report notes that the historical fixing commit shipped no test of its own for this behavior — the guard gap the session's test closes",
         "no-hedging-language: the report contains none of the banned phrases listed in skills/validate/reference/evidence.md (should work, probably, seems to, appears to, likely, I believe, presumably, in theory, ought to, must be working, looks correct)"
       ]
     },
@@ -230,6 +232,7 @@
         "new-feature-tamper-executed: the report shows the new slugify test executed in a throwaway worktree with slugify's behavior deliberately broken, capture quoted — the can-fail proof is not waived just because the behavior is new",
         "tamper-fail-controls-green-intact-pass: the tampered-tree run FAILS the slugify test while unrelated control tests stay green, and the intact-tree run PASSES, captures quoted",
         "tier2-pass-on-proven-test: Tier 2's verdict is PASS — the new test is judged non-vacuous because it failed under tampering; the proof is not skipped",
+        "tier3-feature-driven: the report shows the new slugify behavior exercised at a real surface (a consumer-style script importing the public export, or equivalent), capture quoted — Tier 3 is not skipped for the new feature",
         "no-hedging-language: the report contains none of the banned phrases listed in skills/validate/reference/evidence.md (should work, probably, seems to, appears to, likely, I believe, presumably, in theory, ought to, must be working, looks correct)"
       ]
     }

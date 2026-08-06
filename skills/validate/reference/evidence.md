@@ -39,10 +39,11 @@ runner reports having run, never the scenario/matrix/data-row definitions
 countable in the source.
 
 Wall-clock measurements are not proof of timing behavior: what the code
-requested and what the OS scheduled routinely disagree (a requested 10ms
-delay can measure 6ms). Prove timing claims with logged or calculated
-delays, an injected clock, or fake time — assert on what the code decided,
-not on what the clock happened to read.
+requested and what the clock reads back routinely disagree in both
+directions (scheduling stretches a requested 10ms delay to 14ms; a coarse
+clock can read it back as 6ms). Prove timing claims with logged or
+calculated delays, an injected clock, or fake time — assert on what the
+code decided, not on what the clock happened to read.
 
 ## Banned language
 
@@ -114,9 +115,12 @@ on both sides. Prove the test can fail, preferring the repo's real history
 over a synthetic break.
 
 **First, look for an honest historical boundary.** Search history for the
-commit that introduced or fixed the covered behavior
-(`git log -S '<symbol>'`, `git log -p -- <file>`, `git blame`). If one
-exists, replay against it:
+commit that made the covered behavior true — usually a fix; the
+introduction only when the behavior was born correct. `git log -S` finds
+occurrence-count changes (introductions and removals), not body-only
+fixes, so read the body history too: `git log -p -- <file>`,
+`git log -G'<pattern>'`, `git blame` on the covered lines. If such a
+commit exists, replay against it:
 
 1. Run the new test on the intact tree. It must **pass**.
 2. Create a throwaway worktree at that commit's predecessor
@@ -148,8 +152,10 @@ proof missing in **both** forms does.
 3. Run the new test there. It must **fail** — and one or two unrelated
    tests, run alongside as controls, must stay **green**: a focused failure
    implicates the tampered path; a tree where everything fails proves
-   breakage, not the guard. Run the new test on the intact tree. It must
-   **pass**.
+   breakage, not the guard. When the repo offers no unrelated test to
+   serve as a control, say so and show focus another way: the failure must
+   be the test's own assertion (expected/actual quoted), never a load or
+   build error. Run the new test on the intact tree. It must **pass**.
 4. Both captures go in the report; remove the worktree
    (`git worktree remove <tmp-dir> --force`).
 

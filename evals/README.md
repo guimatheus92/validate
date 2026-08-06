@@ -87,13 +87,25 @@ Some rules have no covering fixture yet:
   the agent into a filtered run — the gate guards an optional behavior of
   the run itself, and a prompt contrived to demand a filter would grade
   the contrivance, not the skill.
+- **Forced rebuild around proofs.** Every fixture is Node or Python run
+  from source — no build step exists anywhere in the suite, so the
+  compiled-stack rebuild rule (evidence.md) is structurally unexercisable
+  here. A deterministic compiled fixture would drag a toolchain
+  dependency into a suite that currently needs none.
+- **Deterministic timing evidence.** No fixture makes a timing claim —
+  a test that depends on real scheduling would make the suite itself
+  flaky, the same design problem as the retry ceiling above.
+- **Controls that discriminate.** Eval 16 asserts the green-controls
+  capture, but its fixture's controls (titleCase) cannot be broken by any
+  slugify tamper — no fixture yet constructs a scenario where a careless
+  tamper would take the controls down and flip the verdict.
 
 If you find a clean fixture design for either, add it here before changing
 the skill text it would guard.
 
 ## Results — iteration 1 (2026-08-04, 1 run per configuration, **evals 0–4 only**)
 
-Evals 5–14 were added after this benchmark; each was validated live on its
+Evals 5–16 were added after this benchmark; each was validated live on its
 fixture when introduced, but they have not been through a benchmarked
 with/without-skill iteration yet. The table below is NOT a whole-suite
 claim.
