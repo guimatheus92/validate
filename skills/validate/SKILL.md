@@ -104,11 +104,14 @@ broken runtime — but the overall verdict is FAIL the moment any tier fails.
 - **Tier 2 — tests**: the project's suites (unit, integration, E2E). "Tests
   pass" alone does not satisfy this tier when the change claims more: a bug
   fix requires regression proof (the covering test fails on the pre-fix
-  code, passes with the fix), and tests added for behavior that already
-  existed require a tamper check (the new test fails when the covered code
-  is deliberately broken in a throwaway worktree, passes intact). A missing
-  or failed proof makes this tier FAIL. Procedure and the infeasibility
-  escape hatch: [reference/evidence.md](reference/evidence.md).
+  code, passes with the fix), and every test the session added must be
+  proven able to fail — replay against the commit in history that
+  introduced or fixed the behavior when one exists, else a tamper check
+  that deliberately breaks the covered code in a throwaway worktree, with
+  the failing and passing captures side by side. A missing or failed proof
+  makes this tier FAIL. Procedure, the filtered-run count gate, and the
+  infeasibility escape hatch:
+  [reference/evidence.md](reference/evidence.md).
 - **Tier 3 — runtime**: run the real thing and observe the changed behavior.
   Surface selection, drive methods, launch discipline, and the degradation
   ladder when browser tooling is missing:

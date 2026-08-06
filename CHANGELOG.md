@@ -7,6 +7,48 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+- **History-first regression proof.** For session-added tests over
+  pre-existing behavior, the skill now searches git history for the commit
+  that introduced or fixed the covered behavior and prefers an exact
+  historical replay (the new test fails at that commit's predecessor on a
+  tree that still builds, passes intact) over a synthetic tamper check.
+  The tamper check remains the fallback when history offers no honest
+  boundary. The replay also notes whether the historical commit shipped a
+  test for the exact input.
+- **The can-fail proof is now universal.** New-feature tests lose their
+  exemption: every test the session added must be proven able to fail —
+  the baseline half is waived for new behavior (no pre-state exists), but
+  the tamper half is required. A feature test that survives tampering
+  caps Tier 2 at FAIL.
+- **Green controls during tampering.** A tamper check now runs one or two
+  unrelated tests alongside the new one: the new test must fail while the
+  controls stay green — a focused failure implicates the tampered path; a
+  tree where everything fails proves breakage, not the guard.
+- **Forced rebuild around proofs.** On stacks with a build step, the proof
+  procedures require a fresh build (or verified artifact change) after
+  altering or restoring source — stale incremental-build outputs can
+  counterfeit either half of a proof.
+- **Filtered-run count gate.** A filtered or categorized test run must
+  name its expected tests up front and match them against runner-reported
+  executions — a filter matching zero tests exits green and proves
+  nothing; generated scenario/matrix definitions never count as
+  executions.
+- **Timing claims need deterministic evidence.** Short wall-clock
+  measurements are ruled out as proof; logged or calculated delays,
+  injected clocks, or fake time are the accepted forms.
+- **Blocked runtime claims leave a runbook.** When a Tier 3 claim ends
+  SKIP or BLOCKED for want of environment or tooling, the report's Next
+  step becomes a short owner runbook: prerequisites, exact commands or
+  flow, the observation that decides pass or fail, and cleanup.
+- **Recipe template gains a Conventions section** (optional): branch
+  naming, PR description limits, test category/selector names, and how
+  the repo expects proofs to be captured.
+- **Two new evals**: `history-replay` (the skill must find the fixing
+  commit in history and replay against its predecessor instead of
+  reaching for a synthetic tamper) and `new-feature-tamper` (a new
+  feature's test must still be proven able to fail, with pre-existing
+  tests as green controls).
+
 ## [0.3.0] — 2026-08-06
 
 - **Regression proof widened beyond bug fixes.** Tests added for behavior

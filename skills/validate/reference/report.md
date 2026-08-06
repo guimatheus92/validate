@@ -25,8 +25,10 @@ omit the line only when the plan declared no gaps>
 
 ### Tier 2
 <runner summary quoted; regression proof side by side — bug fix: the
-pre-fix FAIL capture and the post-fix PASS capture; tests for pre-existing
-behavior: the tampered-tree FAIL capture and the intact-tree PASS capture>
+pre-fix FAIL capture and the post-fix PASS capture; any session-added test
+(pre-existing behavior or new feature): the historical-predecessor or
+tampered-tree FAIL capture (controls green) and the intact-tree PASS
+capture; filtered runs: expected vs runner-reported executions>
 
 ### Tier 3
 <what was driven, the captured output/response/screenshot paths, and what
@@ -51,5 +53,8 @@ Rules:
   drops or adds coverage relative to the declaration is itself wrong.
 - On FAIL or BLOCKED, end with a short **Next step** line: the exact failing
   command or missing prerequisite, and the decision the human needs to make.
+  When a runtime claim ends SKIP or BLOCKED for want of environment or
+  tooling, the Next step grows into a short owner runbook — see
+  [runtime.md](runtime.md).
 - The banned-language list from [evidence.md](evidence.md) applies to every
   word of this report.

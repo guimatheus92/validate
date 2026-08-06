@@ -69,3 +69,15 @@ improvised is the artifact itself. This rung is never required, and its
 absence never downgrades a verdict: running the baseline app is often
 infeasible (databases, env vars, migrations), and the tiers stand on their
 own without it.
+
+## When a runtime claim ends SKIP or BLOCKED: leave a runbook
+
+A named gap ("no browser tooling", "no staging credentials") tells the
+reader what you lacked, not what to do. When a runtime claim you set out
+to prove ends SKIP or BLOCKED for want of environment or tooling, put a
+short runbook in the report so the owner can finish the proof: the
+prerequisites (credentials, environment, data), the exact commands or flow
+to run, the observation that decides pass or fail, and any cleanup. Four
+to eight lines, executable by someone who was not in this session. A SKIP
+that merely scopes the tier out (docs-only change) needs no runbook —
+there is nothing to finish.
