@@ -67,4 +67,6 @@ and gets a full validation.
   tree, both captures in the report — procedure in the skill's
   reference/evidence.md); missing or failed proof makes Tier 2 FAIL.
 - At most 3 fix-and-rerun attempts, then stop and report FAIL with all
-  evidence for the human to decide.
+  evidence for the human to decide. Missing environment is BLOCKED with
+  the missing piece named — never fabricate an env value, credential, or
+  stub to make a check run.

@@ -37,7 +37,8 @@ otherwise apply this compressed contract:
 6. **Verdicts**: PASS / FAIL / BLOCKED / SKIP per tier, overall verdict
    first. Evidence = output, exit codes, response bodies, screenshots
    captured THIS run; memory is not evidence; ambiguous output = FAIL.
-   BLOCKED names exactly what is missing.
+   BLOCKED names exactly what is missing — and never invents it: no
+   fabricated env values, credentials, or stubs to force a check to run.
 7. **Honesty**: never weaken a check to pass it. At most 3 fix-and-rerun
    attempts, then stop and report FAIL. Banned in your conclusions: "should
    work", "probably", "seems to", "appears to", "likely", "I believe", …

@@ -50,6 +50,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   reaching for a synthetic tamper) and `new-feature-tamper` (a new
   feature's test must still be proven able to fail, with pre-existing
   tests as green controls).
+- **Missing environment is BLOCKED, never provisioned.** The rule the
+  eval suite always enforced is now stated in the skill text: fabricating
+  an env value, credential, or stub to make a blocked check run — however
+  loudly disclosed — is a non-fix that converts an honest BLOCKED into a
+  counterfeit verdict.
 
 ## [0.3.0] — 2026-08-06
 

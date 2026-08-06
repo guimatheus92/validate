@@ -10,6 +10,9 @@
 - **BLOCKED** — the check could not run: missing tool, missing credentials,
   broken environment. Name exactly what is missing — BLOCKED with a precise
   cause is actionable; BLOCKED without one is just FAIL with extra steps.
+  Missing environment is named, never manufactured: a fabricated value
+  that makes the check run converts an honest BLOCKED into a counterfeit
+  verdict, however loudly the fabrication is disclosed.
 - **SKIP** — the check does not apply to this change, with the reason stated.
   SKIP is a scoping statement, never a way to avoid an inconvenient check.
 
@@ -65,7 +68,11 @@ Fixes that don't count as fixes (each is itself a FAIL to report):
 
 - loosening or deleting an assertion so it passes;
 - skipping, quarantining, or deleting a failing test;
-- widening a lint/typecheck ignore to silence the finding.
+- widening a lint/typecheck ignore to silence the finding;
+- fabricating environment a check is missing — an env var value,
+  credential, URL, or stubbed endpoint — so it will run, disclosed or
+  not: a check whose environment is missing is BLOCKED with the missing
+  piece named, not an invitation to invent it.
 
 ## Regression proof
 
