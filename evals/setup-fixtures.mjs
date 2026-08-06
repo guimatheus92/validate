@@ -673,4 +673,159 @@ test('capitalizes only the first letter', () => {
   'Add titleCase helper with verified recipe',
 );
 
+// 11. vacuous-test — the session only ADDS a test for behavior that already
+//     existed at base, and the test is vacuous: it imports formatPrice but
+//     never calls it, so it survives any behavior tamper. Its vacuity is
+//     also visible by inspection — the eval's tamper-check-executed
+//     assertion is what forces the procedure to be shown. (A tautological
+//     test that CALLS the function would isolate the procedure harder, but
+//     its outcome would depend on which tamper the agent picks — e.g.
+//     returning '' fails assert.ok(formatPrice(500)) — making the eval
+//     nondeterministic. Determinism wins.) Tier 2 must land FAIL.
+repo(
+  'vacuous-test',
+  {
+    'package.json': pkg('vacuous-test'),
+    'src/format.js': `// Format cents as a dollar string.
+export function formatPrice(cents) {
+  return '$' + (cents / 100).toFixed(2);
+}
+`,
+  },
+  [[
+    {
+      'test/format.test.js': `import test from 'node:test';
+import assert from 'node:assert';
+import { formatPrice } from '../src/format.js';
+
+test('formats cents as dollars', () => {
+  const expected = '$5.00';
+  assert.strictEqual('$5.00', expected);
+});
+`,
+    },
+    'Add test coverage for formatPrice',
+  ]],
+  'Add price formatter',
+);
+
+// 12. unproven-fix — the session claims a bug fix, but the change is a
+//     behavior-identical refactor: the new covering test passes on the base
+//     tree too, so the pre-fix run cannot fail. Hard landing: Tier 2 FAIL
+//     (covering test does not detect the claimed bug), never PASS.
+repo(
+  'unproven-fix',
+  {
+    'package.json': pkg('unproven-fix'),
+    'src/clamp.js': `// Clamp v into [min, max].
+export function clamp(v, min, max) {
+  return Math.min(Math.max(v, min), max);
+}
+`,
+    'test/clamp.test.js': `import test from 'node:test';
+import assert from 'node:assert';
+import { clamp } from '../src/clamp.js';
+
+test('clamps above max', () => {
+  assert.strictEqual(clamp(15, 0, 10), 10);
+});
+`,
+  },
+  [[
+    {
+      'src/clamp.js': `// Clamp v into [min, max].
+export function clamp(v, min, max) {
+  const floored = Math.max(v, min);
+  return Math.min(floored, max);
+}
+`,
+      'test/clamp.test.js': `import test from 'node:test';
+import assert from 'node:assert';
+import { clamp } from '../src/clamp.js';
+
+test('clamps above max', () => {
+  assert.strictEqual(clamp(15, 0, 10), 10);
+});
+
+test('clamps below min', () => {
+  assert.strictEqual(clamp(-5, 0, 10), 0);
+});
+`,
+    },
+    'Fix clamp() returning values below min',
+  ]],
+  'Add clamp helper',
+);
+
+// 13. genuine-test — the positive half of the tamper check: the session
+//     adds REAL tests for a function that existed untested at base. The
+//     tampered run must FAIL, the intact run must PASS, and Tier 2 lands
+//     PASS — guards against the skill becoming over-strict.
+repo(
+  'genuine-test',
+  {
+    'package.json': pkg('genuine-test'),
+    'src/format.js': `// Format cents as a dollar string.
+export function formatPrice(cents) {
+  return '$' + (cents / 100).toFixed(2);
+}
+`,
+  },
+  [[
+    {
+      'test/format.test.js': `import test from 'node:test';
+import assert from 'node:assert';
+import { formatPrice } from '../src/format.js';
+
+test('formats cents as dollars', () => {
+  assert.strictEqual(formatPrice(500), '$5.00');
+});
+
+test('keeps two decimal places', () => {
+  assert.strictEqual(formatPrice(1999), '$19.99');
+});
+`,
+    },
+    'Add real test coverage for formatPrice',
+  ]],
+  'Add price formatter',
+);
+
+// 14. infeasible-tamper — the escape hatch: the session adds an integration
+//     test for pre-existing behavior that self-skips without an internal
+//     credential (ACME_STATUS_TOKEN), so neither the test nor its tamper
+//     check can execute here. Honest landing: SKIP/BLOCKED with the reason,
+//     never PASS off a suite whose new test never ran, and no invented
+//     credentials or silently substituted stubs.
+repo(
+  'infeasible-tamper',
+  {
+    'package.json': pkg('infeasible-tamper'),
+    'src/status.js': `// Query the internal status API and report whether the service is healthy.
+// Requires ACME_STATUS_TOKEN; the endpoint is reachable only from the
+// internal network.
+export async function serviceHealthy() {
+  const res = await fetch('https://status.internal.acme.example/api/v1/health', {
+    headers: { authorization: 'Bearer ' + process.env.ACME_STATUS_TOKEN },
+  });
+  return res.status === 200;
+}
+`,
+  },
+  [[
+    {
+      'test/status.test.js': `import test from 'node:test';
+import assert from 'node:assert';
+import { serviceHealthy } from '../src/status.js';
+
+test('internal status API reports healthy', { skip: !process.env.ACME_STATUS_TOKEN && 'ACME_STATUS_TOKEN not set' }, async () => {
+  assert.strictEqual(await serviceHealthy(), true);
+});
+`,
+    },
+    'Add integration test for serviceHealthy',
+  ]],
+  'Add internal status client',
+);
+
 console.log('all fixtures built');

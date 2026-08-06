@@ -19,7 +19,12 @@ otherwise apply this compressed contract:
    scripts/Makefile/CI definitions. Absent = SKIP with reason.
 4. **Tier 2 — tests**: run the relevant suites. For a bug fix, prove the
    regression: the covering test must fail on the pre-fix code (throwaway
-   `git worktree` at base) and pass on the fixed tree — capture both.
+   `git worktree` at base) and pass on the fixed tree — capture both. For
+   tests added over behavior that already existed, tamper-check them: break
+   the covered code's behavior in a throwaway worktree of HEAD; the new
+   test must fail there and pass intact (SKIP with stated reason only when
+   infeasible). Missing or failed proof = Tier 2 FAIL, however green the
+   suite.
 5. **Tier 3 — runtime**: run the real thing and observe the changed flow.
    CLI → run it and capture output; API → send real requests; web UI → drive
    a browser if tooling exists, else assert on served HTML and mark purely

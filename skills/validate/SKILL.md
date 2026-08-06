@@ -101,10 +101,14 @@ broken runtime — but the overall verdict is FAIL the moment any tier fails.
 
 - **Tier 1 — static**: typecheck, lint, build. Missing from the project =
   SKIP with the reason stated, not silently absent.
-- **Tier 2 — tests**: the project's suites (unit, integration, E2E). For a
-  bug fix, this tier is not satisfied by "tests pass" — it requires
-  regression proof: the covering test fails without the fix and passes with
-  it. Procedure in [reference/evidence.md](reference/evidence.md).
+- **Tier 2 — tests**: the project's suites (unit, integration, E2E). "Tests
+  pass" alone does not satisfy this tier when the change claims more: a bug
+  fix requires regression proof (the covering test fails on the pre-fix
+  code, passes with the fix), and tests added for behavior that already
+  existed require a tamper check (the new test fails when the covered code
+  is deliberately broken in a throwaway worktree, passes intact). A missing
+  or failed proof makes this tier FAIL. Procedure and the infeasibility
+  escape hatch: [reference/evidence.md](reference/evidence.md).
 - **Tier 3 — runtime**: run the real thing and observe the changed behavior.
   Surface selection, drive methods, launch discipline, and the degradation
   ladder when browser tooling is missing:

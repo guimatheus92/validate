@@ -24,8 +24,9 @@ omit the line only when the plan declared no gaps>
 <command → exit code, and the lines that matter, quoted>
 
 ### Tier 2
-<runner summary quoted; for a bug fix: the pre-fix FAIL capture and the
-post-fix PASS capture, side by side>
+<runner summary quoted; regression proof side by side — bug fix: the
+pre-fix FAIL capture and the post-fix PASS capture; tests for pre-existing
+behavior: the tampered-tree FAIL capture and the intact-tree PASS capture>
 
 ### Tier 3
 <what was driven, the captured output/response/screenshot paths, and what

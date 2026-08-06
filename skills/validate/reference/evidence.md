@@ -26,6 +26,11 @@ Not evidence: your memory of it working earlier in the session (rerun it),
 your reading of the code ("this clearly handles the case"), a file existing
 on disk, or output too garbled to interpret (ambiguous = FAIL).
 
+The list is not exhaustive. When none of these forms fit, improvise the
+capture — a diff of two outputs, a pair of responses, a generated file, a
+before/after excerpt of anything observable. The evidence FORM is free;
+its existence is not: improvise how you capture, never what you conclude.
+
 ## Banned language
 
 These words, applied to whether the work is correct, are unbacked claims in
@@ -48,10 +53,23 @@ Fixes that don't count as fixes (each is itself a FAIL to report):
 - skipping, quarantining, or deleting a failing test;
 - widening a lint/typecheck ignore to silence the finding.
 
-## Regression proof (bug fixes)
+## Regression proof
 
-"All tests pass" after a bug fix is compatible with the fix doing nothing —
-maybe no test covers the bug at all. Prove the causal link:
+"All tests pass" is compatible with the change proving nothing — maybe no
+test covers the change at all, or the covering test would pass regardless.
+Tier 2 cannot be PASS until the causal link is proven in the mode the
+change calls for. A missing or failed proof caps the tier: Tier 2 is
+**FAIL**, with the reason stated (covering test does not detect the bug /
+new test survived tampering), no matter how green the suite is.
+
+Mode selection follows the claim, not the observed state. Work presented
+as a bug fix — or that modifies the covered source — always takes the
+bug-fix proof: when the behavior looks already present at base, that is
+exactly what the pre-fix run exposes. The tamper check is for pure test
+additions — the session added or modified tests and claims no behavioral
+change. New-feature tests follow the feature rule.
+
+### Bug fix — prove the test detects the bug
 
 1. Identify (or write) the test that covers the fixed behavior.
 2. Run it against the **pre-fix** code: create a throwaway worktree at the
@@ -61,8 +79,39 @@ maybe no test covers the bug at all. Prove the causal link:
 4. Both captures go in the report; remove the worktree
    (`git worktree remove <tmp-dir> --force`).
 
-If the pre-fix run doesn't fail, the test doesn't cover the bug — say so;
-the fix is unproven regardless of how green the suite is.
+If the pre-fix run does not fail, the test does not detect the bug and the
+fix is unproven — Tier 2 is FAIL with that reason. The remedy is a test
+that does fail pre-fix (it counts against the retry ceiling), never a
+softened verdict.
 
-For a new feature, the rule relaxes: a test exercising the new behavior
-exists and passes. No pre-state to prove against.
+### Tests added for behavior that already existed — prove they can fail
+
+When the session adds or modifies tests covering behavior that was already
+present at base, the baseline comparison proves nothing — the test passes
+on both sides. Prove the test is not vacuous with a **tamper check**:
+
+1. Create a throwaway worktree of the current branch
+   (`git worktree add <tmp-dir> HEAD`), and make sure the new test is
+   present in it — copy the test file in if it is not yet committed
+   (`git worktree add` carries only committed state).
+2. In the worktree, deliberately break the covered code path — alter its
+   behavior (flip a comparison, change a returned value), never its syntax:
+   a tree that cannot build fails every test and proves nothing about this
+   one.
+3. Run the new test there. It must **fail**. Run it on the intact tree. It
+   must **pass**.
+4. Both captures go in the report; remove the worktree
+   (`git worktree remove <tmp-dir> --force`).
+
+A new test that survives tampering is vacuous — it guards nothing — and
+Tier 2 is FAIL with that reason. When the tamper check is genuinely
+infeasible (the test depends on an external service or environment a
+worktree cannot have), mark it SKIP with the reason stated — never
+silently. A SKIP'd tamper check caps the tier at SKIP — never PASS: a
+green suite cannot stand in for the proof it was exempted from.
+
+### New feature
+
+Behavior that did not exist at base: a test exercising the new behavior
+exists and passes. There is no pre-state to prove against and no tamper
+check required — the feature's runtime proof lives in Tier 3.

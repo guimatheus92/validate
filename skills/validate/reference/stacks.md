@@ -63,9 +63,11 @@ reason stated ("no linter configured"), never silently omitted.
 | Elixir | `mix test` | `mix test <file>` |
 
 Run the full relevant suite once (scoped to the affected package in a
-monorepo). Then, for a bug fix, run the regression-proof procedure from
-[evidence.md](evidence.md) on the covering test — a full green suite does not
-by itself prove the fix fixed anything.
+monorepo). Then run the regression-proof procedure from
+[evidence.md](evidence.md) in the mode the change calls for — bug fix:
+covering test against the pre-fix base; tests added for pre-existing
+behavior: the tamper check. A full green suite does not by itself prove
+either, and a missing or failed proof makes Tier 2 FAIL.
 
 E2E suites (Playwright, Cypress, pytest-e2e) belong to Tier 2 when they
 already exist in the project: run the specs covering the changed flow, not

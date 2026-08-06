@@ -1,8 +1,9 @@
 // Consistency check for the prompt-only plugin: manifests in lockstep,
-// required frontmatter present, no dangling reference links, and the
+// required frontmatter present, no dangling reference links, the
 // banned-language list identical between its source of truth (evidence.md)
-// and the eval assertions graded against it. This is the whole test suite —
-// there is no compiled code to test.
+// and the eval assertions graded against it, and the eval roster coherent
+// (contiguous ids, no orphan fixtures, README table complete). This is the
+// whole test suite — there is no compiled code to test.
 //
 // Usage: node scripts/check.mjs
 import { readFileSync, readdirSync, existsSync } from 'node:fs';
@@ -118,6 +119,29 @@ if (!evidenceList) {
     if (e.fixture && !built.has(e.fixture)) {
       fail(`evals/evals.json (${e.name}): fixture "${e.fixture}" is not built by setup-fixtures.mjs (built: ${[...built].join(', ')})`);
     }
+  }
+}
+
+// 6. Eval roster integrity: ids unique and contiguous from 0, every built
+//    fixture referenced by at least one eval, and every eval named in the
+//    evals/README.md scenario table. 0.2.0 shipped a documented-but-missing
+//    eval (`plan-only-mode`) that sailed through green — this makes that
+//    class of drift fail loudly instead.
+{
+  const evals = readJson('evals/evals.json')?.evals ?? [];
+  const ids = evals.map((e) => e.id).sort((a, b) => a - b);
+  if (JSON.stringify(ids) !== JSON.stringify([...ids.keys()])) {
+    fail(`evals/evals.json: eval ids are not unique and contiguous from 0 (got ${ids.join(', ')})`);
+  }
+  const setup = readText('evals/setup-fixtures.mjs') ?? '';
+  const built = [...setup.matchAll(/^repo\(\s*\n?\s*'([^']+)'/gm)].map((m) => m[1]);
+  const referenced = new Set(evals.map((e) => e.fixture));
+  for (const name of built) {
+    if (!referenced.has(name)) fail(`evals/setup-fixtures.mjs: fixture "${name}" is built but referenced by no eval`);
+  }
+  const roster = readText('evals/README.md') ?? '';
+  for (const e of evals) {
+    if (e.name && !roster.includes(`\`${e.name}\``)) fail(`evals/README.md: eval "${e.name}" is missing from the scenario table`);
   }
 }
 

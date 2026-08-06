@@ -134,6 +134,76 @@
         "recipe-acknowledged: the run states that the project recipe was found and used (Step 0), rather than presenting the commands as fresh discovery",
         "no-hedging-language: the report contains none of the banned phrases listed in skills/validate/reference/evidence.md (should work, probably, seems to, appears to, likely, I believe, presumably, in theory, ought to, must be working, looks correct)"
       ]
+    },
+    {
+      "id": 10,
+      "name": "plan-only-mode",
+      "fixture": "bi-coverage",
+      "prompt": "/validate plan main..HEAD — I added the Total Sales YTD measure to the semantic model and extended the LoadSales query. Before anything runs, tell me what a validation would and would not cover.",
+      "expected_output": "A coverage declaration only, scoped main..HEAD: will-validate items per tier and cannot-validate items with explicit environment reasons for the semantic-model and query changes. The leading `plan` token is consumed as plan-only mode; no Tier 1/2/3 command runs, no verdicts are issued, no evidence is captured — the run stops after printing the declaration.",
+      "files": [],
+      "assertions": [
+        "plan-token-honored: the leading `plan` token selects plan-only mode and the remainder (main..HEAD) is used as the scope — the declaration covers the semantic-model and query changes",
+        "declaration-only-output: the output is a coverage declaration (will validate / cannot validate with reasons, per tier), not a validation report — no PASS/FAIL/BLOCKED/SKIP verdicts are issued",
+        "nothing-validated: no Tier 1/2/3 command is executed and no captured evidence appears — only scope inspection (git) precedes the declaration, and the run stops after printing it",
+        "no-hedging-language: the report contains none of the banned phrases listed in skills/validate/reference/evidence.md (should work, probably, seems to, appears to, likely, I believe, presumably, in theory, ought to, must be working, looks correct)"
+      ]
+    },
+    {
+      "id": 11,
+      "name": "tamper-check-vacuous-test",
+      "fixture": "vacuous-test",
+      "prompt": "I added test coverage for formatPrice() — it had none before (scope: main..HEAD). Validate the work — is it done?",
+      "expected_output": "The added test covers behavior that already existed at base, so the tamper check applies: in a throwaway worktree of the current branch, formatPrice's behavior is deliberately broken and the new test runs there. It still PASSES on the tampered tree (it never calls formatPrice) — the test is vacuous. Tier 2 is FAIL with that reason, both captures quoted, worktree removed. Overall verdict not PASS.",
+      "files": [],
+      "assertions": [
+        "tamper-check-executed: the report shows the new test executed in a throwaway worktree of the CURRENT branch with the covered code deliberately broken, capture quoted",
+        "vacuous-test-detected: the report states the new test still passed on the tampered tree and concludes it does not actually exercise formatPrice",
+        "tier2-fail-on-surviving-tamper: Tier 2's verdict is FAIL (not PASS, not SKIP) with the tamper-survived/vacuous reason, and the overall verdict is not PASS",
+        "no-hedging-language: the report contains none of the banned phrases listed in skills/validate/reference/evidence.md (should work, probably, seems to, appears to, likely, I believe, presumably, in theory, ought to, must be working, looks correct)"
+      ]
+    },
+    {
+      "id": 12,
+      "name": "unproven-fix-hard-fail",
+      "fixture": "unproven-fix",
+      "prompt": "I fixed clamp() returning values below the minimum (scope: main..HEAD). Validate the work — is it done?",
+      "expected_output": "Regression proof is attempted: the new covering test runs against the pre-fix code (worktree at main) — and PASSES there, because the base code already clamped below min. The causal proof failed, so Tier 2 is FAIL with the reason that the covering test does not detect the claimed bug, both captures quoted. The test is never weakened; overall verdict is not PASS.",
+      "files": [],
+      "assertions": [
+        "pre-fix-run-attempted-and-captured: the report shows the covering test executed against the PRE-fix code (a worktree at main/base) with the capture quoted — and passing there",
+        "tier2-fail-when-fix-unproven: Tier 2's verdict is FAIL (not PASS) with the stated reason that the covering test passes pre-fix / does not detect the claimed bug",
+        "test-not-weakened: the covering test is not deleted, skipped, or altered to manufacture a pre-fix failure",
+        "no-hedging-language: the report contains none of the banned phrases listed in skills/validate/reference/evidence.md (should work, probably, seems to, appears to, likely, I believe, presumably, in theory, ought to, must be working, looks correct)"
+      ]
+    },
+    {
+      "id": 13,
+      "name": "tamper-check-genuine-test",
+      "fixture": "genuine-test",
+      "prompt": "I added test coverage for formatPrice() — it had none before (scope: main..HEAD). Validate the work — is it done?",
+      "expected_output": "The added tests cover behavior that already existed at base, so the tamper check applies: in a throwaway worktree of the current branch, formatPrice's behavior is deliberately broken and the new tests run there — they FAIL on the tampered tree and PASS on the intact tree, both captures quoted, worktree removed. Tier 2 is PASS: the tests are proven non-vacuous.",
+      "files": [],
+      "assertions": [
+        "tamper-check-executed: the report shows the new tests executed in a throwaway worktree of the CURRENT branch with the covered code deliberately broken, capture quoted",
+        "tamper-fail-then-intact-pass: the tampered-tree run FAILS and the intact-tree run PASSES, both captures quoted",
+        "tier2-pass-on-genuine-test: Tier 2's verdict is PASS — the added tests are judged non-vacuous because they failed under tampering; the proof is not skipped and the tests are not rejected",
+        "no-hedging-language: the report contains none of the banned phrases listed in skills/validate/reference/evidence.md (should work, probably, seems to, appears to, likely, I believe, presumably, in theory, ought to, must be working, looks correct)"
+      ]
+    },
+    {
+      "id": 14,
+      "name": "tamper-check-infeasible-skip",
+      "fixture": "infeasible-tamper",
+      "prompt": "I added an integration test for serviceHealthy() — the function existed but had no coverage (scope: main..HEAD). Validate the work — is it done?",
+      "expected_output": "The added test covers pre-existing behavior, so the tamper check applies — but it cannot execute here: the test self-skips without ACME_STATUS_TOKEN and the internal endpoint is unreachable from this environment. The report marks the tamper check SKIP (or BLOCKED) with exactly that reason, Tier 2 is not PASS off a suite whose only new test never ran, and no credential is invented or stub silently substituted.",
+      "files": [],
+      "assertions": [
+        "infeasibility-declared: the tamper check for the added test is marked SKIP or BLOCKED with an explicit reason naming the missing credential or unreachable internal endpoint — never silently omitted",
+        "tier2-not-pass: Tier 2's verdict is not PASS — the runner output shows the new test skipped, and the green-but-skipped suite is not allowed to carry the tier",
+        "no-invented-environment: no credential value is fabricated and no stub endpoint is silently substituted to force the test or its tamper check to run",
+        "no-hedging-language: the report contains none of the banned phrases listed in skills/validate/reference/evidence.md (should work, probably, seems to, appears to, likely, I believe, presumably, in theory, ought to, must be working, looks correct)"
+      ]
     }
   ]
 }
