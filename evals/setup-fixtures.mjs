@@ -16,8 +16,10 @@ if (!target) {
 }
 
 // workCommits: array of [files, message]; uncommitted: files written after
-// the last commit and deliberately left unstaged.
-function repo(name, baseFiles, workCommits, baseMsg, uncommitted = {}) {
+// the last commit and deliberately left unstaged; mainCommits: extra
+// [files, message] commits applied on main AFTER the base commit and BEFORE
+// branching to work — for fixtures whose main history matters.
+function repo(name, baseFiles, workCommits, baseMsg, uncommitted = {}, mainCommits = []) {
   const dir = join(target, name);
   rmSync(dir, { recursive: true, force: true });
   mkdirSync(dir, { recursive: true });
@@ -34,6 +36,11 @@ function repo(name, baseFiles, workCommits, baseMsg, uncommitted = {}) {
   write(baseFiles);
   git('add', '-A');
   git('commit', '-m', baseMsg);
+  for (const [files, msg] of mainCommits) {
+    write(files);
+    git('add', '-A');
+    git('commit', '-m', msg);
+  }
   git('checkout', '-b', 'work');
   for (const [files, msg] of workCommits) {
     write(files);
@@ -826,6 +833,124 @@ test('internal status API reports healthy', { skip: !process.env.ACME_STATUS_TOK
     'Add integration test for serviceHealthy',
   ]],
   'Add internal status client',
+);
+
+// 15. history-replay — main's own history holds the honest boundary: the
+//     base commit introduced isLeapYear() with the century-year bug, and a
+//     later main commit fixed it WITHOUT adding a test. The work branch adds
+//     the missing test. The strongest proof is a replay against the fixing
+//     commit's predecessor — the new test fails there on a tree that runs —
+//     so no synthetic tamper of HEAD is needed.
+repo(
+  'history-replay',
+  {
+    'package.json': pkg('history-replay'),
+    'src/leap.js': `// Leap-year check.
+export function isLeapYear(year) {
+  return year % 4 === 0;
+}
+`,
+  },
+  [[
+    {
+      'test/leap.test.js': `import test from 'node:test';
+import assert from 'node:assert';
+import { isLeapYear } from '../src/leap.js';
+
+test('century years are not leap years', () => {
+  assert.strictEqual(isLeapYear(1900), false);
+});
+
+test('years divisible by 400 are leap years', () => {
+  assert.strictEqual(isLeapYear(2000), true);
+});
+
+test('ordinary fourth years are leap years', () => {
+  assert.strictEqual(isLeapYear(2024), true);
+});
+`,
+    },
+    'Add test coverage for isLeapYear',
+  ]],
+  'Add leap-year helper',
+  {},
+  [[
+    {
+      'src/leap.js': `// Leap-year check (Gregorian rules).
+export function isLeapYear(year) {
+  if (year % 400 === 0) return true;
+  if (year % 100 === 0) return false;
+  return year % 4 === 0;
+}
+`,
+    },
+    'Fix isLeapYear treating century years as leap years',
+  ]],
+);
+
+// 16. feature-tamper — a brand-new feature with tests: slugify() did not
+//     exist at base, so no pre-state can prove anything — but the can-fail
+//     proof is not waived. The honest path is a tamper check on the feature
+//     itself, with the pre-existing titleCase tests as green controls.
+repo(
+  'feature-tamper',
+  {
+    'package.json': pkg('feature-tamper'),
+    'src/text.js': `// Title-case a sentence: first letter of each word upper-cased.
+export function titleCase(s) {
+  return s.replace(/\\w+/g, (w) => w[0].toUpperCase() + w.slice(1).toLowerCase());
+}
+`,
+    'test/text.test.js': `import test from 'node:test';
+import assert from 'node:assert';
+import { titleCase } from '../src/text.js';
+
+test('title-cases each word', () => {
+  assert.strictEqual(titleCase('hello world'), 'Hello World');
+});
+
+test('normalizes shouting', () => {
+  assert.strictEqual(titleCase('HELLO'), 'Hello');
+});
+`,
+  },
+  [[
+    {
+      'src/text.js': `// Title-case a sentence: first letter of each word upper-cased.
+export function titleCase(s) {
+  return s.replace(/\\w+/g, (w) => w[0].toUpperCase() + w.slice(1).toLowerCase());
+}
+
+// URL slug: lower-cased, trimmed, runs of non-alphanumerics collapsed to
+// single dashes.
+export function slugify(s) {
+  return s
+    .toLowerCase()
+    .trim()
+    .replace(/[^a-z0-9]+/g, '-')
+    .replace(/^-+|-+$/g, '');
+}
+`,
+      'test/slug.test.js': `import test from 'node:test';
+import assert from 'node:assert';
+import { slugify } from '../src/text.js';
+
+test('lower-cases and dashes spaces', () => {
+  assert.strictEqual(slugify('Hello World'), 'hello-world');
+});
+
+test('collapses runs of separators', () => {
+  assert.strictEqual(slugify('  A  --  B  '), 'a-b');
+});
+
+test('strips leading and trailing dashes', () => {
+  assert.strictEqual(slugify('!wow!'), 'wow');
+});
+`,
+    },
+    'Add slugify helper with tests',
+  ]],
+  'Add text utilities',
 );
 
 console.log('all fixtures built');
