@@ -108,8 +108,11 @@ Run the tiers in order. A FAIL in an earlier tier does not excuse skipping a
 later one when it can still run meaningfully — a lint error shouldn't hide a
 broken runtime — but the overall verdict is FAIL the moment any tier fails.
 
-- **Tier 1 — static**: typecheck, lint, build. Missing from the project =
-  SKIP with the reason stated, not silently absent.
+- **Tier 1 — static**: typecheck, lint, build, plus the universal
+  diff-hygiene pass — conflict markers, unexpected or generated files, the
+  changed-file scope gate ([reference/scope.md](reference/scope.md)).
+  Missing from the project = SKIP with the reason stated, not silently
+  absent; the hygiene pass always runs.
 - **Tier 2 — tests**: the project's suites (unit, integration, E2E). "Tests
   pass" alone does not satisfy this tier when the change claims more: a bug
   fix requires regression proof (the covering test fails on the pre-fix

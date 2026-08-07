@@ -20,7 +20,10 @@ otherwise apply this compressed contract:
    compatibility, reliability, deployment) no claim covers. The final report
    must match this declaration, claim by claim.
 3. **Tier 1 — static**: typecheck, lint, build, using the project's own
-   scripts/Makefile/CI definitions. Absent = SKIP with reason.
+   scripts/Makefile/CI definitions. Absent = SKIP with reason. On every
+   stack, also run diff hygiene: `git diff --check`, leftover conflict
+   markers, unexpected or generated files flagged against the stated task,
+   every changed file expected or flagged.
 4. **Tier 2 — tests**: run the relevant suites. For a bug fix, prove the
    regression: the covering test must fail on the pre-fix code (throwaway
    `git worktree` at base) and pass on the fixed tree — capture both. For

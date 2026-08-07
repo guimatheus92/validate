@@ -69,6 +69,19 @@ the hard Tier 2 cap). Compressed carriers to move in the same commit:
 
 Evals 0 and 11–16 guard this.
 
+### Diff hygiene
+
+Source of truth: the "Diff hygiene — universal Tier 1 checks" section of
+`skills/validate/reference/scope.md`. Compressed carriers to move in the
+same commit:
+
+- `skills/validate/SKILL.md` — the Tier 1 bullet
+- `skills/validate/reference/stacks.md` — the Tier 1 intro pointer
+- `.github/prompts/validate.prompt.md` — item 3
+
+Eval 18 guards this (the self-review item is deliberately unfixtured — see
+Known gaps in `evals/README.md`).
+
 ### Banned language
 
 `skills/validate/reference/evidence.md` is canonical. The list quoted in

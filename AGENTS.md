@@ -92,6 +92,11 @@ reference files read on demand.
   deployment — are the one fixed list it may name).
 - **Change the report format:** edit `skills/validate/reference/report.md`;
   keep `report-has-per-tier-verdicts` in the evals passing.
+- **Change the diff-hygiene checks:** the "Diff hygiene" section of
+  `skills/validate/reference/scope.md` is the source of truth. Compressed
+  carriers that must move in the same commit: SKILL.md's Tier 1 bullet,
+  stacks.md's Tier 1 intro pointer, and
+  .github/prompts/validate.prompt.md item 3. Keep eval 18 passing.
 - **Change gating rules:** `skills/validate/reference/evidence.md` is the
   source of truth. The banned-language list in the eval assertions is
   machine-checked against it by `scripts/check.mjs` — edit evidence.md and
