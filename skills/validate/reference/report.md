@@ -15,8 +15,15 @@ above it, no hedged commentary below it. The report IS the answer.
 | 2 — tests | PASS | `npm test` (142 passed) + regression proof | see appendix |
 | 3 — runtime | PASS | drove /checkout flow, 3 screenshots | see appendix |
 
-**Not validated**: <each gap declared in the coverage plan, with its reason —
-omit the line only when the plan declared no gaps>
+| Claim | Verdict | Evidence |
+|---|---|---|
+| negative values no longer dropped by sum() | PASS | Tier 2 regression proof (appendix) |
+| /export returns the report as JSON | PASS | Tier 3 response capture (appendix) |
+
+**Not validated**: <each gap declared in the coverage plan, with its reason,
+ending with the nonfunctional dimensions no claim covered (security,
+performance, scale, compatibility, reliability, deployment) — this line is
+never omitted>
 
 ## Evidence
 
@@ -52,6 +59,12 @@ Rules:
   **Not validated** with its original reason; anything the run had to do
   differently from the plan is named as a deviation. A report that silently
   drops or adds coverage relative to the declaration is itself wrong.
+- **Every declared claim appears in the claims table** with its own verdict
+  and an evidence pointer. A claim proven wholesale by one tier may point at
+  that tier's row (keeps trivial runs terse); a claim with no evidence is
+  FAIL, never silently absent. A nonfunctional claim (faster, safer, scales
+  further) follows the same rule: measured evidence or an explicit
+  SKIP/BLOCKED reason, never a verdict from reasoning alone.
 - On FAIL or BLOCKED, end with a short **Next step** line: the exact failing
   command or missing prerequisite, and the decision the human needs to make.
 - A runtime claim that ends SKIP or BLOCKED for want of environment or

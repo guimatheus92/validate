@@ -40,13 +40,18 @@ surface; after editing, run the structural check and the guarding evals.
 
 Four surfaces, same commit:
 
-1. `skills/validate/SKILL.md` Step 3 — the declaration + the plan-only trigger
-2. `skills/validate/reference/report.md` — plan-must-match-report rule + the "Not validated" line
+1. `skills/validate/SKILL.md` Step 3 — claims + will/cannot-validate + the
+   nonfunctional not-claimed line + the plan-only trigger
+2. `skills/validate/reference/report.md` — claims table +
+   plan-must-match-report rule + the always-present "Not validated" line
 3. `commands/validate.md` — the plan-only trigger (duplicated so the dispatcher stands alone)
-4. `.github/prompts/validate.prompt.md` — the declare-coverage item + its "Not validated" line
+4. `.github/prompts/validate.prompt.md` — the declare-coverage item + its report line
 
-Keep the declaration stack-agnostic — never name products. Evals 7 and 10
-guard this.
+Keep the declaration stack-agnostic — never name products; the generic
+nonfunctional dimensions (security, performance, scale, compatibility,
+reliability, deployment) are the one fixed list it may name. Evals 7 and 10
+guard the declaration contract; eval 17 guards per-claim verdicts; eval 20
+guards the claimed-nonfunctional half.
 
 ### Regression proof
 

@@ -15,8 +15,9 @@ code. Until then, the work is not done — it is merely written.
 - You may not declare the work correct. Only evidence may. Every claim in
   your final report is either backed by captured output or marked as
   unverified — and unverified means the overall verdict is not PASS.
-- Verdicts are **PASS / FAIL / BLOCKED / SKIP**, per tier and overall.
-  Definitions and evidence rules: [reference/evidence.md](reference/evidence.md).
+- Verdicts are **PASS / FAIL / BLOCKED / SKIP**, per claim, per tier, and
+  overall. Definitions and evidence rules:
+  [reference/evidence.md](reference/evidence.md).
 - Green checks alone are not proof the change works — they prove you can run
   CI. Runtime observation (Tier 3) is what proves behavior, which is why it
   is a tier and not an afterthought.
@@ -69,21 +70,29 @@ which surface Tier 3 must drive.
 Before running anything, tell the user what this validation will and will
 not cover — in a compact block, one line per item:
 
+- **Claims**: what the session asserts it did — drawn from the user's
+  request, the commit messages, and the diff — one line per claim, with the
+  tier(s) and method that will prove it. These rows return in the final
+  report, each with its own verdict.
 - **Will validate**: per tier, the commands that will run and the surface
   Tier 3 will drive.
 - **Cannot validate**: each item with its explicit reason — no tooling in
   this environment, no credentials, not locally executable. An artifact
   that can't execute locally still gets what IS checkable — parse, syntax,
   schema, a dry-run — and the rest is declared, not omitted.
+- **Not claimed**: nonfunctional dimensions — security, performance, scale,
+  compatibility, reliability, deployment — are validated only when a claim
+  names one. List the ones no claim covers, so their absence is a
+  statement, not an oversight.
 
 Why upfront: on many stacks a large part of the work is not locally
 verifiable. Saying so before spending the run is the honest version of a
 surprising report — the user can stop you, supply what's missing, or accept
 the gap before it costs anything.
 
-The declaration is a contract. Every declared item appears in the final
-report with a verdict; every declared-impossible item appears there as SKIP
-or BLOCKED with the same reason. If the run forces a deviation from the
+The declaration is a contract. Every declared claim and item appears in the
+final report with a verdict; every declared-impossible item appears there as
+SKIP or BLOCKED with the same reason. If the run forces a deviation from the
 plan, the report names it — silent drift between plan and report is a FAIL
 of the report itself.
 
