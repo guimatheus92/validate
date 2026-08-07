@@ -91,10 +91,9 @@ Some rules have no covering fixture yet:
   the agent into a filtered run — the gate guards an optional behavior of
   the run itself, and a prompt contrived to demand a filter would grade
   the contrivance, not the skill.
-- **Forced rebuild around proofs.** Every fixture is Node or Python run
-  from source — no build step exists anywhere in the suite, so the
-  compiled-stack rebuild rule (evidence.md) is structurally unexercisable
-  here. A deterministic compiled fixture would drag a toolchain
+- **Forced rebuild around proofs.** Every fixture runs from source — no
+  build step exists anywhere in the suite, so the compiled-stack rebuild
+  rule (evidence.md) is structurally unexercisable here. A deterministic compiled fixture would drag a toolchain
   dependency into a suite that currently needs none.
 - **Deterministic timing evidence.** No fixture makes a timing claim —
   a test that depends on real scheduling would make the suite itself
@@ -114,13 +113,19 @@ Some rules have no covering fixture yet:
   unfixtured: asserting it on an existing eval would grade rote boilerplate,
   not judgment. Eval 20 guards the claimed half (a named nonfunctional claim
   must be proven or explicitly declared unvalidated).
+- **The never-run-locally prohibition.** Recipe entries listing commands
+  that must never run locally (recipe.md) have no covering fixture: eval
+  9's recipe carries no prohibition, and a fixture would need a
+  deterministic bait the agent must refuse — grading the contrivance, not
+  the skill, the same design problem as the filtered-run gate. The rule is
+  guarded by prose only.
 
 If you find a clean fixture design for any of these, add it here before
 changing the skill text it would guard.
 
 ## Results — iteration 1 (2026-08-04, 1 run per configuration, **evals 0–4 only**)
 
-Evals 5–16 were added after this benchmark; each was validated live on its
+Evals 5–20 were added after this benchmark; each was validated live on its
 fixture when introduced, but they have not been through a benchmarked
 with/without-skill iteration yet. The table below is NOT a whole-suite
 claim.

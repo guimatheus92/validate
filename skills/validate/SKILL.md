@@ -160,9 +160,9 @@ creating it.
 
 Produce the final report exactly per
 [reference/report.md](reference/report.md): overall verdict first, per-tier
-table, declared-but-not-validated items with their reasons, evidence
-appendix. Print it verbatim — no summary prose above it, no hedging below
-it.
+table, per-claim verdict table, declared-but-not-validated items with their
+reasons, evidence appendix. Print it verbatim — no summary prose above it,
+no hedging below it.
 
 ## Reference index
 

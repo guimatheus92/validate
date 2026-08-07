@@ -41,8 +41,8 @@ otherwise apply this compressed contract:
    CLI → run it and capture output; API → send real requests; web UI → drive
    a browser if tooling exists, else assert on served HTML and mark purely
    visual claims SKIP, never PASS.
-6. **Verdicts**: PASS / FAIL / BLOCKED / SKIP per tier, overall verdict
-   first. Evidence = output, exit codes, response bodies, screenshots
+6. **Verdicts**: PASS / FAIL / BLOCKED / SKIP per claim and per tier,
+   overall verdict first. Evidence = output, exit codes, response bodies, screenshots
    captured THIS run; memory is not evidence; ambiguous output = FAIL.
    BLOCKED names exactly what is missing — and never invents it: no
    fabricated env values, credentials, or stubs to force a check to run.

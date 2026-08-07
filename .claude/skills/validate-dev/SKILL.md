@@ -1,6 +1,6 @@
 ---
 name: validate-dev
-description: Development runbook for maintaining the validate plugin repo itself (the repo whose root holds commands/validate.md, skills/validate/, and evals/). Use this skill whenever editing any content under skills/, commands/, .github/prompts/, or evals/; whenever changing the coverage-declaration, regression-proof, banned-language, recipe, report, or blocked-runtime rules — each lives on several hand-synced surfaces that must move in the same commit; whenever running or grading the eval suite or its With/Without Skill benchmark; and whenever cutting a release. Trigger on prompts like "change the regression-proof rules", "sync the banned-language list", "run the evals", "add a stack playbook", "add a Tier 3 surface", or "cut a release" — even when the prompt does not mention syncing, because the sync map is exactly what is easy to miss.
+description: Development runbook for maintaining the validate plugin repo itself (the repo whose root holds commands/validate.md, skills/validate/, and evals/). Use this skill whenever editing any content under skills/, commands/, .github/prompts/, or evals/; whenever changing the coverage-declaration, regression-proof, banned-language, recipe, report, diff-hygiene, or blocked-runtime rules — each lives on several hand-synced surfaces that must move in the same commit; whenever running or grading the eval suite or its With/Without Skill benchmark; and whenever cutting a release. Trigger on prompts like "change the regression-proof rules", "sync the banned-language list", "run the evals", "add a stack playbook", "add a Tier 3 surface", or "cut a release" — even when the prompt does not mention syncing, because the sync map is exactly what is easy to miss.
 ---
 
 # Developing the validate plugin
@@ -40,12 +40,14 @@ surface; after editing, run the structural check and the guarding evals.
 
 Four surfaces, same commit:
 
-1. `skills/validate/SKILL.md` Step 3 — claims + will/cannot-validate + the
-   nonfunctional not-claimed line + the plan-only trigger
-2. `skills/validate/reference/report.md` — claims table +
-   plan-must-match-report rule + the always-present "Not validated" line
+1. `skills/validate/SKILL.md` — Step 3 (claims + will/cannot-validate + the
+   nonfunctional not-claimed line + the plan-only trigger), the contract's
+   per-claim verdict bullet, and Step 8's report enumeration
+2. `skills/validate/reference/report.md` — claims table + claim roll-up
+   rule + plan-must-match-report rule + the always-present "Not validated" line
 3. `commands/validate.md` — the plan-only trigger (duplicated so the dispatcher stands alone)
-4. `.github/prompts/validate.prompt.md` — the declare-coverage item + its report line
+4. `.github/prompts/validate.prompt.md` — the declare-coverage item, the
+   per-claim verdicts item, + its report line
 
 Keep the declaration stack-agnostic — never name products; the generic
 nonfunctional dimensions (security, performance, scale, compatibility,
@@ -104,7 +106,8 @@ Two hand-synced pieces, each same-commit:
   changes how anything is judged, so it does not collide with the
   untrusted-repo-content rule.
 
-Eval 9 guards recipe reuse.
+Eval 9 guards recipe reuse; the never-run prohibition is deliberately
+unfixtured (see Known gaps in `evals/README.md`).
 
 ### Blocked-runtime runbook
 

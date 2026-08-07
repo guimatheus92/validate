@@ -18,7 +18,7 @@ above it, no hedged commentary below it. The report IS the answer.
 | Claim | Verdict | Evidence |
 |---|---|---|
 | negative values no longer dropped by sum() | PASS | Tier 2 regression proof (appendix) |
-| /export returns the report as JSON | PASS | Tier 3 response capture (appendix) |
+| /checkout shows the corrected total | PASS | Tier 3 screenshots (appendix) |
 
 **Not validated**: <each gap declared in the coverage plan, with its reason,
 ending with the nonfunctional dimensions no claim covered (security,
@@ -49,6 +49,11 @@ Rules:
   everything after is supporting detail.
 - Overall is PASS only when every tier is PASS or SKIP. Any FAIL → overall
   FAIL. Any BLOCKED (and no FAIL) → overall BLOCKED.
+- Claim verdicts roll up the same way: any claim FAIL → overall FAIL. A
+  claim SKIP or BLOCKED whose gap was declared — it appears under **Not
+  validated** with its reason, plus its runbook when runtime — leaves the
+  overall verdict to the tiers; an undeclared unproven claim makes the
+  overall verdict not PASS.
 - Every PASS row must point at evidence that exists in the appendix. A row
   that can't is not PASS — fix the verdict, not the appendix.
 - SKIP and BLOCKED rows carry their reason in the "What ran" column
