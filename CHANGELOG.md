@@ -7,6 +7,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.5.0] — 2026-08-07
+
 - **Project icon and README header.** New `assets/icon.svg` (rounded-square
   gradient with a shield-check glyph) and a centered README header — logo,
   tagline, and CI / version / hosts / prompt-only / license badges.
