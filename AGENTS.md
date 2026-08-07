@@ -58,6 +58,10 @@ reference files read on demand.
   the user's recipe file** (`.claude/skills/validate-recipe/SKILL.md` in
   their repo, written by the skill at run time). Never hardcode a specific
   project's commands here.
+- **PR delivery is out of scope.** Server-side changed-file verification,
+  PR-description limits, evidence comments, merge readback — /validate
+  proves work, it does not deliver it. Those concerns belong to other
+  tools.
 
 ## Testing the plugin
 
@@ -103,8 +107,10 @@ reference files read on demand.
   the check tells you where to sync. The copies in `commands/validate.md`
   and `.github/prompts/validate.prompt.md` are deliberately COMPRESSED
   pointers (a few examples + a link to evidence.md), not full lists — keep
-  them pointers; the same goes for the recipe read-order duplicated between
-  `commands/validate.md` and `reference/recipe.md`, which is hand-synced.
+  them pointers; the same goes for the recipe read-order, hand-synced
+  across THREE carriers (`commands/validate.md`, `reference/recipe.md`,
+  and SKILL.md Step 0 — which also carries the "Never run locally"
+  honor clause synced with recipe.md's rules).
 - **Change the regression-proof rules:** the "Regression proof" section of
   `skills/validate/reference/evidence.md` is the source of truth (three
   modes — bug-fix baseline proof; historical replay with tamper-check

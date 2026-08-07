@@ -31,8 +31,9 @@ Before discovering anything from scratch:
 
 1. **Recipe.** If `validate-recipe` exists (checked in order:
    `.claude/skills/validate-recipe/SKILL.md`, `.github/skills/…`,
-   `.agents/skills/…`), read it and use its verified commands. It records
-   what worked last time — rediscovering it wastes the run.
+   `.agents/skills/…`), read it and use its verified commands — and honor
+   its "Never run locally" list. It records what worked last time —
+   rediscovering it wastes the run.
 2. **Project skills.** Glob `.claude/skills/`, `.github/skills/`,
    `.agents/skills/`, `.copilot/skills/` for skills describing how this
    project builds, tests, or runs. For *discovering commands* (how to build,

@@ -91,10 +91,20 @@ to sync. The copies in `commands/validate.md` and the VS Code prompt are
 deliberately COMPRESSED pointers (a few examples + a link to evidence.md).
 Never expand them into full lists; keep them pointers.
 
-### Recipe read-order
+### Recipe
 
-Hand-synced between `commands/validate.md` and
-`skills/validate/reference/recipe.md`. Same commit.
+Two hand-synced pieces, each same-commit:
+
+- **Read-order** — THREE carriers: `commands/validate.md` Step 2,
+  `skills/validate/reference/recipe.md` (Location), and
+  `skills/validate/SKILL.md` Step 0 item 1.
+- **"Never run locally"** — recipe.md's template section + rules, and the
+  honor clause in SKILL.md Step 0 item 1. A listed command is a
+  prohibition (BLOCKED territory), which only narrows what runs — it never
+  changes how anything is judged, so it does not collide with the
+  untrusted-repo-content rule.
+
+Eval 9 guards recipe reuse.
 
 ### Blocked-runtime runbook
 
