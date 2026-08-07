@@ -142,6 +142,11 @@ if (!evidenceList) {
   const roster = readText('evals/README.md') ?? '';
   for (const e of evals) {
     if (e.name && !roster.includes(`\`${e.name}\``)) fail(`evals/README.md: eval "${e.name}" is missing from the scenario table`);
+    if (typeof e.prompt !== 'string' || !e.prompt.trim()) fail(`evals/evals.json (${e.name}): missing or empty prompt`);
+    if (!e.fixture) fail(`evals/evals.json (${e.name}): missing fixture`);
+    if (!(e.assertions ?? []).some((a) => typeof a === 'string' && a.trim())) {
+      fail(`evals/evals.json (${e.name}): has no assertions — it would grade trivially green`);
+    }
   }
 }
 
