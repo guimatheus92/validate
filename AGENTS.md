@@ -37,7 +37,7 @@ reference files read on demand.
 - `.github/prompts/validate.prompt.md` — compressed contract for VS Code
   Copilot Chat users, who cannot load CLI plugins.
 - `evals/` — the skill's regression suite: `evals.json` (scenarios +
-  assertions) and `setup-fixtures.mjs` (builds the fourteen fixture repos).
+  assertions) and `setup-fixtures.mjs` (builds the sixteen fixture repos).
   Re-run the evals after any change to `skills/` content.
 
 ## Key conventions
@@ -96,12 +96,19 @@ reference files read on demand.
   `commands/validate.md` and `reference/recipe.md`, which is hand-synced.
 - **Change the regression-proof rules:** the "Regression proof" section of
   `skills/validate/reference/evidence.md` is the source of truth (three
-  modes — bug-fix baseline proof, tamper check, new-feature relaxation —
-  plus the hard Tier 2 cap). Compressed carriers that must move in the same
-  commit: SKILL.md's Tier 2 bullet, stacks.md's post-suite pointer,
-  report.md's Tier 2 appendix placeholder, commands/validate.md's
-  hard-rules line, and .github/prompts/validate.prompt.md item 4. Keep
-  evals 0 and 11–14 passing.
+  modes — bug-fix baseline proof; historical replay with tamper-check
+  fallback for session-added tests; new-feature tamper, no pre-state but
+  the can-fail proof still required — plus the hard Tier 2 cap). Compressed
+  carriers that must move in the same commit: SKILL.md's Tier 2 bullet,
+  stacks.md's post-suite pointer, report.md's Tier 2 appendix placeholder,
+  commands/validate.md's hard-rules line, and
+  .github/prompts/validate.prompt.md item 4. Keep evals 0 and 11–16
+  passing.
+- **Change the blocked-runtime runbook rule:** the "When a runtime claim
+  ends SKIP or BLOCKED" section of `skills/validate/reference/runtime.md`
+  is the source of truth; `reference/report.md`'s rules name where the
+  runbook surfaces in the report (Next step vs Tier 3 evidence). Move both
+  in the same commit and keep eval 3's runbook assertion passing.
 - **Cut a release:** `node scripts/release.mjs <patch|minor|major|x.y.z>` —
   bumps the three manifests, verifies no stale version, rolls CHANGELOG,
   commits and tags (push left to you).

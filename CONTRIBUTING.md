@@ -30,7 +30,7 @@ If you touch anything under `skills/`, re-run the eval scenarios — they are
 the skill's regression suite:
 
 ```bash
-node evals/setup-fixtures.mjs <tmp-dir>   # builds the 14 fixture repos
+node evals/setup-fixtures.mjs <tmp-dir>   # builds the 16 fixture repos
 ```
 
 Then run each prompt from `evals/evals.json` in its fixture (on the `work`

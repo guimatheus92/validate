@@ -151,8 +151,8 @@ Ruby, PHP, Elixir). Project knowledge enters two ways:
 
 ## Evals
 
-The skill ships with its own regression suite in [`evals/`](evals/): fifteen
-scenarios over fourteen disposable fixtures, each guarding a specific failure mode of "the work
+The skill ships with its own regression suite in [`evals/`](evals/): seventeen
+scenarios over sixteen disposable fixtures, each guarding a specific failure mode of "the work
 is done" (fake regression proof, runtime PASS on a docs-only change, visual
 claims without a browser, environment failures blamed on code, hedged
 verdicts on untested projects, scope truncated to the last commit, weakening
@@ -160,8 +160,10 @@ a failing test to force a pass, undeclared coverage gaps, obeying repo-planted
 fake-PASS instructions, ignoring the project recipe, executing anything
 during a plan-only dry run, vacuous new tests that survive tampering, fixes
 whose covering test already passed pre-fix, genuine new tests wrongly
-rejected by the tamper procedure, and infeasible tamper checks quietly
-converted into PASS). Every run is benchmarked **With Skill**
+rejected by the tamper procedure, infeasible tamper checks quietly
+converted into PASS, synthetic tampers used where the repo's own history
+held the honest boundary, and new-feature tests exempted from the can-fail
+proof). Every run is benchmarked **With Skill**
 against a **Without Skill** baseline — the same model and prompt with no
 skill — so the skill's value is measured, not assumed.
 

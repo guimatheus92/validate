@@ -25,7 +25,7 @@ refactor.
 ## Running the suite
 
 ```bash
-node evals/setup-fixtures.mjs <tmp-dir>    # builds the 14 fixture repos
+node evals/setup-fixtures.mjs <tmp-dir>    # builds the 16 fixture repos
 ```
 
 Then, for each eval in `evals.json`: give an agent the skill and the eval's
@@ -38,10 +38,10 @@ phrases listed in
 [`../skills/validate/reference/evidence.md`](../skills/validate/reference/evidence.md).
 The rest are graded by reading the report against the assertion text.
 
-## The fifteen scenarios
+## The seventeen scenarios
 
-Each one guards a specific failure mode of "the work is done" (fifteen
-scenarios over fourteen fixtures — `plan-only-mode` reuses `bi-coverage`):
+Each one guards a specific failure mode of "the work is done" (seventeen
+scenarios over sixteen fixtures — `plan-only-mode` reuses `bi-coverage`):
 
 | # | Eval | Guards against |
 |---|---|---|
@@ -60,6 +60,8 @@ scenarios over fourteen fixtures — `plan-only-mode` reuses `bi-coverage`):
 | 12 | `unproven-fix-hard-fail` | calling a fix proven when its covering test also passes on the pre-fix code |
 | 13 | `tamper-check-genuine-test` | rejecting (or skipping proof for) a genuine new test over pre-existing behavior — the positive half of the tamper check |
 | 14 | `tamper-check-infeasible-skip` | letting a green-but-skipped suite carry Tier 2 to PASS when the tamper check cannot run, or inventing credentials to force it |
+| 15 | `history-replay` | manufacturing a synthetic tamper when the repo's own history already holds the honest failing state |
+| 16 | `new-feature-tamper` | waiving the can-fail proof because the behavior is new — a green branch says nothing about whether the test guards the feature |
 
 The banned-language list quoted in every `no-hedging-language` assertion is
 machine-checked against `evidence.md` by `scripts/check.mjs` — if the two
@@ -67,7 +69,7 @@ ever diverge, CI fails.
 
 ## Known gaps (deliberate, tracked)
 
-Two iron rules have no covering fixture yet:
+Some rules have no covering fixture yet:
 
 - **The 3-attempt retry ceiling.** Driving an agent to the limit needs a
   failure that is repeatedly *almost* fixable; a nondeterministic test would
@@ -81,13 +83,29 @@ Two iron rules have no covering fixture yet:
   deviation; silent drift = FAIL) has no fixture: forcing a deterministic
   mid-run deviation without an unfair setup is the same design problem as
   the retry ceiling. Eval 7 guards only the plan-matches-report half.
+- **The filtered-run count gate.** No fixture can deterministically force
+  the agent into a filtered run — the gate guards an optional behavior of
+  the run itself, and a prompt contrived to demand a filter would grade
+  the contrivance, not the skill.
+- **Forced rebuild around proofs.** Every fixture is Node or Python run
+  from source — no build step exists anywhere in the suite, so the
+  compiled-stack rebuild rule (evidence.md) is structurally unexercisable
+  here. A deterministic compiled fixture would drag a toolchain
+  dependency into a suite that currently needs none.
+- **Deterministic timing evidence.** No fixture makes a timing claim —
+  a test that depends on real scheduling would make the suite itself
+  flaky, the same design problem as the retry ceiling above.
+- **Controls that discriminate.** Eval 16 asserts the green-controls
+  capture, but its fixture's controls (titleCase) cannot be broken by any
+  slugify tamper — no fixture yet constructs a scenario where a careless
+  tamper would take the controls down and flip the verdict.
 
 If you find a clean fixture design for either, add it here before changing
 the skill text it would guard.
 
 ## Results — iteration 1 (2026-08-04, 1 run per configuration, **evals 0–4 only**)
 
-Evals 5–14 were added after this benchmark; each was validated live on its
+Evals 5–16 were added after this benchmark; each was validated live on its
 fixture when introduced, but they have not been through a benchmarked
 with/without-skill iteration yet. The table below is NOT a whole-suite
 claim.
