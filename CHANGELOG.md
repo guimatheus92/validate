@@ -7,6 +7,15 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+- **Project icon and README header.** New `assets/icon.svg` (rounded-square
+  gradient with a shield-check glyph) and a centered README header — logo,
+  tagline, and CI / version / hosts / prompt-only / license badges.
+- **`validate-dev` project skill.** `.claude/skills/validate-dev/SKILL.md`
+  carries the repo's own maintenance runbook — the hand-synced surface map,
+  the eval procedure, and the release process — loading on demand for
+  agents working in this repo. `AGENTS.md` points to it, and
+  `.claude/settings.local.json` is now gitignored.
+
 ## [0.4.0] — 2026-08-06
 
 - **History-first regression proof.** For session-added tests over

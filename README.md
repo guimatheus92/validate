@@ -1,4 +1,18 @@
-# validate
+<p align="center">
+  <img src="assets/icon.svg" width="88" height="88" alt="validate" />
+</p>
+
+<h1 align="center">validate</h1>
+
+<p align="center"><em>Prove the session's work is correct — before anyone calls it done.</em></p>
+
+<p align="center">
+  <a href="https://github.com/guimatheus92/validate/actions/workflows/ci.yml"><img src="https://img.shields.io/github/actions/workflow/status/guimatheus92/validate/ci.yml?branch=main&label=CI&labelColor=1e1e2e&color=10b981" alt="CI" /></a>
+  <a href="https://github.com/guimatheus92/validate/tags"><img src="https://img.shields.io/github/v/tag/guimatheus92/validate?label=version&labelColor=1e1e2e&color=14b8a6" alt="version" /></a>
+  <img src="https://img.shields.io/badge/hosts-Copilot%20CLI%20%2B%20Claude%20Code-0ea5e9?labelColor=1e1e2e" alt="hosts" />
+  <img src="https://img.shields.io/badge/prompt--only-no%20compiled%20code-14b8a6?labelColor=1e1e2e" alt="prompt-only" />
+  <a href="LICENSE"><img src="https://img.shields.io/badge/license-MIT-0ea5e9?labelColor=1e1e2e" alt="license" /></a>
+</p>
 
 One command that proves an AI coding session's work is correct **before**
 anyone calls it done. `/validate` detects what the session changed, runs the
