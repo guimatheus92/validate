@@ -57,6 +57,10 @@ and gets a full validation.
 
 - Every verdict needs evidence captured THIS run: quoted output, exit codes,
   response bodies, screenshot paths. Memory is not evidence.
+- Verdicts are per claim as well as per tier: enumerate the session's
+  claims up front; each returns in the report evidence-backed or declared
+  SKIP/BLOCKED with its reason (never silently absent), and the
+  nonfunctional dimensions no claim covers are named as not validated.
 - Your final message may not contain hedging about the work's correctness —
   no "should work", "probably", "seems to", "appears to", "likely", … (the
   canonical list lives in the skill's reference/evidence.md). A claim

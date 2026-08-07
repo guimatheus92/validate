@@ -13,8 +13,11 @@ code. Until then, the work is not done — it is merely written.
 ## The contract
 
 - You may not declare the work correct. Only evidence may. Every claim in
-  your final report is either backed by captured output or marked as
-  unverified — and unverified means the overall verdict is not PASS.
+  your final report is backed by captured output, declared as a gap
+  (SKIP/BLOCKED under **Not validated**, with its reason), or unverified —
+  and an unverified, undeclared claim means the overall verdict is not
+  PASS. A declared gap does not by itself force the overall verdict; the
+  roll-up rule lives in [reference/report.md](reference/report.md).
 - Verdicts are **PASS / FAIL / BLOCKED / SKIP**, per claim, per tier, and
   overall. Definitions and evidence rules:
   [reference/evidence.md](reference/evidence.md).

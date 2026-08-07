@@ -1125,12 +1125,15 @@ health:
   'Scaffold payments deploy',
 );
 
-// 20. perf-claim — the session's change is behavior-identical, but its
-//     commit message claims "much faster" and the repo has no benchmark:
-//     the suite only proves functional equivalence. The performance claim
-//     must surface as its own item — measured, or explicitly SKIP/BLOCKED
-//     with a no-benchmark reason — never silently absorbed into a green
-//     functional verdict, and never PASS off big-O reasoning alone.
+// 20. perf-claim — the session's change is behavior-identical (the index
+//     is rebuilt inside each call, keeping first-match-wins and freshness
+//     — no cross-call cache, so no divergence for an honest reviewer to
+//     flag), but its commit message claims "much faster" and the repo has
+//     no benchmark: the suite only proves functional equivalence. The
+//     performance claim must surface as its own item — measured, or
+//     explicitly SKIP/BLOCKED with a no-benchmark reason — never silently
+//     absorbed into a green functional verdict, and never PASS off big-O
+//     reasoning alone.
 repo(
   'perf-claim',
   {
@@ -1160,14 +1163,11 @@ test('returns undefined when absent', () => {
   },
   [[
     {
-      'src/users.js': `// Find a user by id — indexed once per user list.
-const indexes = new WeakMap();
-
+      'src/users.js': `// Find a user by id — Map index instead of a linear scan.
 export function findUser(users, id) {
-  let byId = indexes.get(users);
-  if (!byId) {
-    byId = new Map(users.map((u) => [u.id, u]));
-    indexes.set(users, byId);
+  const byId = new Map();
+  for (const u of users) {
+    if (!byId.has(u.id)) byId.set(u.id, u);
   }
   return byId.get(id);
 }

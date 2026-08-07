@@ -45,7 +45,8 @@ Four surfaces, same commit:
    per-claim verdict bullet, and Step 8's report enumeration
 2. `skills/validate/reference/report.md` — claims table + claim roll-up
    rule + plan-must-match-report rule + the always-present "Not validated" line
-3. `commands/validate.md` — the plan-only trigger (duplicated so the dispatcher stands alone)
+3. `commands/validate.md` — the plan-only trigger + the per-claim
+   hard-rules bullet (duplicated so the dispatcher stands alone)
 4. `.github/prompts/validate.prompt.md` — the declare-coverage item, the
    per-claim verdicts item, + its report line
 

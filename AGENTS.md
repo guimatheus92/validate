@@ -89,9 +89,10 @@ reference files read on demand.
   plan-only trigger; plus the contract's per-claim verdict bullet and
   Step 8's report enumeration), report.md (claims table + claim roll-up
   rule + plan-must-match-report rule + the always-present Not validated
-  line), commands/validate.md (the plan-only trigger, duplicated so the
-  dispatcher stands alone), and .github/prompts/validate.prompt.md (the
-  declare-coverage item + the per-claim verdicts item + its report line). Keep evals 7, 10, 17, and 20 passing. The declaration must
+  line), commands/validate.md (the plan-only trigger + the per-claim
+  hard-rules bullet, duplicated so the dispatcher stands alone), and
+  .github/prompts/validate.prompt.md (the declare-coverage item + the
+  per-claim verdicts item + its report line). Keep evals 7, 10, 17, and 20 passing. The declaration must
   stay stack-agnostic — never name products (the generic nonfunctional
   dimensions — security, performance, scale, compatibility, reliability,
   deployment — are the one fixed list it may name).

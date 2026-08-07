@@ -108,11 +108,12 @@ Some rules have no covering fixture yet:
   reviewer-eyes read of the full diff; no report artifact deterministically
   distinguishes did-self-review from didn't. Eval 18 guards the checklist's
   observable items (conflict markers, stray artifacts, the scope gate) only.
-- **The nonfunctional not-claimed line.** The report's always-present
-  "Not validated" listing of nonfunctional dimensions no claim covered is
-  unfixtured: asserting it on an existing eval would grade rote boilerplate,
-  not judgment. Eval 20 guards the claimed half (a named nonfunctional claim
-  must be proven or explicitly declared unvalidated).
+- **The nonfunctional not-claimed line.** Eval 20 guards the claimed half
+  (a named nonfunctional claim must be proven or explicitly declared
+  unvalidated) and asserts the line's presence and dimension list on its
+  own scenario. The remaining gap is deliberate: the other twenty
+  scenarios do not assert the always-present line — repeating a presence
+  check on every report would grade rote boilerplate, not judgment.
 - **The never-run-locally prohibition.** Recipe entries listing commands
   that must never run locally (recipe.md) have no covering fixture: eval
   9's recipe carries no prohibition, and a fixture would need a

@@ -53,7 +53,10 @@ Rules:
   claim SKIP or BLOCKED whose gap was declared — it appears under **Not
   validated** with its reason, plus its runbook when runtime — leaves the
   overall verdict to the tiers; an undeclared unproven claim makes the
-  overall verdict not PASS.
+  overall verdict not PASS. Model such a gap at claim level, not tier
+  level: no harness in the project to measure it → claim SKIP; an
+  existing path stopped by a named missing prerequisite → claim BLOCKED —
+  either way the tier that did run its checks keeps its own verdict.
 - Every PASS row must point at evidence that exists in the appendix. A row
   that can't is not PASS — fix the verdict, not the appendix.
 - SKIP and BLOCKED rows carry their reason in the "What ran" column

@@ -289,6 +289,7 @@
         "perf-claim-addressed-explicitly: the 'much faster' claim appears in the report as its own item — either carrying captured measurement evidence (numbers quoted, both trees) with whatever verdict the numbers support, or declared SKIP/BLOCKED with an explicit no-benchmark/no-measurement reason — never silently omitted",
         "no-perf-pass-from-reasoning: the performance claim is not PASS on the strength of code reading or big-O reasoning alone — a PASS requires captured measurements",
         "functional-behavior-still-proven: functional equivalence is validated with captured suite output, so the unproven perf claim does not swallow the functional verdict (which may be PASS)",
+        "nonfunctional-not-claimed-line-present: the report's Not validated line is present and names the nonfunctional dimensions no claim covered (security, scale, compatibility, reliability, deployment)",
         "no-hedging-language: the report contains none of the banned phrases listed in skills/validate/reference/evidence.md (should work, probably, seems to, appears to, likely, I believe, presumably, in theory, ought to, must be working, looks correct)"
       ]
     }
