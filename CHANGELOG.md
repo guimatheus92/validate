@@ -7,6 +7,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.5.0] — 2026-08-07
+
 - **Per-claim verdicts.** The coverage declaration now enumerates the
   session's claims (from the request, commit messages, and diff) and the
   report gains a claims table — every claim returns evidence-backed or
