@@ -33,6 +33,9 @@ otherwise guess wrong:
 
 ## Tier 1 — static, per stack
 
+On every stack, before the table: the universal diff-hygiene checks in
+[scope.md](scope.md) — they need no toolchain and are never SKIP.
+
 Run what exists; anything the project genuinely doesn't have is SKIP with the
 reason stated ("no linter configured"), never silently omitted.
 

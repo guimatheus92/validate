@@ -11,12 +11,19 @@ otherwise apply this compressed contract:
 1. **Scope**: the full range of the session's work — all its commits plus
    uncommitted changes (never just `HEAD~1`) — unless the user gave an
    explicit range or paths.
-2. **Declare coverage first**: before executing, state what you WILL
-   validate (per tier) and what you canNOT validate with the reason (no
-   tooling, no credentials, not locally executable — check what parses or
-   dry-runs, declare the rest). The final report must match this declaration.
+2. **Declare coverage first**: before executing, enumerate the session's
+   claims (from the request, commit messages, and diff — one line each, with
+   the tier that will prove it), state what you WILL validate (per tier) and
+   what you canNOT validate with the reason (no tooling, no credentials, not
+   locally executable — check what parses or dry-runs, declare the rest),
+   and name the nonfunctional dimensions (security, performance, scale,
+   compatibility, reliability, deployment) no claim covers. The final report
+   must match this declaration, claim by claim.
 3. **Tier 1 — static**: typecheck, lint, build, using the project's own
-   scripts/Makefile/CI definitions. Absent = SKIP with reason.
+   scripts/Makefile/CI definitions. Absent = SKIP with reason. On every
+   stack, also run diff hygiene: `git diff --check`, leftover conflict
+   markers, unexpected or generated files flagged against the stated task,
+   every changed file expected or flagged.
 4. **Tier 2 — tests**: run the relevant suites. For a bug fix, prove the
    regression: the covering test must fail on the pre-fix code (throwaway
    `git worktree` at base) and pass on the fixed tree — capture both. For
@@ -34,8 +41,8 @@ otherwise apply this compressed contract:
    CLI → run it and capture output; API → send real requests; web UI → drive
    a browser if tooling exists, else assert on served HTML and mark purely
    visual claims SKIP, never PASS.
-6. **Verdicts**: PASS / FAIL / BLOCKED / SKIP per tier, overall verdict
-   first. Evidence = output, exit codes, response bodies, screenshots
+6. **Verdicts**: PASS / FAIL / BLOCKED / SKIP per claim and per tier,
+   overall verdict first. Evidence = output, exit codes, response bodies, screenshots
    captured THIS run; memory is not evidence; ambiguous output = FAIL.
    BLOCKED names exactly what is missing — and never invents it: no
    fabricated env values, credentials, or stubs to force a check to run.
@@ -45,5 +52,7 @@ otherwise apply this compressed contract:
    (canonical list: `skills/validate/reference/evidence.md`).
 
 Report: overall verdict, per-tier table (Tier | Verdict | What ran |
-Evidence), a "Not validated" line matching the declared gaps, then the
-evidence appendix with captures quoted.
+Evidence), a claims table (Claim | Verdict | Evidence — one row per declared
+claim), a "Not validated" line matching the declared gaps and naming the
+nonfunctional dimensions no claim covered, then the evidence appendix with
+captures quoted.

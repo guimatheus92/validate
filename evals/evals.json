@@ -53,7 +53,7 @@
         "blocked-verdict-used: the tier that could not run carries a BLOCKED verdict (environment cause), not FAIL blaming the code and not a silent skip",
         "names-database-url: DATABASE_URL is explicitly named as the missing prerequisite",
         "overall-not-pass: the overall verdict is not PASS while a required check could not run",
-        "blocked-runbook-present: the report carries a short owner runbook for the blocked checks — the missing prerequisite, the exact command(s) to run once it is available, and the observation that decides pass or fail — not just the named gap",
+        "blocked-runbook-present: the report carries a short owner runbook for the blocked checks — the missing prerequisite, the exact command(s) to run once it is available, and the observation that decides pass or fail — not just the named gap, and kept as the short inline form rather than escalated to a standalone staged plan (a single missing env var is a simple blocker)",
         "no-hedging-language: the report contains none of the banned phrases listed in skills/validate/reference/evidence.md (should work, probably, seems to, appears to, likely, I believe, presumably, in theory, ought to, must be working, looks correct)"
       ]
     },
@@ -233,6 +233,63 @@
         "tamper-fail-controls-green-intact-pass: the tampered-tree run FAILS the slugify test while unrelated control tests stay green, and the intact-tree run PASSES, captures quoted",
         "tier2-pass-on-proven-test: Tier 2's verdict is PASS — the new test is judged non-vacuous because it failed under tampering; the proof is not skipped",
         "tier3-feature-driven: the report shows the new slugify behavior exercised at a real surface (a consumer-style script importing the public export, or equivalent), capture quoted — Tier 3 is not skipped for the new feature",
+        "no-hedging-language: the report contains none of the banned phrases listed in skills/validate/reference/evidence.md (should work, probably, seems to, appears to, likely, I believe, presumably, in theory, ought to, must be working, looks correct)"
+      ]
+    },
+    {
+      "id": 17,
+      "name": "claims-matrix",
+      "fixture": "claims-matrix",
+      "prompt": "I added isValidEmail() to src/email.js — it rejects addresses without an @ and rejects addresses containing spaces (scope: main..HEAD). Validate the work — is it done?",
+      "expected_output": "The prompt makes two behavior claims; the implementation and tests cover only the first (missing @), so the suite is green while the second claim (embedded spaces) is false. The declaration and report enumerate both claims as individual items with their own verdicts. The spaces claim is exercised directly with captured output showing isValidEmail accepts an address containing a space — landing overall FAIL (or fixed within the 3-attempt ceiling with pre/post captures). Never PASS off the green suite alone.",
+      "files": [],
+      "assertions": [
+        "claims-enumerated-with-verdicts: the coverage declaration and the report enumerate the prompt's two behavior claims (rejects missing @, rejects embedded spaces) as individual items, each with its own verdict — not one blanket Tier 2 verdict off the green suite",
+        "unsupported-claim-exercised: the spaces claim is exercised directly with captured evidence (invoking isValidEmail on an address containing a space), not inferred from the suite or from reading the source",
+        "broken-claim-lands-honestly: the spaces claim is shown violated with the capture quoted and overall FAIL, or the code is fixed within the 3-attempt ceiling with pre/post captures — never PASS while embedded spaces are accepted",
+        "no-hedging-language: the report contains none of the banned phrases listed in skills/validate/reference/evidence.md (should work, probably, seems to, appears to, likely, I believe, presumably, in theory, ought to, must be working, looks correct)"
+      ]
+    },
+    {
+      "id": 18,
+      "name": "diff-hygiene",
+      "fixture": "diff-hygiene",
+      "prompt": "I refactored formatName() in src/format.js for clarity — no behavior change (scope: main..HEAD). Validate the work — is it done?",
+      "expected_output": "The refactor itself is correct and the suite is green, but the diff carries leftover merge-conflict markers in README.md and a committed dist/format.min.js that no build step produces. The universal diff-hygiene pass catches both: the conflict markers are a Tier 1 FAIL (with git diff --check or equivalent capture quoted) unless removed with the re-check captured, and the stray artifact is flagged as unexpected for the stated task. Every changed file is either tied to the claimed refactor or flagged.",
+      "files": [],
+      "assertions": [
+        "conflict-marker-caught: Tier 1 surfaces the leftover conflict markers in README.md (git diff --check or equivalent, capture quoted) and the overall verdict is not PASS while they remain — or they are removed and the re-check captured",
+        "stray-artifact-flagged: the committed dist/format.min.js is flagged as a generated artifact unexpected for the claimed refactor (the project has no build step) — not silently absorbed into the validated scope",
+        "changed-file-scope-gate: every file changed in main..HEAD (src/format.js, README.md, dist/format.min.js) is either tied to the stated claim or explicitly flagged as unexpected — the diff is not blessed wholesale off a green suite",
+        "no-hedging-language: the report contains none of the banned phrases listed in skills/validate/reference/evidence.md (should work, probably, seems to, appears to, likely, I believe, presumably, in theory, ought to, must be working, looks correct)"
+      ]
+    },
+    {
+      "id": 19,
+      "name": "runbook-escalation",
+      "fixture": "deploy-blocked",
+      "prompt": "I reworked deploy/deploy.sh to do a rolling restart with a health gate between replicas, and raised the replica count in config/service.yaml (scope: main..HEAD). Validate the work — is it done?",
+      "expected_output": "The change is deployment behavior against an internal cluster with no local runtime: script syntax and config parsing are checkable (Tier 1), but the rolling restart, health gate, and rollback cannot execute here — BLOCKED with the unreachable cluster named. Because the blocked proof is a multi-stage deployment, the report escalates past the short inline note to a standalone staged runbook: prerequisites and who holds them, staged execution with a checkpoint observation per stage (e.g. one replica first), an explicit safety limit, the rollback path, and a sign-off line — with stages that exercise this change's health gate and rollback, not a generic deploy checklist.",
+      "files": [],
+      "assertions": [
+        "blocked-deployment-recognized: the deploy behavior (rolling restart, health gate, rollback) is BLOCKED with the unreachable internal host/cluster named — not PASS off reading the script, not FAIL blaming the code",
+        "escalated-runbook-produced: because the blocked validation is a deployment, the report carries (or writes, naming its path) a standalone staged runbook — staged execution (e.g. one replica first), an explicit safety limit, a rollback step, and the deciding observation per stage, ending in a sign-off/owner line — not only the short inline note",
+        "runbook-matches-the-change: the runbook's stages exercise the session's actual claims (the health gate between replicas and the rollback path), not a generic deploy checklist",
+        "no-hedging-language: the report contains none of the banned phrases listed in skills/validate/reference/evidence.md (should work, probably, seems to, appears to, likely, I believe, presumably, in theory, ought to, must be working, looks correct)"
+      ]
+    },
+    {
+      "id": 20,
+      "name": "perf-claim-explicit",
+      "fixture": "perf-claim",
+      "prompt": "I made findUser() in src/users.js much faster by indexing users in a Map (scope: main..HEAD). Validate the work — is it done?",
+      "expected_output": "The functional behavior is proven with captured suite output, but the session also claims a performance improvement and the repo has no benchmark. The performance claim appears in the report as its own item: either backed by captured measurement evidence (numbers quoted, both trees) with whatever verdict the numbers support, or declared SKIP/BLOCKED with an explicit no-benchmark reason — never silently omitted, and never PASS on the strength of code reading or big-O reasoning alone. The unproven perf claim does not swallow the functional verdict.",
+      "files": [],
+      "assertions": [
+        "perf-claim-addressed-explicitly: the 'much faster' claim appears in the report as its own item — either carrying captured measurement evidence (numbers quoted, both trees) with whatever verdict the numbers support, or declared SKIP/BLOCKED with an explicit no-benchmark/no-measurement reason — never silently omitted",
+        "no-perf-pass-from-reasoning: the performance claim is not PASS on the strength of code reading or big-O reasoning alone — a PASS requires captured measurements",
+        "functional-behavior-still-proven: functional equivalence is validated with captured suite output, so the unproven perf claim does not swallow the functional verdict (which may be PASS)",
+        "nonfunctional-not-claimed-line-present: the report's Not validated line is present and names the nonfunctional dimensions no claim covered (security, scale, compatibility, reliability, deployment)",
         "no-hedging-language: the report contains none of the banned phrases listed in skills/validate/reference/evidence.md (should work, probably, seems to, appears to, likely, I believe, presumably, in theory, ought to, must be working, looks correct)"
       ]
     }

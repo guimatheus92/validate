@@ -37,7 +37,7 @@ reference files read on demand.
 - `.github/prompts/validate.prompt.md` — compressed contract for VS Code
   Copilot Chat users, who cannot load CLI plugins.
 - `evals/` — the skill's regression suite: `evals.json` (scenarios +
-  assertions) and `setup-fixtures.mjs` (builds the sixteen fixture repos).
+  assertions) and `setup-fixtures.mjs` (builds the twenty fixture repos).
   Re-run the evals after any change to `skills/` content.
 
 ## Key conventions
@@ -58,6 +58,10 @@ reference files read on demand.
   the user's recipe file** (`.claude/skills/validate-recipe/SKILL.md` in
   their repo, written by the skill at run time). Never hardcode a specific
   project's commands here.
+- **PR delivery is out of scope.** Server-side changed-file verification,
+  PR-description limits, evidence comments, merge readback — /validate
+  proves work, it does not deliver it. Those concerns belong to other
+  tools.
 
 ## Testing the plugin
 
@@ -80,23 +84,35 @@ reference files read on demand.
 - **Add a Tier 3 surface:** edit `skills/validate/reference/runtime.md`'s
   surface table.
 - **Change the coverage-declaration rules:** the prose lives on FOUR
-  surfaces that must be hand-synced in the same commit — SKILL.md Step 3
-  (declaration + plan-only trigger), report.md (plan-must-match-report rule
-  + the Not validated line), commands/validate.md (the plan-only trigger,
-  duplicated so the dispatcher stands alone), and
-  .github/prompts/validate.prompt.md (the declare-coverage item + its Not
-  validated line). Keep evals 7 and 10 passing. The declaration must stay
-  stack-agnostic — never name products.
+  surfaces that must be hand-synced in the same commit — SKILL.md (Step 3:
+  claims + will/cannot-validate + the nonfunctional not-claimed line +
+  plan-only trigger; plus the contract's per-claim verdict bullet and
+  Step 8's report enumeration), report.md (claims table + claim roll-up
+  rule + plan-must-match-report rule + the always-present Not validated
+  line), commands/validate.md (the plan-only trigger + the per-claim
+  hard-rules bullet, duplicated so the dispatcher stands alone), and
+  .github/prompts/validate.prompt.md (the declare-coverage item + the
+  per-claim verdicts item + its report line). Keep evals 7, 10, 17, and 20 passing. The declaration must
+  stay stack-agnostic — never name products (the generic nonfunctional
+  dimensions — security, performance, scale, compatibility, reliability,
+  deployment — are the one fixed list it may name).
 - **Change the report format:** edit `skills/validate/reference/report.md`;
   keep `report-has-per-tier-verdicts` in the evals passing.
+- **Change the diff-hygiene checks:** the "Diff hygiene" section of
+  `skills/validate/reference/scope.md` is the source of truth. Compressed
+  carriers that must move in the same commit: SKILL.md's Tier 1 bullet,
+  stacks.md's Tier 1 intro pointer, and
+  .github/prompts/validate.prompt.md item 3. Keep eval 18 passing.
 - **Change gating rules:** `skills/validate/reference/evidence.md` is the
   source of truth. The banned-language list in the eval assertions is
   machine-checked against it by `scripts/check.mjs` — edit evidence.md and
   the check tells you where to sync. The copies in `commands/validate.md`
   and `.github/prompts/validate.prompt.md` are deliberately COMPRESSED
   pointers (a few examples + a link to evidence.md), not full lists — keep
-  them pointers; the same goes for the recipe read-order duplicated between
-  `commands/validate.md` and `reference/recipe.md`, which is hand-synced.
+  them pointers; the same goes for the recipe read-order, hand-synced
+  across THREE carriers (`commands/validate.md`, `reference/recipe.md`,
+  and SKILL.md Step 0 — which also carries the "Never run locally"
+  honor clause synced with recipe.md's rules).
 - **Change the regression-proof rules:** the "Regression proof" section of
   `skills/validate/reference/evidence.md` is the source of truth (three
   modes — bug-fix baseline proof; historical replay with tamper-check
@@ -109,9 +125,12 @@ reference files read on demand.
   passing.
 - **Change the blocked-runtime runbook rule:** the "When a runtime claim
   ends SKIP or BLOCKED" section of `skills/validate/reference/runtime.md`
-  is the source of truth; `reference/report.md`'s rules name where the
-  runbook surfaces in the report (Next step vs Tier 3 evidence). Move both
-  in the same commit and keep eval 3's runbook assertion passing.
+  is the source of truth for both forms — the 4–8-line short runbook and
+  the escalated staged plan for complex blocked claims (multi-system,
+  deployment, load); `reference/report.md`'s rules name where each form
+  surfaces in the report (Next step vs Tier 3 evidence vs its own
+  `## Runbook` section). Move both files in the same commit and keep
+  eval 3 (short form stays short) and eval 19 (escalation) passing.
 - **Cut a release:** `node scripts/release.mjs <patch|minor|major|x.y.z>` —
   bumps the three manifests, verifies no stale version, rolls CHANGELOG,
   commits and tags (push left to you).

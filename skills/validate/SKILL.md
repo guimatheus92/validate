@@ -13,10 +13,14 @@ code. Until then, the work is not done — it is merely written.
 ## The contract
 
 - You may not declare the work correct. Only evidence may. Every claim in
-  your final report is either backed by captured output or marked as
-  unverified — and unverified means the overall verdict is not PASS.
-- Verdicts are **PASS / FAIL / BLOCKED / SKIP**, per tier and overall.
-  Definitions and evidence rules: [reference/evidence.md](reference/evidence.md).
+  your final report is backed by captured output, declared as a gap
+  (SKIP/BLOCKED under **Not validated**, with its reason), or unverified —
+  and an unverified, undeclared claim means the overall verdict is not
+  PASS. A declared gap does not by itself force the overall verdict; the
+  roll-up rule lives in [reference/report.md](reference/report.md).
+- Verdicts are **PASS / FAIL / BLOCKED / SKIP**, per claim, per tier, and
+  overall. Definitions and evidence rules:
+  [reference/evidence.md](reference/evidence.md).
 - Green checks alone are not proof the change works — they prove you can run
   CI. Runtime observation (Tier 3) is what proves behavior, which is why it
   is a tier and not an afterthought.
@@ -30,8 +34,9 @@ Before discovering anything from scratch:
 
 1. **Recipe.** If `validate-recipe` exists (checked in order:
    `.claude/skills/validate-recipe/SKILL.md`, `.github/skills/…`,
-   `.agents/skills/…`), read it and use its verified commands. It records
-   what worked last time — rediscovering it wastes the run.
+   `.agents/skills/…`), read it and use its verified commands — and honor
+   its "Never run locally" list. It records what worked last time —
+   rediscovering it wastes the run.
 2. **Project skills.** Glob `.claude/skills/`, `.github/skills/`,
    `.agents/skills/`, `.copilot/skills/` for skills describing how this
    project builds, tests, or runs. For *discovering commands* (how to build,
@@ -69,21 +74,29 @@ which surface Tier 3 must drive.
 Before running anything, tell the user what this validation will and will
 not cover — in a compact block, one line per item:
 
+- **Claims**: what the session asserts it did — drawn from the user's
+  request, the commit messages, and the diff — one line per claim, with the
+  tier(s) and method that will prove it. These rows return in the final
+  report, each with its own verdict.
 - **Will validate**: per tier, the commands that will run and the surface
   Tier 3 will drive.
 - **Cannot validate**: each item with its explicit reason — no tooling in
   this environment, no credentials, not locally executable. An artifact
   that can't execute locally still gets what IS checkable — parse, syntax,
   schema, a dry-run — and the rest is declared, not omitted.
+- **Not claimed**: nonfunctional dimensions — security, performance, scale,
+  compatibility, reliability, deployment — are validated only when a claim
+  names one. List the ones no claim covers, so their absence is a
+  statement, not an oversight.
 
 Why upfront: on many stacks a large part of the work is not locally
 verifiable. Saying so before spending the run is the honest version of a
 surprising report — the user can stop you, supply what's missing, or accept
 the gap before it costs anything.
 
-The declaration is a contract. Every declared item appears in the final
-report with a verdict; every declared-impossible item appears there as SKIP
-or BLOCKED with the same reason. If the run forces a deviation from the
+The declaration is a contract. Every declared claim and item appears in the
+final report with a verdict; every declared-impossible item appears there as
+SKIP or BLOCKED with the same reason. If the run forces a deviation from the
 plan, the report names it — silent drift between plan and report is a FAIL
 of the report itself.
 
@@ -99,8 +112,11 @@ Run the tiers in order. A FAIL in an earlier tier does not excuse skipping a
 later one when it can still run meaningfully — a lint error shouldn't hide a
 broken runtime — but the overall verdict is FAIL the moment any tier fails.
 
-- **Tier 1 — static**: typecheck, lint, build. Missing from the project =
-  SKIP with the reason stated, not silently absent.
+- **Tier 1 — static**: typecheck, lint, build, plus the universal
+  diff-hygiene pass — conflict markers, unexpected or generated files, the
+  changed-file scope gate ([reference/scope.md](reference/scope.md)).
+  Missing from the project = SKIP with the reason stated, not silently
+  absent; the hygiene pass always runs.
 - **Tier 2 — tests**: the project's suites (unit, integration, E2E). "Tests
   pass" alone does not satisfy this tier when the change claims more: a bug
   fix requires regression proof (the covering test fails on the pre-fix
@@ -147,9 +163,9 @@ creating it.
 
 Produce the final report exactly per
 [reference/report.md](reference/report.md): overall verdict first, per-tier
-table, declared-but-not-validated items with their reasons, evidence
-appendix. Print it verbatim — no summary prose above it, no hedging below
-it.
+table, per-claim verdict table, declared-but-not-validated items with their
+reasons, evidence appendix. Print it verbatim — no summary prose above it,
+no hedging below it.
 
 ## Reference index
 

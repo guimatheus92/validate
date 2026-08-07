@@ -44,9 +44,14 @@ description: Verified build/test/run commands for <project name>. Used by /valid
 ## Gotchas
 - <env var that must be set, port conflicts, slow first build, …>
 
+## Never run locally (optional)
+- `<command/script>`     # <why: deploys, destroys data, hits a shared env>
+
 ## Conventions (optional)
 - <branch naming, PR description limits, test category/selector names,
-  how this repo expects proofs to be captured, …>
+  expected test counts per category, structure boundaries (which dirs a
+  change may touch), evidence/artifact directory, how this repo expects
+  proofs to be captured, …>
 
 Last verified: <YYYY-MM-DD> against <commit sha>
 ```
@@ -55,8 +60,12 @@ Last verified: <YYYY-MM-DD> against <commit sha>
 
 - **Record only what succeeded this run.** A command you didn't execute, or
   that failed, has no place here — the whole value of the file is that every
-  line is known-good (conventions are the one exception: record them as
-  observed, not as executed).
+  line is known-good (conventions and "Never run locally" entries are the
+  exception: record them as observed — from CI config, deploy scripts,
+  project docs — not as executed).
+- **"Never run locally" entries are prohibitions for future runs.** A listed
+  command is BLOCKED territory, not a dare: a claim only that command could
+  prove ends BLOCKED with a runbook, never with the command executed.
 - **Update on drift.** When a recorded command fails and you find a working
   replacement, replace the line and refresh `Last verified`. A stale recipe
   is worse than none — it burns the run's trust budget on a false lead.

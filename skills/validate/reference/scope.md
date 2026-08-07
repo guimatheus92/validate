@@ -52,6 +52,28 @@ Merge committed and uncommitted paths into one deduplicated list with status
 Include the list in the final report — it is the reader's proof that you
 validated the right thing.
 
+## Diff hygiene — universal Tier 1 checks
+
+The per-stack playbooks vary; these run on every stack, because they check
+the diff itself, not the code:
+
+- `git diff --check <base>` — whitespace errors and leftover conflict
+  markers in the changed lines. Run it on the full scope: a marker in a
+  docs or config file breaks no test and is exactly what this catches.
+- **Unexpected content**: build outputs, generated artifacts nothing in the
+  project produces, lockfile churn with no dependency change, editor/OS
+  droppings, local config, credentials — anything in the diff the stated
+  task did not require.
+- **The scope gate**: walk the changed-file list — every file is either
+  expected for the stated task or flagged in the report. An unexplained
+  file is a finding, not a footnote.
+- **Author self-review**: read the full diff with reviewer eyes — leftover
+  debug output, commented-out code, TODOs introduced this session, dead
+  branches.
+
+A leftover conflict marker or a committed credential is a Tier 1 FAIL.
+Other findings are named in the report; the reader decides their weight.
+
 ## Monorepos
 
 Group the changed files by their nearest manifest (`package.json`,

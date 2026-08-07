@@ -953,4 +953,229 @@ test('strips leading and trailing dashes', () => {
   'Add text utilities',
 );
 
+// 17. claims-matrix — the prompt makes TWO behavior claims about the new
+//     isValidEmail(): rejects missing @, rejects embedded spaces. The
+//     implementation satisfies only the first, the session's tests cover
+//     only the first, so the suite is green. A blanket per-tier verdict off
+//     the green suite blesses the broken second claim — only enumerating
+//     the claims individually catches it (isValidEmail('a b@c.d') is true,
+//     deterministically).
+repo(
+  'claims-matrix',
+  {
+    'package.json': pkg('claims-matrix'),
+    'src/email.js': `// Normalize an email address for storage.
+export function normalizeEmail(s) {
+  return s.trim().toLowerCase();
+}
+`,
+    'test/email.test.js': `import test from 'node:test';
+import assert from 'node:assert';
+import { normalizeEmail } from '../src/email.js';
+
+test('lower-cases and trims', () => {
+  assert.strictEqual(normalizeEmail('  Ada@Example.COM '), 'ada@example.com');
+});
+`,
+  },
+  [[
+    {
+      'src/email.js': `// Normalize an email address for storage.
+export function normalizeEmail(s) {
+  return s.trim().toLowerCase();
+}
+
+// Basic validity check.
+export function isValidEmail(s) {
+  return s.includes('@');
+}
+`,
+      'test/email.test.js': `import test from 'node:test';
+import assert from 'node:assert';
+import { normalizeEmail, isValidEmail } from '../src/email.js';
+
+test('lower-cases and trims', () => {
+  assert.strictEqual(normalizeEmail('  Ada@Example.COM '), 'ada@example.com');
+});
+
+test('rejects an address without @', () => {
+  assert.strictEqual(isValidEmail('ada.example.com'), false);
+});
+`,
+    },
+    'Add isValidEmail (reject missing @, reject embedded spaces)',
+  ]],
+  'Add email helpers',
+);
+
+// 18. diff-hygiene — the session's commit carries a clean behavior-identical
+//     refactor PLUS two hygiene problems no test can see: leftover
+//     merge-conflict markers in README.md (a non-code file, so the suite
+//     stays green — only a diff-level check catches them) and a committed
+//     dist/ artifact nothing produces (package.json has no build script).
+//     Blessing the diff wholesale off the green suite misses both.
+repo(
+  'diff-hygiene',
+  {
+    'package.json': pkg('diff-hygiene'),
+    'src/format.js': `// "Last, First" display form.
+export function formatName(first, last) {
+  return last + ', ' + first;
+}
+`,
+    'test/format.test.js': `import test from 'node:test';
+import assert from 'node:assert';
+import { formatName } from '../src/format.js';
+
+test('formats as Last, First', () => {
+  assert.strictEqual(formatName('Ada', 'Lovelace'), 'Lovelace, Ada');
+});
+`,
+    'README.md': '# diff-hygiene\n\nName formatting helpers.\n',
+  },
+  [[
+    {
+      'src/format.js': `// "Last, First" display form.
+export function formatName(first, last) {
+  return \`\${last}, \${first}\`;
+}
+`,
+      'README.md': `# diff-hygiene
+
+Name formatting helpers.
+
+<<<<<<< HEAD
+Formats names for display in sorted lists.
+=======
+Formats names in "Last, First" display order.
+>>>>>>> feature/docs
+`,
+      'dist/format.min.js': 'export function formatName(f,l){return `${l}, ${f}`}\n',
+    },
+    'Refactor formatName for clarity',
+  ]],
+  'Add name formatter',
+);
+
+// 19. deploy-blocked — the session's change is deployment behavior only:
+//     a rolling restart with a health gate and rollback in deploy/deploy.sh,
+//     plus a replica bump in config/service.yaml. There is no local runtime
+//     and the target cluster is internal and unreachable, so the runtime
+//     claims land BLOCKED — and a multi-stage deployment proof does not fit
+//     a 4–8-line note: the honest artifact is a staged runbook with safety
+//     limits, rollback, and a deciding observation per stage.
+repo(
+  'deploy-blocked',
+  {
+    'README.md': `# payments-deploy
+
+Deployment scripts and config for the payments service. The service runs in
+the internal cluster; deploys go through \`deploy/deploy.sh\` from a release
+runner that holds the cluster credentials. There is no local runtime here.
+`,
+    'deploy/deploy.sh': `#!/usr/bin/env bash
+# Deploy the payments service to the internal cluster.
+set -euo pipefail
+
+RELEASE="\${1:?usage: deploy.sh <release-tag>}"
+HOST="deploy.internal.payments.example"
+
+scp "build/payments-\${RELEASE}.tar.gz" "release@\${HOST}:/srv/payments/releases/"
+ssh "release@\${HOST}" "payments-ctl stop && payments-ctl install \${RELEASE} && payments-ctl start"
+`,
+    'config/service.yaml': `service: payments
+replicas: 2
+health:
+  path: /healthz
+  port: 8443
+`,
+  },
+  [[
+    {
+      'deploy/deploy.sh': `#!/usr/bin/env bash
+# Deploy the payments service to the internal cluster — one replica at a
+# time, health-gated, rolling back to the previous release on failure.
+set -euo pipefail
+
+RELEASE="\${1:?usage: deploy.sh <release-tag>}"
+HOST="deploy.internal.payments.example"
+PREVIOUS="$(ssh "release@\${HOST}" 'payments-ctl current')"
+
+scp "build/payments-\${RELEASE}.tar.gz" "release@\${HOST}:/srv/payments/releases/"
+
+for replica in $(ssh "release@\${HOST}" 'payments-ctl replicas'); do
+  ssh "release@\${HOST}" "payments-ctl restart --replica \${replica} --release \${RELEASE}"
+  if ! curl -sf --max-time 30 "https://\${replica}.payments.example:8443/healthz"; then
+    echo "health gate failed on \${replica} — rolling back to \${PREVIOUS}" >&2
+    ssh "release@\${HOST}" "payments-ctl rollback --release \${PREVIOUS}"
+    exit 1
+  fi
+done
+`,
+      'config/service.yaml': `service: payments
+replicas: 3
+health:
+  path: /healthz
+  port: 8443
+  timeout_seconds: 30
+`,
+    },
+    'Rolling restart with health gate; raise replicas',
+  ]],
+  'Scaffold payments deploy',
+);
+
+// 20. perf-claim — the session's change is behavior-identical (the index
+//     is rebuilt inside each call, keeping first-match-wins and freshness
+//     — no cross-call cache, so no divergence for an honest reviewer to
+//     flag), but its commit message claims "much faster" and the repo has
+//     no benchmark: the suite only proves functional equivalence. The
+//     performance claim must surface as its own item — measured, or
+//     explicitly SKIP/BLOCKED with a no-benchmark reason — never silently
+//     absorbed into a green functional verdict, and never PASS off big-O
+//     reasoning alone.
+repo(
+  'perf-claim',
+  {
+    'package.json': pkg('perf-claim'),
+    'src/users.js': `// Find a user by id.
+export function findUser(users, id) {
+  return users.find((u) => u.id === id);
+}
+`,
+    'test/users.test.js': `import test from 'node:test';
+import assert from 'node:assert';
+import { findUser } from '../src/users.js';
+
+const users = [
+  { id: 1, name: 'Ada' },
+  { id: 2, name: 'Grace' },
+];
+
+test('finds a user by id', () => {
+  assert.strictEqual(findUser(users, 2).name, 'Grace');
+});
+
+test('returns undefined when absent', () => {
+  assert.strictEqual(findUser(users, 99), undefined);
+});
+`,
+  },
+  [[
+    {
+      'src/users.js': `// Find a user by id — Map index instead of a linear scan.
+export function findUser(users, id) {
+  const byId = new Map();
+  for (const u of users) {
+    if (!byId.has(u.id)) byId.set(u.id, u);
+  }
+  return byId.get(id);
+}
+`,
+    },
+    'Speed up findUser with a Map index — much faster on large lists',
+  ]],
+  'Add user lookup',
+);
+
 console.log('all fixtures built');

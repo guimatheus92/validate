@@ -1,6 +1,6 @@
 ---
 name: validate-dev
-description: Development runbook for maintaining the validate plugin repo itself (the repo whose root holds commands/validate.md, skills/validate/, and evals/). Use this skill whenever editing any content under skills/, commands/, .github/prompts/, or evals/; whenever changing the coverage-declaration, regression-proof, banned-language, recipe, report, or blocked-runtime rules — each lives on several hand-synced surfaces that must move in the same commit; whenever running or grading the eval suite or its With/Without Skill benchmark; and whenever cutting a release. Trigger on prompts like "change the regression-proof rules", "sync the banned-language list", "run the evals", "add a stack playbook", "add a Tier 3 surface", or "cut a release" — even when the prompt does not mention syncing, because the sync map is exactly what is easy to miss.
+description: Development runbook for maintaining the validate plugin repo itself (the repo whose root holds commands/validate.md, skills/validate/, and evals/). Use this skill whenever editing any content under skills/, commands/, .github/prompts/, or evals/; whenever changing the coverage-declaration, regression-proof, banned-language, recipe, report, diff-hygiene, or blocked-runtime rules — each lives on several hand-synced surfaces that must move in the same commit; whenever running or grading the eval suite or its With/Without Skill benchmark; and whenever cutting a release. Trigger on prompts like "change the regression-proof rules", "sync the banned-language list", "run the evals", "add a stack playbook", "add a Tier 3 surface", or "cut a release" — even when the prompt does not mention syncing, because the sync map is exactly what is easy to miss.
 ---
 
 # Developing the validate plugin
@@ -40,13 +40,21 @@ surface; after editing, run the structural check and the guarding evals.
 
 Four surfaces, same commit:
 
-1. `skills/validate/SKILL.md` Step 3 — the declaration + the plan-only trigger
-2. `skills/validate/reference/report.md` — plan-must-match-report rule + the "Not validated" line
-3. `commands/validate.md` — the plan-only trigger (duplicated so the dispatcher stands alone)
-4. `.github/prompts/validate.prompt.md` — the declare-coverage item + its "Not validated" line
+1. `skills/validate/SKILL.md` — Step 3 (claims + will/cannot-validate + the
+   nonfunctional not-claimed line + the plan-only trigger), the contract's
+   per-claim verdict bullet, and Step 8's report enumeration
+2. `skills/validate/reference/report.md` — claims table + claim roll-up
+   rule + plan-must-match-report rule + the always-present "Not validated" line
+3. `commands/validate.md` — the plan-only trigger + the per-claim
+   hard-rules bullet (duplicated so the dispatcher stands alone)
+4. `.github/prompts/validate.prompt.md` — the declare-coverage item, the
+   per-claim verdicts item, + its report line
 
-Keep the declaration stack-agnostic — never name products. Evals 7 and 10
-guard this.
+Keep the declaration stack-agnostic — never name products; the generic
+nonfunctional dimensions (security, performance, scale, compatibility,
+reliability, deployment) are the one fixed list it may name. Evals 7 and 10
+guard the declaration contract; eval 17 guards per-claim verdicts; eval 20
+guards the claimed-nonfunctional half.
 
 ### Regression proof
 
@@ -64,6 +72,19 @@ the hard Tier 2 cap). Compressed carriers to move in the same commit:
 
 Evals 0 and 11–16 guard this.
 
+### Diff hygiene
+
+Source of truth: the "Diff hygiene — universal Tier 1 checks" section of
+`skills/validate/reference/scope.md`. Compressed carriers to move in the
+same commit:
+
+- `skills/validate/SKILL.md` — the Tier 1 bullet
+- `skills/validate/reference/stacks.md` — the Tier 1 intro pointer
+- `.github/prompts/validate.prompt.md` — item 3
+
+Eval 18 guards this (the self-review item is deliberately unfixtured — see
+Known gaps in `evals/README.md`).
+
 ### Banned language
 
 `skills/validate/reference/evidence.md` is canonical. The list quoted in
@@ -73,17 +94,32 @@ to sync. The copies in `commands/validate.md` and the VS Code prompt are
 deliberately COMPRESSED pointers (a few examples + a link to evidence.md).
 Never expand them into full lists; keep them pointers.
 
-### Recipe read-order
+### Recipe
 
-Hand-synced between `commands/validate.md` and
-`skills/validate/reference/recipe.md`. Same commit.
+Two hand-synced pieces, each same-commit:
+
+- **Read-order** — THREE carriers: `commands/validate.md` Step 2,
+  `skills/validate/reference/recipe.md` (Location), and
+  `skills/validate/SKILL.md` Step 0 item 1.
+- **"Never run locally"** — recipe.md's template section + rules, and the
+  honor clause in SKILL.md Step 0 item 1. A listed command is a
+  prohibition (BLOCKED territory), which only narrows what runs — it never
+  changes how anything is judged, so it does not collide with the
+  untrusted-repo-content rule.
+
+Eval 9 guards recipe reuse; the never-run prohibition is deliberately
+unfixtured (see Known gaps in `evals/README.md`).
 
 ### Blocked-runtime runbook
 
 `skills/validate/reference/runtime.md` ("When a runtime claim ends SKIP or
-BLOCKED") is the source of truth; `skills/validate/reference/report.md`
-names where the runbook surfaces in the report (Next step vs Tier 3
-evidence). Same commit; eval 3's runbook assertion guards it.
+BLOCKED") is the source of truth for both forms — the 4–8-line short
+runbook and the escalated staged plan (prerequisites, staged execution,
+safety limits, deciding observation, rollback, sign-off) for complex
+blocked claims; `skills/validate/reference/report.md` names where each
+form surfaces (Next step vs Tier 3 evidence vs its own `## Runbook`
+section). Same commit; eval 3 guards the short form staying short, eval 19
+guards the escalation.
 
 ### Version lockstep
 

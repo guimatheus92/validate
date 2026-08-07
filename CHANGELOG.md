@@ -7,6 +7,44 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.5.0] — 2026-08-07
+
+- **Per-claim verdicts.** The coverage declaration now enumerates the
+  session's claims (from the request, commit messages, and diff) and the
+  report gains a claims table — every claim returns evidence-backed or
+  declared SKIP/BLOCKED with its reason, never silently absent. Roll-up:
+  a claim FAIL is an overall FAIL; a declared gap leaves the overall
+  verdict to the tiers; an undeclared unproven claim caps the overall
+  verdict below PASS.
+- **Nonfunctional dimensions are explicit.** Security, performance,
+  scale, compatibility, reliability, and deployment are validated only
+  when a claim names one; the always-present **Not validated** line names
+  the dimensions no claim covers. A claimed nonfunctional property needs
+  measured evidence or an explicit gap — never a verdict from reasoning
+  alone.
+- **Universal diff-hygiene pass in Tier 1.** On every stack: `git diff
+  --check` over the full scope, leftover conflict markers, unexpected or
+  generated files gated against the stated task, and an author
+  self-review read of the diff. A conflict marker or committed credential
+  is a Tier 1 FAIL.
+- **Escalated runbooks for complex blocked claims.** When a blocked proof
+  spans systems, needs a provisioned environment (deployment, load, data
+  migration), or has steps whose failure needs rollback, the short owner
+  runbook escalates to a staged plan — prerequisites, staged execution
+  with per-stage checkpoints, safety limits, the deciding observation,
+  rollback, sign-off — in its own report section.
+- **Recipe: never-run-locally list and broader conventions.** The recipe
+  template records commands that must never run locally (deploys,
+  data-destroying scripts, shared-env jobs) as prohibitions future runs
+  honor, plus expected test counts, structure boundaries, and the
+  evidence-directory convention.
+- **PR delivery declared a non-goal.** /validate proves work; it does not
+  deliver it.
+- **Four new evals (17–20)** on deterministic fixtures — `claims-matrix`,
+  `diff-hygiene`, `runbook-escalation`, `perf-claim-explicit` — and
+  eval 3 gains the anti-escalation half (a single missing env var keeps
+  the short runbook form).
+
 ## [0.4.1] — 2026-08-07
 
 - **Project icon and README header.** New `assets/icon.svg` (rounded-square
