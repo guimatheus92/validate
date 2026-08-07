@@ -37,7 +37,7 @@ reference files read on demand.
 - `.github/prompts/validate.prompt.md` — compressed contract for VS Code
   Copilot Chat users, who cannot load CLI plugins.
 - `evals/` — the skill's regression suite: `evals.json` (scenarios +
-  assertions) and `setup-fixtures.mjs` (builds the sixteen fixture repos).
+  assertions) and `setup-fixtures.mjs` (builds the twenty fixture repos).
   Re-run the evals after any change to `skills/` content.
 
 ## Key conventions

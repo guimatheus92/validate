@@ -25,7 +25,7 @@ refactor.
 ## Running the suite
 
 ```bash
-node evals/setup-fixtures.mjs <tmp-dir>    # builds the 16 fixture repos
+node evals/setup-fixtures.mjs <tmp-dir>    # builds the 20 fixture repos
 ```
 
 Then, for each eval in `evals.json`: give an agent the skill and the eval's
@@ -38,10 +38,10 @@ phrases listed in
 [`../skills/validate/reference/evidence.md`](../skills/validate/reference/evidence.md).
 The rest are graded by reading the report against the assertion text.
 
-## The seventeen scenarios
+## The twenty-one scenarios
 
-Each one guards a specific failure mode of "the work is done" (seventeen
-scenarios over sixteen fixtures — `plan-only-mode` reuses `bi-coverage`):
+Each one guards a specific failure mode of "the work is done" (twenty-one
+scenarios over twenty fixtures — `plan-only-mode` reuses `bi-coverage`):
 
 | # | Eval | Guards against |
 |---|---|---|
@@ -62,6 +62,10 @@ scenarios over sixteen fixtures — `plan-only-mode` reuses `bi-coverage`):
 | 14 | `tamper-check-infeasible-skip` | letting a green-but-skipped suite carry Tier 2 to PASS when the tamper check cannot run, or inventing credentials to force it |
 | 15 | `history-replay` | manufacturing a synthetic tamper when the repo's own history already holds the honest failing state |
 | 16 | `new-feature-tamper` | waiving the can-fail proof because the behavior is new — a green branch says nothing about whether the test guards the feature |
+| 17 | `claims-matrix` | blessing an unenumerated behavior claim off a green suite — each claim gets its own verdict, not one blanket tier verdict |
+| 18 | `diff-hygiene` | shipping conflict markers or stray generated artifacts the test suite can never see — the diff itself is a Tier 1 surface |
+| 19 | `runbook-escalation` | compressing a blocked multi-stage deployment proof into a 4–8-line note — complex blocked claims need a staged runbook with safety limits, rollback, and sign-off |
+| 20 | `perf-claim-explicit` | silently absorbing a performance claim into a green functional verdict — a nonfunctional claim gets measured evidence or an explicit declared gap |
 
 The banned-language list quoted in every `no-hedging-language` assertion is
 machine-checked against `evidence.md` by `scripts/check.mjs` — if the two
@@ -94,14 +98,25 @@ Some rules have no covering fixture yet:
   dependency into a suite that currently needs none.
 - **Deterministic timing evidence.** No fixture makes a timing claim —
   a test that depends on real scheduling would make the suite itself
-  flaky, the same design problem as the retry ceiling above.
+  flaky, the same design problem as the retry ceiling above. Eval 20
+  (`perf-claim-explicit`) deliberately grades only that a performance
+  claim is surfaced and honestly declared, never measured timing itself.
 - **Controls that discriminate.** Eval 16 asserts the green-controls
   capture, but its fixture's controls (titleCase) cannot be broken by any
   slugify tamper — no fixture yet constructs a scenario where a careless
   tamper would take the controls down and flip the verdict.
+- **Author self-review.** The diff-hygiene pass (scope.md) asks for a
+  reviewer-eyes read of the full diff; no report artifact deterministically
+  distinguishes did-self-review from didn't. Eval 18 guards the checklist's
+  observable items (conflict markers, stray artifacts, the scope gate) only.
+- **The nonfunctional not-claimed line.** The report's always-present
+  "Not validated" listing of nonfunctional dimensions no claim covered is
+  unfixtured: asserting it on an existing eval would grade rote boilerplate,
+  not judgment. Eval 20 guards the claimed half (a named nonfunctional claim
+  must be proven or explicitly declared unvalidated).
 
-If you find a clean fixture design for either, add it here before changing
-the skill text it would guard.
+If you find a clean fixture design for any of these, add it here before
+changing the skill text it would guard.
 
 ## Results — iteration 1 (2026-08-04, 1 run per configuration, **evals 0–4 only**)
 
