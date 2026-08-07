@@ -69,6 +69,9 @@ reference files read on demand.
 - Live: `/plugin marketplace add <path-to-this-repo>` then
   `/plugin install validate@validate` in a Claude Code or Copilot session,
   and run `/validate` in a repo with a fresh change.
+- Deeper runbook (surface map, eval procedure, release):
+  `.claude/skills/validate-dev/SKILL.md` — loads automatically as a
+  project skill when working in this repo.
 
 ## Common tasks
 

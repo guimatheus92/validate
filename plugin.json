@@ -1,7 +1,7 @@
 {
   "name": "validate",
   "description": "Prove an AI coding session's work is correct before calling it done. One command runs static checks, tests with regression proof, and live runtime verification (CLI, API, browser) with captured evidence and PASS/FAIL/BLOCKED/SKIP verdicts. Works on Copilot CLI and Claude Code.",
-  "version": "0.4.0",
+  "version": "0.4.1",
   "author": {
     "name": "Guilherme Matheus",
     "email": "guilherme_matheus12@hotmail.com"
