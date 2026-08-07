@@ -117,9 +117,12 @@ reference files read on demand.
   passing.
 - **Change the blocked-runtime runbook rule:** the "When a runtime claim
   ends SKIP or BLOCKED" section of `skills/validate/reference/runtime.md`
-  is the source of truth; `reference/report.md`'s rules name where the
-  runbook surfaces in the report (Next step vs Tier 3 evidence). Move both
-  in the same commit and keep eval 3's runbook assertion passing.
+  is the source of truth for both forms — the 4–8-line short runbook and
+  the escalated staged plan for complex blocked claims (multi-system,
+  deployment, load); `reference/report.md`'s rules name where each form
+  surfaces in the report (Next step vs Tier 3 evidence vs its own
+  `## Runbook` section). Move both files in the same commit and keep
+  eval 3 (short form stays short) and eval 19 (escalation) passing.
 - **Cut a release:** `node scripts/release.mjs <patch|minor|major|x.y.z>` —
   bumps the three manifests, verifies no stale version, rolls CHANGELOG,
   commits and tags (push left to you).

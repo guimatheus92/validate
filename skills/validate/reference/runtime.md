@@ -81,3 +81,25 @@ to run, the observation that decides pass or fail, and any cleanup. Four
 to eight lines, executable by someone who was not in this session. A SKIP
 that merely scopes the tier out (docs-only change) needs no runbook —
 there is nothing to finish.
+
+**Escalate the form when the short version cannot honestly fit** — the
+proof spans more than one system or service, needs a provisioned
+environment (deployment, load, data migration), or has steps whose failure
+needs rollback. The escalated runbook is a full plan, its own
+`## Runbook — <claim>` section of the report:
+
+1. **Prerequisites** — environment, credentials, data, access, and who
+   holds them
+2. **Staged execution** — ordered steps sized to limit blast radius (one
+   replica, one tenant, a canary slice first), with a checkpoint
+   observation after each
+3. **Safety limits** — load caps, test-tenant scoping, what must never be
+   touched
+4. **The deciding observation** — what to capture at each stage; which
+   result is PASS and which is FAIL
+5. **Rollback / cleanup** — how to undo each stage if its checkpoint fails
+6. **Sign-off** — who confirms the result, and where the evidence lands
+
+Offer to also write the plan to a file in the repo — ask first, the same
+rule as the recipe; if the project recipe records an evidence-directory
+convention, that is where it goes.

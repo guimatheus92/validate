@@ -99,9 +99,13 @@ Hand-synced between `commands/validate.md` and
 ### Blocked-runtime runbook
 
 `skills/validate/reference/runtime.md` ("When a runtime claim ends SKIP or
-BLOCKED") is the source of truth; `skills/validate/reference/report.md`
-names where the runbook surfaces in the report (Next step vs Tier 3
-evidence). Same commit; eval 3's runbook assertion guards it.
+BLOCKED") is the source of truth for both forms — the 4–8-line short
+runbook and the escalated staged plan (prerequisites, staged execution,
+safety limits, deciding observation, rollback, sign-off) for complex
+blocked claims; `skills/validate/reference/report.md` names where each
+form surfaces (Next step vs Tier 3 evidence vs its own `## Runbook`
+section). Same commit; eval 3 guards the short form staying short, eval 19
+guards the escalation.
 
 ### Version lockstep
 

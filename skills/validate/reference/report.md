@@ -68,9 +68,12 @@ Rules:
 - On FAIL or BLOCKED, end with a short **Next step** line: the exact failing
   command or missing prerequisite, and the decision the human needs to make.
 - A runtime claim that ends SKIP or BLOCKED for want of environment or
-  tooling carries its owner runbook (see [runtime.md](runtime.md)) — in
-  the Next step when the overall verdict is FAIL or BLOCKED, otherwise as
-  the closing lines of the Tier 3 evidence section. An overall PASS does
-  not waive it.
+  tooling carries its owner runbook (see [runtime.md](runtime.md)) — short
+  form in the Next step when the overall verdict is FAIL or BLOCKED,
+  otherwise as the closing lines of the Tier 3 evidence section. An
+  escalated runbook for a complex blocked claim (multi-system, deployment,
+  load — see runtime.md) is its own `## Runbook — <claim>` section,
+  referenced from the Next step. An overall PASS does not waive either
+  form.
 - The banned-language list from [evidence.md](evidence.md) applies to every
   word of this report.
