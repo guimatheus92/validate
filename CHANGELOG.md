@@ -7,6 +7,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.6.0] — 2026-08-13
+
 - **Deployed-evidence phase.** After the three tiers, when the change
   touches deployed behavior (a bug fix to shipped code, a service/worker
   surface, production or incident mentions, a recipe-named source), the
