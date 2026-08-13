@@ -7,6 +7,53 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+- **Deployed-evidence phase.** After the three tiers, when the change
+  touches deployed behavior (a bug fix to shipped code, a service/worker
+  surface, production or incident mentions, a recipe-named source), the
+  run reads real deployed data — telemetry, logs, query results — and
+  reports reachability, failure incidence, provenance, customer impact,
+  deployment state, and post-deployment effect as separate evidence
+  statuses under a mandatory verdict-scope line. Sources are discovered
+  (recipe → docs → session tools → the code that emits operation names),
+  never invented; missing coordinates trigger a provide/use-another/waive
+  question, and secrets are never requested through the agent. Full
+  methodology in the new `reference/deployed-evidence.md`: identifiers
+  derived from the emitting code, zero-inclusive positive controls,
+  payload-field inspection (protocol failures hide under transport
+  success), correlation-id hierarchy, base rates with numerator and
+  denominator, deployment-state gating.
+- **Causal proof and deployed incidence are independent claims.** A
+  pre-fix-fails / post-fix-passes proof no longer implies deployed truth:
+  an asserted production claim with zero rows in a fit source is FAIL, an
+  explicitly required data check answered NOT OBSERVED is PASS, and a
+  supplemental dimension lands as a declared gap with a runbook under a
+  scoped PASS. Zero rows read "NOT OBSERVED in that source/window", never
+  "no impact"; zero eligible operations read "NOT MEASURABLE — 0 eligible
+  target operations", never 0/0.
+- **SKIP taxonomy.** SKIP is now always one of three verbatim labels —
+  `SKIP (not applicable)` (evidence shows no bearing), `SKIP (infeasible)`
+  (no method exists in this environment), `SKIP (user-waived)` (the user's
+  explicit waiver, quoted). Agents may classify from evidence but never
+  self-waive, and unknown applicability never becomes not-applicable.
+  BLOCKED stays distinct: a defined path with a named missing
+  prerequisite. `scripts/check.mjs` machine-checks the labels everywhere
+  they appear.
+- **Reachability check in Tier 1 diff hygiene.** Every changed function,
+  route, or module must have a caller, consumer, or registration in the
+  repo; a changed surface nothing references is a finding, and Tier 3
+  never validates dead code as if it were live.
+- **Eleven new evals (21–31) on five new fixtures** with deterministic
+  local telemetry data (JSONL snapshots, deployment inventories):
+  zero-rows positive controls, asserted-production-claim FAIL, user
+  waiver, required-source BLOCKED, dead-code reachability, hidden
+  protocol failures, provenance splitting, activity-hierarchy
+  reconstruction, deployment-version gating, post-deployment effect, and
+  customer-impact separation. Eval 14 renamed to
+  `tamper-check-blocked-credential` (a named missing credential is
+  BLOCKED, not SKIP). `scripts/check.mjs` gains three checks: a
+  deployed-evidence sentinel on every carrier, SKIP-label lockstep, and
+  semantic pins on the fixture telemetry data.
+
 ## [0.5.0] — 2026-08-07
 
 - **Per-claim verdicts.** The coverage declaration now enumerates the
