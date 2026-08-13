@@ -7,6 +7,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.7.0] — 2026-08-13
+
 - **Caller-first deployed evidence.** The phase now proves deployed
   caller reachability before service-side rows count as eligible
   deployed traffic: identify the real deployed producer, query the
