@@ -140,8 +140,11 @@ the result, decides the roll-up (full rules: [report.md](report.md)):
 
 1. **Asserted claim** — the user, commits, or work item state a deployed
    fact ("customers are hitting this"). It gets a claims-table row: zero
-   target rows in a fit source = FAIL; source unavailable and not waived
-   = BLOCKED.
+   target rows in a fit source = FAIL; a fit source that runs and does
+   not support the assertion = FAIL; source unavailable and not waived =
+   BLOCKED — and an asserted claim's FAIL or BLOCKED controls the
+   overall verdict. Declaring the gap never releases an asserted claim
+   to the tiers; only supplemental dimensions get that.
 2. **Explicitly required check** — the user asks a question ("is this
    happening in data?"). The check is PASS when a fit source answers it
    conclusively — including a NOT OBSERVED or a measured-rate answer.

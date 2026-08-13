@@ -60,10 +60,12 @@ otherwise apply this compressed contract:
    OBSERVED in <source> over <window>" — never "never happens" or "no
    customer impact"; zero eligible operations is "NOT MEASURABLE — 0
    eligible target operations", never 0/0. A production fact the user or
-   commits asserted is a claim: zero rows in a fit source = that claim
-   FAIL; source unavailable and not waived = BLOCKED. A dimension you
-   added on your own is a declared gap with a runbook, not a claim — a
-   scoped PASS is allowed. When this phase applies, the verdict line
+   commits asserted is a claim: zero rows in a fit source, or a fit
+   source that does not support the assertion = that claim FAIL; source
+   unavailable and not waived = BLOCKED — either way an asserted claim's
+   verdict controls the overall one. A dimension you added on your own
+   is a declared gap with a runbook, not a claim — a scoped PASS is
+   allowed. When this phase applies, the verdict line
    carries a scope: "causal correctness PASS; deployed incidence NOT
    OBSERVED; customer impact UNPROVEN".
 7. **Verdicts**: PASS / FAIL / BLOCKED / SKIP per claim and per tier,

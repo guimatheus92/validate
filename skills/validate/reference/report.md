@@ -84,13 +84,16 @@ Rules:
 - **Classify each deployed item before executing it**
   ([deployed-evidence.md](deployed-evidence.md)): an **asserted** deployed
   claim (the user, commits, or work item state a production fact) is a
-  claims-table row — zero target rows in a fit source = FAIL; source
-  unavailable and not waived = BLOCKED. An **explicitly required check**
-  (the user asked a question) is PASS when a fit source answers it
-  conclusively, including a NOT OBSERVED answer. A **supplemental**
-  dimension the validator added is not a claim — blocked or not-observed,
-  it is a declared gap under **Not validated** with a runbook, and the
-  declared-gap rule above already yields the scoped PASS.
+  claims-table row — zero target rows in a fit source = FAIL; a fit
+  source that runs and does not support the assertion = FAIL; source
+  unavailable and not waived = BLOCKED, and that BLOCKED **controls the
+  overall verdict** — declaring the gap never releases an asserted claim
+  to the tiers. An **explicitly required check** (the user asked a
+  question) is PASS when a fit source answers it conclusively, including
+  a NOT OBSERVED answer. A **supplemental** dimension the validator
+  added is not a claim — blocked or not-observed, it is a declared gap
+  under **Not validated** with a runbook, and the declared-gap rule
+  above already yields the scoped PASS.
 - **The status words are not interchangeable.** NOT OBSERVED = a live
   source was queried and held zero target rows; UNPROVEN = no source
   answered the question; BLOCKED = a defined path with a named missing
