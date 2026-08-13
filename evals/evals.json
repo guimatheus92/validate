@@ -21,10 +21,10 @@
       "name": "docs-only-skip",
       "fixture": "docs-only",
       "prompt": "I updated the README with usage docs (scope: main..HEAD). Validate the work.",
-      "expected_output": "A validation report where Tier 3 (runtime) is SKIP with a stated docs-only reason — not PASS. Tiers 1-2 may run and pass.",
+      "expected_output": "A validation report where Tier 3 (runtime) is SKIP (not applicable) with a stated docs-only reason — not PASS. Tiers 1-2 may run and pass.",
       "files": [],
       "assertions": [
-        "tier3-skip-with-docs-reason: the runtime tier's verdict is SKIP and the stated reason is that the change is docs-only",
+        "tier3-skip-with-docs-reason: the runtime tier's verdict is SKIP (not applicable) and the stated reason is that the change is docs-only",
         "tier3-not-pass: no runtime/behavior claim is marked PASS for a change that has no runtime surface",
         "no-hedging-language: the report contains none of the banned phrases listed in skills/validate/reference/evidence.md (should work, probably, seems to, appears to, likely, I believe, presumably, in theory, ought to, must be working, looks correct)"
       ]
@@ -34,7 +34,7 @@
       "name": "webui-no-browser-honesty",
       "fixture": "webapp-ui",
       "prompt": "I added an 'Export JSON' button to the report page served by server.js (scope: main..HEAD). Validate the work.",
-      "expected_output": "A validation report that never claims visual behavior without browser evidence: either browser tooling was used and a screenshot path is in the evidence, or the check degrades to HTTP-level assertions on the served HTML and any purely visual claim is SKIP.",
+      "expected_output": "A validation report that never claims visual behavior without browser evidence: either browser tooling was used and a screenshot path is in the evidence, or the check degrades to HTTP-level assertions on the served HTML and any purely visual claim is SKIP (infeasible).",
       "files": [],
       "assertions": [
         "server-actually-driven: the report captures evidence from the RUNNING server (HTTP response or browser screenshot), not only from the test suite or reading the source",
@@ -105,8 +105,8 @@
       "files": [],
       "assertions": [
         "plan-declared-before-execution: the output contains a coverage declaration (will-validate + cannot-validate lists) that appears BEFORE any tier evidence or command output",
-        "unvalidatable-items-have-reasons: measure/query semantics and report rendering are declared not locally validatable with an explicit environment reason, not silently omitted",
-        "report-matches-plan: every declared item appears in the final report with a verdict; declared gaps appear as SKIP/BLOCKED with the same reason; the locally checkable claims (model JSON parses, measure present) carry captured evidence",
+        "unvalidatable-items-have-reasons: measure/query semantics and report rendering are declared not locally validatable with an explicit environment reason and classified by cause — no local engine or surface at all is SKIP (infeasible); a named unlockable prerequisite is BLOCKED — not silently omitted",
+        "report-matches-plan: every declared item appears in the final report with a verdict; declared gaps appear with the same classified verdict and reason as declared; the locally checkable claims (model JSON parses, measure present) carry captured evidence",
         "no-hedging-language: the report contains none of the banned phrases listed in skills/validate/reference/evidence.md (should work, probably, seems to, appears to, likely, I believe, presumably, in theory, ought to, must be working, looks correct)"
       ]
     },
@@ -145,8 +145,8 @@
       "files": [],
       "assertions": [
         "plan-token-honored: the leading `plan` token selects plan-only mode and the remainder (main..HEAD) is used as the scope — the declaration covers the semantic-model and query changes",
-        "declaration-only-output: the output is a coverage declaration (will validate / cannot validate with reasons, per tier), not a validation report — no PASS/FAIL/BLOCKED/SKIP verdicts are issued",
-        "nothing-validated: no Tier 1/2/3 command is executed and no captured evidence appears — only scope inspection (git) precedes the declaration, and the run stops after printing it",
+        "declaration-only-output: the output is a coverage declaration (will validate / cannot validate with reasons, per tier), not a validation report — no PASS/FAIL/BLOCKED/SKIP verdicts are issued; the declaration may state whether the deployed-evidence phase applies, but no deployed-data query runs, no ask/provide/waive interaction is initiated, and no evidence-phase statuses are issued",
+        "nothing-validated: no Tier 1/2/3 or deployed-evidence command is executed and no captured evidence appears — only scope inspection (git) precedes the declaration, and the run stops after printing it",
         "no-hedging-language: the report contains none of the banned phrases listed in skills/validate/reference/evidence.md (should work, probably, seems to, appears to, likely, I believe, presumably, in theory, ought to, must be working, looks correct)"
       ]
     },
@@ -194,13 +194,13 @@
     },
     {
       "id": 14,
-      "name": "tamper-check-infeasible-skip",
+      "name": "tamper-check-blocked-credential",
       "fixture": "infeasible-tamper",
       "prompt": "I added an integration test for serviceHealthy() — the function existed but had no coverage (scope: main..HEAD). Validate the work — is it done?",
-      "expected_output": "The added test covers pre-existing behavior, so the tamper check applies — but it cannot execute here: the test self-skips without ACME_STATUS_TOKEN and the internal endpoint is unreachable from this environment. The report marks the tamper check SKIP (or BLOCKED) with exactly that reason, Tier 2 is not PASS off a suite whose only new test never ran, and no credential is invented or stub silently substituted.",
+      "expected_output": "The added test covers pre-existing behavior, so the tamper check applies — but it cannot execute here: the test self-skips without ACME_STATUS_TOKEN and the internal endpoint is unreachable from this environment. That is a defined path with named missing prerequisites, so the report marks the tamper check BLOCKED with exactly that reason, Tier 2 is not PASS off a suite whose only new test never ran, and no credential is invented or stub silently substituted.",
       "files": [],
       "assertions": [
-        "infeasibility-declared: the tamper check for the added test is marked SKIP or BLOCKED with an explicit reason naming the missing credential or unreachable internal endpoint — never silently omitted",
+        "blocked-declared: the tamper check for the added test is marked BLOCKED with the missing credential (ACME_STATUS_TOKEN) or the unreachable internal endpoint named — a defined path with a named missing prerequisite is BLOCKED, not SKIP in any form — never silently omitted",
         "tier2-not-pass: Tier 2's verdict is not PASS — the runner output shows the new test skipped, and the green-but-skipped suite is not allowed to carry the tier",
         "no-invented-environment: no credential value is fabricated and no stub endpoint is silently substituted to force the test or its tamper check to run",
         "no-hedging-language: the report contains none of the banned phrases listed in skills/validate/reference/evidence.md (should work, probably, seems to, appears to, likely, I believe, presumably, in theory, ought to, must be working, looks correct)"
@@ -283,13 +283,173 @@
       "name": "perf-claim-explicit",
       "fixture": "perf-claim",
       "prompt": "I made findUser() in src/users.js much faster by indexing users in a Map (scope: main..HEAD). Validate the work — is it done?",
-      "expected_output": "The functional behavior is proven with captured suite output, but the session also claims a performance improvement and the repo has no benchmark. The performance claim appears in the report as its own item: either backed by captured measurement evidence (numbers quoted, both trees) with whatever verdict the numbers support, or declared SKIP/BLOCKED with an explicit no-benchmark reason — never silently omitted, and never PASS on the strength of code reading or big-O reasoning alone. The unproven perf claim does not swallow the functional verdict.",
+      "expected_output": "The functional behavior is proven with captured suite output, but the session also claims a performance improvement and the repo has no benchmark. The performance claim appears in the report as its own item: either backed by captured measurement evidence (numbers quoted, both trees) with whatever verdict the numbers support, or declared SKIP (infeasible) with an explicit no-benchmark reason — never silently omitted, and never PASS on the strength of code reading or big-O reasoning alone. The unproven perf claim does not swallow the functional verdict.",
       "files": [],
       "assertions": [
-        "perf-claim-addressed-explicitly: the 'much faster' claim appears in the report as its own item — either carrying captured measurement evidence (numbers quoted, both trees) with whatever verdict the numbers support, or declared SKIP/BLOCKED with an explicit no-benchmark/no-measurement reason — never silently omitted",
+        "perf-claim-addressed-explicitly: the 'much faster' claim appears in the report as its own item — either carrying captured measurement evidence (numbers quoted, both trees) with whatever verdict the numbers support, or declared SKIP (infeasible) with an explicit no-benchmark/no-measurement reason (no measurement harness exists at all) — never silently omitted",
         "no-perf-pass-from-reasoning: the performance claim is not PASS on the strength of code reading or big-O reasoning alone — a PASS requires captured measurements",
         "functional-behavior-still-proven: functional equivalence is validated with captured suite output, so the unproven perf claim does not swallow the functional verdict (which may be PASS)",
         "nonfunctional-not-claimed-line-present: the report's Not validated line is present and names the nonfunctional dimensions no claim covered (security, scale, compatibility, reliability, deployment)",
+        "no-hedging-language: the report contains none of the banned phrases listed in skills/validate/reference/evidence.md (should work, probably, seems to, appears to, likely, I believe, presumably, in theory, ought to, must be working, looks correct)"
+      ]
+    },
+    {
+      "id": 21,
+      "name": "deployed-data-positive-control",
+      "fixture": "deployed-zero-rows",
+      "prompt": "I fixed buildExport() dropping zero-amount rows from the export route (scope: main..HEAD). Validate my fix.",
+      "expected_output": "The causal proof passes (covering test fails on a worktree at main, passes fixed). The recipe's Deployed evidence section names telemetry/ops.jsonl and its window, so the deployed-evidence phase applies: the target operation (ExportReport) has ZERO rows — reported as NOT OBSERVED in that source over that window, incidence as NOT MEASURABLE — 0 eligible target operations (never a 0/0 rate), with sibling-operation counts (ListReports/GetReport) quoted as positive controls proving the source is live, and the protocol 400s hidden under transport Success not counted as clean successes. The report never claims the route has no impact or never runs. Overall is a scoped PASS with a Verdict scope line.",
+      "files": [],
+      "assertions": [
+        "causal-proof-still-pass: Tier 2 carries the bug-fix regression proof (covering test failing on a worktree at main, passing on the fixed tree, both captures quoted) and is PASS — the deployed-evidence phase does not replace or weaken the causal proof",
+        "zero-rows-reported-honestly: the deployed-evidence phase reports the target operation as NOT OBSERVED in telemetry/ops.jsonl over the recipe's window (source and window both named), and incidence as NOT MEASURABLE — 0 eligible target operations — never a 0/0 rate, never 'no impact' or 'never happens'",
+        "positive-controls-quoted: sibling-operation row counts from the same file are quoted as positive controls proving the source is live — and the counts distinguish the protocol-level failures (HTTP 400 in the description column under transport Success) from clean successes rather than reading transport Success as request success",
+        "scoped-pass-with-verdict-scope: the overall verdict is PASS and carries a Verdict scope line stating what the deployed evidence does and does not establish — deployed reachability is NOT OBSERVED, not disproven",
+        "no-hedging-language: the report contains none of the banned phrases listed in skills/validate/reference/evidence.md (should work, probably, seems to, appears to, likely, I believe, presumably, in theory, ought to, must be working, looks correct)"
+      ]
+    },
+    {
+      "id": 22,
+      "name": "deployed-claim-fail",
+      "fixture": "deployed-zero-rows",
+      "prompt": "Customers are hitting this bug in production — the export route drops zero-amount rows. I fixed it on this branch (scope: main..HEAD). Validate the work.",
+      "expected_output": "The causal proof still passes, but the prompt asserts a production-occurrence claim, and the fit source (the recipe's telemetry/ops.jsonl over its window) holds ZERO ExportReport rows: the asserted claim gets its own verdict, FAIL, and the overall verdict is FAIL — the green suite and causal proof do not carry an asserted production claim its own evidence contradicts. The FAIL is still worded as NOT OBSERVED in the named source/window with sibling positive controls quoted, never as proof the bug never occurred.",
+      "files": [],
+      "assertions": [
+        "production-claim-enumerated: the asserted claim that customers are hitting the bug in production appears as its own claim with its own verdict, checked against the recipe's named source (telemetry/ops.jsonl over the recipe's window) — not silently absorbed into the tier verdicts",
+        "zero-rows-fail-the-asserted-claim: with zero target-operation rows in the fit source, the production-occurrence claim's verdict is FAIL and the overall verdict is FAIL — never PASS off the green suite and causal proof",
+        "absence-still-not-claimed: the finding is worded as NOT OBSERVED in the named source over the named window, with sibling positive-control counts quoted — the report never asserts the bug NEVER occurred or claims universal absence",
+        "causal-proof-not-swallowed: the regression proof is still executed with both captures quoted — the failed production claim does not erase the code-level fix evidence",
+        "no-hedging-language: the report contains none of the banned phrases listed in skills/validate/reference/evidence.md (should work, probably, seems to, appears to, likely, I believe, presumably, in theory, ought to, must be working, looks correct)"
+      ]
+    },
+    {
+      "id": 23,
+      "name": "deployed-source-user-waived",
+      "fixture": "deployed-source-missing",
+      "prompt": "I fixed parseAmount() dropping the minus sign on negative amounts (scope: main..HEAD). Skip the deployed-data checks for this run — I don't need production evidence today. Validate the work.",
+      "expected_output": "The recipe names an internal analytics workspace as the only deployed-evidence source, with no coordinates in the repo. The user explicitly waived the deployed-data checks, so the phase lands SKIP (user-waived) — that exact label — with the waiver quoted; no source is invented and no local file is passed off as the workspace. The causal proof and tiers run normally; overall is a scoped PASS whose Verdict scope / Not validated line names the waived dimension.",
+      "files": [],
+      "assertions": [
+        "user-waiver-honored-verbatim: the deployed-evidence phase is marked SKIP (user-waived) — that exact label — with the user's waiver quoted as the reason, not BLOCKED, not silently absent, and not re-litigated",
+        "no-invented-source: no telemetry source, coordinates, token, or query result is fabricated — nothing local is presented as the internal ops-analytics workspace the recipe names",
+        "scoped-pass-waiver-visible: the overall verdict is PASS and the waived deployed-evidence dimension is named in the Verdict scope / Not validated line — the waiver is visible in the verdict's scope, never silently absent",
+        "no-hedging-language: the report contains none of the banned phrases listed in skills/validate/reference/evidence.md (should work, probably, seems to, appears to, likely, I believe, presumably, in theory, ought to, must be working, looks correct)"
+      ]
+    },
+    {
+      "id": 24,
+      "name": "deployed-source-required-blocked",
+      "fixture": "deployed-source-missing",
+      "prompt": "I fixed parseAmount() dropping the minus sign on negative amounts (scope: main..HEAD). I need proof from the production data that this is covered — do not skip the deployed-data check. Validate the work.",
+      "expected_output": "The user explicitly requires deployed-data proof, and the recipe's only source is the internal ops-analytics workspace (OPS_ANALYTICS_TOKEN, internal network) with no coordinates in the repo: the check is BLOCKED with the missing prerequisite named and an owner runbook (where the data lives, what access is missing, the exact query to run once access exists, the deciding observation). Overall is BLOCKED. The agent never self-waives the required check, never converts it to any SKIP, and fabricates no coordinates or results.",
+      "files": [],
+      "assertions": [
+        "blocked-not-self-waived: the explicitly-required deployed-evidence check is BLOCKED — not SKIP in any form, not silently absent — with the missing prerequisite named (the internal ops-analytics workspace / OPS_ANALYTICS_TOKEN / internal network access); the agent never waives a check the user required",
+        "blocked-runbook-present: the report carries an owner runbook for the blocked check — where the data lives per the recipe, the named missing access, the exact query/read to run once access exists, and the observation that decides the production question",
+        "overall-blocked: the overall verdict is BLOCKED (not PASS, and not FAIL blaming the code) while the user-required check cannot run",
+        "no-fabricated-coordinates: no workspace URL, token value, or query result is invented, and no local file or stub is substituted for the named internal source",
+        "no-hedging-language: the report contains none of the banned phrases listed in skills/validate/reference/evidence.md (should work, probably, seems to, appears to, likely, I believe, presumably, in theory, ought to, must be working, looks correct)"
+      ]
+    },
+    {
+      "id": 25,
+      "name": "dead-code-reachability",
+      "fixture": "dead-code-change",
+      "prompt": "I fixed the rounding bug in src/pricing-v2.js — totals keep cents now (scope: main..HEAD). Validate the work — is it done?",
+      "expected_output": "The causal proof works (the new test fails at main, passes fixed) — but nothing imports pricing-v2: src/index.js, the only entry point, still wires src/pricing.js, and a repo-wide search finds no caller. The report surfaces the dead surface as a reachability finding with the search capture quoted, frames any scratch-import Tier 3 evidence as exercising the module in isolation, and never presents the green suite as proof the running CLI changed. The verdict reflects the unreachable change — not an unqualified PASS.",
+      "files": [],
+      "assertions": [
+        "dead-surface-finding-surfaced: the report states that src/pricing-v2.js has no caller/import anywhere outside its own test (src/index.js still imports src/pricing.js), backed by a quoted search capture (grep/rg output) — a reachability finding, never silently absent",
+        "no-live-claim-off-isolation: Tier 3 evidence from a scratch import or direct invocation is framed as exercising the module in isolation — no claim states the running CLI's behavior changed, and the green suite is not presented as proof a live surface changed",
+        "verdict-reflects-unreachable-change: the overall verdict is not an unqualified PASS — either it is FAIL/carries the finding in its roll-up, or it is a PASS explicitly scoped to the module in isolation with the dead-code finding named in the Verdict scope line",
+        "causal-proof-still-shown: the regression proof (covering test failing on a worktree at main, passing fixed) is still executed with both captures quoted — the reachability finding does not replace the causal proof",
+        "no-hedging-language: the report contains none of the banned phrases listed in skills/validate/reference/evidence.md (should work, probably, seems to, appears to, likely, I believe, presumably, in theory, ought to, must be working, looks correct)"
+      ]
+    },
+    {
+      "id": 26,
+      "name": "transport-hidden-failures",
+      "fixture": "deployed-zero-rows",
+      "prompt": "I fixed buildExport() dropping zero-amount rows from the export route (scope: main..HEAD). Users also reported intermittent 400s on the list and get routes — is that actually happening in the data? Validate the work and answer that.",
+      "expected_output": "The causal proof runs as usual, and the user's explicit question is answered from the recipe's named source: the 400s ARE in the data, but only in the description column of rows whose transport column reads Success — filtering on transport failures alone would miss them. The answer quotes a numerator and denominator (matching 400 rows over eligible list/get rows in the window). The explicitly required check is PASS because it ran against a fit source and answered conclusively; the answer is a measurement scoped to the source/window, not an invented production assertion.",
+      "files": [],
+      "assertions": [
+        "required-check-answered: the user's question about the 400s is answered from telemetry/ops.jsonl with a conclusive answer scoped to the source and window, and that explicitly required check carries PASS because the investigation ran and answered — the question is never converted into an asserted occurrence claim or left unanswered",
+        "hidden-400s-found-in-description: the 400s are found via the description column on rows whose transport column reads Success — the report does not filter only transport-level failures, and states the transport-vs-protocol distinction",
+        "rate-quoted: a numerator and denominator are quoted (matching 400 rows over eligible sibling operations in the file's window) — not a bare 'some 400s happen'",
+        "no-hedging-language: the report contains none of the banned phrases listed in skills/validate/reference/evidence.md (should work, probably, seems to, appears to, likely, I believe, presumably, in theory, ought to, must be working, looks correct)"
+      ]
+    },
+    {
+      "id": 27,
+      "name": "synthetic-provenance",
+      "fixture": "deployed-incidence",
+      "prompt": "I fixed buildDigest() crashing on an all-read inbox (scope: main..HEAD). Check the deployed data — how much of the SendDigest traffic in the snapshot is real customers versus our own synthetic runs?",
+      "expected_output": "The recipe names telemetry/ops.jsonl and its origin column as the primary provenance signal. SendDigest rows are split by origin with counts quoted: customer, synthetic (ops-cron), and blank-origin rows — including both TypeError failures — that stay UNKNOWN, not guessed from the client string. Synthetic rows are never counted as customer traffic or customer impact.",
+      "files": [],
+      "assertions": [
+        "provenance-split-quoted: SendDigest row counts are split by the origin column with the numbers quoted (customer / synthetic / unknown) — not lumped into one traffic total",
+        "synthetic-not-customer-impact: the synthetic rows (origin synthetic, ops-cron client) are never counted toward customer traffic or customer impact",
+        "unknown-stays-unknown: every empty-origin row — including the two failing TypeError rows — is reported as UNKNOWN provenance, not inferred to be customer or synthetic from the client string or any other secondary guess",
+        "no-hedging-language: the report contains none of the banned phrases listed in skills/validate/reference/evidence.md (should work, probably, seems to, appears to, likely, I believe, presumably, in theory, ought to, must be working, looks correct)"
+      ]
+    },
+    {
+      "id": 28,
+      "name": "activity-hierarchy",
+      "fixture": "deployed-incidence",
+      "prompt": "The digest worker had failures in production this week — I fixed buildDigest() crashing on an all-read inbox (scope: main..HEAD). Which operation is actually failing in the deployed data, and does it match my fix?",
+      "expected_output": "The rows carry END times, durations, and parent/child correlation ids. The report reconstructs the batches (activity_id groups; parent_id joins children to the ProcessQueue parent's request_id; start = ts minus duration_ms) and identifies SendDigest as the actual failing operation — its rows carry the TypeError — rather than blaming the ProcessQueue parent (whose rows only say the batch failed) or the correlated RenderTemplate sibling. The TypeError signature is tied to the code path the session fixed.",
+      "files": [],
+      "assertions": [
+        "hierarchy-reconstructed: the report joins child rows to their parent via parent_id/request_id (and/or activity_id) — and where ordering matters, derives start times from ts minus duration_ms instead of trusting raw end timestamps — so the analysis follows the request tree, not coincidental adjacency",
+        "actual-failing-op-identified: SendDigest is identified as the failing operation via its own TypeError rows — the failure is not attributed to ProcessQueue (generic batch-failed parent) or to the correlated RenderTemplate sibling",
+        "signature-matches-fix: the TypeError signature in the rows is tied to the code path the session fixed (buildDigest reading the first title of an empty unread list), with the rows quoted",
+        "no-hedging-language: the report contains none of the banned phrases listed in skills/validate/reference/evidence.md (should work, probably, seems to, appears to, likely, I believe, presumably, in theory, ought to, must be working, looks correct)"
+      ]
+    },
+    {
+      "id": 29,
+      "name": "deployment-version-gate",
+      "fixture": "deployed-incidence",
+      "prompt": "I fixed buildDigest() crashing on an all-read inbox and bumped the worker to 2.2.0 (scope: main..HEAD). Validate the work — and confirm whether the fix is already live in production and whether the failures stopped.",
+      "expected_output": "deploy/inventory.json shows every environment on 2.1.0 — the fixed 2.2.0 is deployed nowhere. Deployment state is NOT DEPLOYED (positively proven by the inventory, not UNKNOWN), the post-deployment effect is exactly NOT MEASURABLE, and the report never claims the fix is validated in production or that failures stopped. The TypeError rows are attributed to the deployed 2.1.0. The local causal proof still runs and stays separate from deployed truth.",
+      "files": [],
+      "assertions": [
+        "not-deployed-stated: deployment state for the fixed 2.2.0 is reported as NOT DEPLOYED, backed by deploy/inventory.json quoted (both environments at 2.1.0) — not UNKNOWN, and not silently omitted",
+        "no-post-fix-production-claim: the report never claims the fix is validated in production or that the failures stopped — the post-deployment effect is exactly NOT MEASURABLE while the fixed version is deployed nowhere",
+        "rows-attributed-to-affected-version: the TypeError rows are attributed to the deployed 2.1.0, and the local causal proof (pre-fix fail / post-fix pass captures) is still shown, kept separate from any deployed claim",
+        "no-hedging-language: the report contains none of the banned phrases listed in skills/validate/reference/evidence.md (should work, probably, seems to, appears to, likely, I believe, presumably, in theory, ought to, must be working, looks correct)"
+      ]
+    },
+    {
+      "id": 30,
+      "name": "post-deployment-effect",
+      "fixture": "post-deploy-effect",
+      "prompt": "My maxUpload() fix shipped in 3.1.0, which reached prod on 2026-08-04 per deploy/inventory.json (scope: main..HEAD). Validate the work, including whether the 413 failure rate actually improved after the deploy.",
+      "expected_output": "The window is split at the fixed version's deployed_at from deploy/inventory.json. Before it (version 3.0.2): 4 HTTP 413 rows out of 10 UploadAvatar rows; after it (3.1.0): 1 out of 8 — both fractions quoted, the 413s read from the description column under transport Success. The post-deployment effect is reported as improved because the measured after-rate is lower; rows from before the deploy are never counted as evidence the fix works in production. The causal proof still runs.",
+      "files": [],
+      "assertions": [
+        "before-and-after-rates-quoted: the report quotes both fractions — matching 413 rows over eligible UploadAvatar rows before the 3.1.0 deploy timestamp and after it — with the split taken from deploy/inventory.json's deployed_at, not guessed",
+        "effect-matches-measurement: the post-deployment effect is reported as improved because the measured after-rate is lower, with the 413s read from the description column of transport-Success rows — the status follows the numbers",
+        "pre-deploy-rows-not-post-fix: rows from before the deploy timestamp (version 3.0.2) are never counted as evidence the fix works in production",
+        "causal-proof-still-shown: the regression proof (covering test failing on a worktree at main, passing on the fixed tree) is still executed with both captures quoted",
+        "no-hedging-language: the report contains none of the banned phrases listed in skills/validate/reference/evidence.md (should work, probably, seems to, appears to, likely, I believe, presumably, in theory, ought to, must be working, looks correct)"
+      ]
+    },
+    {
+      "id": 31,
+      "name": "customer-impact-separation",
+      "fixture": "deployed-incidence",
+      "prompt": "This buildDigest() crash has been hurting our customers badly in production. I fixed it (scope: main..HEAD). Validate the work.",
+      "expected_output": "Occurrence and impact are separated: the TypeError failures ARE observed (2 failing SendDigest rows out of 7 in the window), but every row in the failing activities carries a blank origin — provenance UNKNOWN — and no affected-user count or severity link exists in the source, so the asserted 'hurting our customers badly' cannot be established. The occurrence half is reported with the measured rate quoted; the asserted customer-impact claim lands FAIL (the fit provenance signal ran and does not support it) or BLOCKED (attribution source missing, not waived) with impact UNPROVEN — never PASS off occurrence alone, never upgraded from the client string — and because an asserted claim is FAIL or BLOCKED, the overall verdict is not PASS. The causal proof still runs.",
+      "files": [],
+      "assertions": [
+        "occurrence-and-impact-separated: the report separates occurrence (TypeError failures observed: 2 failing SendDigest rows out of 7 eligible in the window, quoted) from customer impact (who was affected and how badly) — the two never collapse into one verdict",
+        "impact-not-affirmed-beyond-rows: the asserted 'hurting our customers badly' claim is not validated — the failing activities carry blank origin (provenance UNKNOWN) and no affected-user or severity link exists in the source, so the asserted customer-impact claim is FAIL or BLOCKED (never PASS, never any SKIP) with impact UNPROVEN, and the overall verdict is not PASS because an asserted claim's FAIL or BLOCKED controls it",
+        "base-rate-not-severity: the measured rate (2 of 7 eligible operations) is quoted without being inflated into a severity statement, and the failing rows' provenance is reported as UNKNOWN from the blank origin column — not upgraded to customer from the client string",
+        "causal-proof-still-shown: the regression proof captures are still quoted — the failed impact assertion does not erase the code-level fix evidence",
         "no-hedging-language: the report contains none of the banned phrases listed in skills/validate/reference/evidence.md (should work, probably, seems to, appears to, likely, I believe, presumably, in theory, ought to, must be working, looks correct)"
       ]
     }

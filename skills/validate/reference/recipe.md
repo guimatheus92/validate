@@ -44,6 +44,16 @@ description: Verified build/test/run commands for <project name>. Used by /valid
 ## Gotchas
 - <env var that must be set, port conflicts, slow first build, …>
 
+## Deployed evidence (optional)
+- Applicability: <which changes warrant the phase in this repo>
+- Source: <system>; dataset/table: <name>; default window: <e.g. 30d>
+- Identifier derivation: <file/pattern where operation or metric names are emitted>
+- Positive control: <query proving the source live>
+- Correlation fields: <ids that join request → operation>
+- Deployment source: <how to read which version is deployed where>
+- Auth: <non-secret instructions — login command, SSO note; never tokens>
+- Never query: <tables/scopes off-limits>
+
 ## Never run locally (optional)
 - `<command/script>`     # <why: deploys, destroys data, hits a shared env>
 
@@ -62,10 +72,14 @@ Last verified: <YYYY-MM-DD> against <commit sha>
   that failed, has no place here — the whole value of the file is that every
   line is known-good (conventions and "Never run locally" entries are the
   exception: record them as observed — from CI config, deploy scripts,
-  project docs — not as executed).
+  project docs — not as executed). Deployed-evidence sources follow the
+  same rule: record a source only after a query against it succeeded this
+  run.
 - **"Never run locally" entries are prohibitions for future runs.** A listed
   command is BLOCKED territory, not a dare: a claim only that command could
-  prove ends BLOCKED with a runbook, never with the command executed.
+  prove ends BLOCKED with a runbook, never with the command executed. This
+  includes production queries — a listed query stays BLOCKED even when the
+  user supplies coordinates mid-run; their remedy is editing the recipe.
 - **Update on drift.** When a recorded command fails and you find a working
   replacement, replace the line and refresh `Last verified`. A stale recipe
   is worse than none — it burns the run's trust budget on a false lead.

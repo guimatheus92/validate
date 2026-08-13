@@ -49,7 +49,8 @@ session scope as the skill describes. Plan-only mode is selected ONLY when
 the first whitespace-separated token of `$ARGUMENTS` is exactly `plan`:
 consume that token (the remainder, if any, is the scope), follow the skill
 through its coverage declaration and stop there — print what would and would
-not be validated, execute nothing. A scope path or branch that merely
+not be validated, including whether the deployed-evidence phase would apply
+and which sources it would try; execute nothing. A scope path or branch that merely
 contains the word (e.g. `src/planner/`, `feature/plan-b`) is a normal scope
 and gets a full validation.
 
@@ -70,6 +71,14 @@ and gets a full validation.
   fails against its real historical predecessor or a deliberately tampered
   tree, both captures in the report — procedure in the skill's
   reference/evidence.md); missing or failed proof makes Tier 2 FAIL.
+- When the change touches deployed behavior (a bug fix to shipped code,
+  prod/incident/telemetry in the request, a service/worker/deploy
+  surface), a deployed-evidence phase runs after the tiers. Never invent
+  a cluster, table, operation name, or time window — discover sources,
+  else ask the user for coordinates or an explicit waiver (never for
+  secrets). Zero rows reads "NOT OBSERVED in that source/window", never
+  "no impact"; local causal proof alone earns at most a scoped PASS.
+  Procedure: the skill's reference/deployed-evidence.md.
 - At most 3 fix-and-rerun attempts, then stop and report FAIL with all
   evidence for the human to decide. Missing environment is BLOCKED with
   the missing piece named — never fabricate an env value, credential, or

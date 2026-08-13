@@ -13,7 +13,19 @@
   Missing environment is named, never manufactured: a fabricated value
   that makes the check run converts an honest BLOCKED into a counterfeit
   verdict, however loudly the fabrication is disclosed.
-- **SKIP** — the check does not apply to this change, with the reason stated.
+- **SKIP** — the check was not run, honestly. Always one of three labeled
+  forms, used verbatim everywhere a SKIP appears:
+  - `SKIP (not applicable)` — evidence shows the check has no bearing on
+    this change (docs-only, no such surface). Requires that evidence;
+    unknown applicability is never not-applicable.
+  - `SKIP (infeasible)` — the check applies but no method exists in this
+    environment (a visual claim with no browser tooling, a measurement
+    with no harness). Distinct from BLOCKED: BLOCKED has a defined path
+    and a named missing prerequisite; infeasible has no path at all.
+  - `SKIP (user-waived)` — the user explicitly declined the check this
+    run. Quote their exact words beside the verdict. You may classify
+    not-applicable or infeasible from evidence; you may never waive on
+    the user's behalf.
   SKIP is a scoping statement, never a way to avoid an inconvenient check.
 
 ## What counts as evidence
@@ -23,7 +35,11 @@ Evidence is something captured **during this validation run**:
 - the command line, its exit code, and the relevant output lines quoted;
 - HTTP status + response body for API checks;
 - screenshot file paths for browser checks;
-- test runner summaries (counts, names of the specific tests).
+- test runner summaries (counts, names of the specific tests);
+- query results, log excerpts, or telemetry rows, quoted with their source
+  and time window — a zero-row result is evidence only beside a positive
+  control from the same source and window proving it was live; zero rows
+  alone proves nothing about the world.
 
 Not evidence: your memory of it working earlier in the session (rerun it),
 your reading of the code ("this clearly handles the case"), a file existing
@@ -167,10 +183,11 @@ proof missing in **both** forms does.
    (`git worktree remove <tmp-dir> --force`).
 
 A new test that survives tampering is vacuous — it guards nothing — and
-Tier 2 is FAIL with that reason. When neither form of the proof is
-feasible (the test depends on an external service or environment a
-worktree cannot have), mark the tamper check SKIP with the reason stated —
-never silently. A SKIP'd proof caps the tier at SKIP — never PASS: a
+Tier 2 is FAIL with that reason. When neither form of the proof can run,
+classify the cause, never silently: a named missing prerequisite (a
+credential, an unreachable endpoint the test needs) makes the proof
+BLOCKED; no compatible proof surface at all makes it `SKIP (infeasible)`.
+Either way the unrun proof caps the tier at that verdict — never PASS: a
 green suite cannot stand in for the proof it was exempted from.
 
 ### New feature — prove the test exercises it

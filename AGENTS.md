@@ -3,8 +3,10 @@
 Prompt-only validation plugin for Copilot CLI and Claude Code. One command —
 `/validate` — proves an AI coding session's work is correct before anyone
 calls it done: static checks (Tier 1), tests with regression proof (Tier 2),
-and live runtime verification (Tier 3), each producing PASS/FAIL/BLOCKED/SKIP
-verdicts backed by evidence captured during the run.
+live runtime verification (Tier 3), and a post-tier deployed-evidence phase
+(telemetry/log/data sources) when the change touches deployed behavior —
+each producing PASS/FAIL/BLOCKED/SKIP verdicts backed by evidence captured
+during the run.
 
 ## No build, no tests to run — by design
 
@@ -13,7 +15,7 @@ is markdown (a command, a skill, reference docs) plus three JSON manifests.
 The consistency check is the whole local suite:
 
 ```bash
-node scripts/check.mjs   # manifests in lockstep (real semver), frontmatter present, no dangling reference links, banned-language list in lockstep between evidence.md and evals.json
+node scripts/check.mjs   # manifests in lockstep (real semver), frontmatter present, no dangling reference links, banned-language list in lockstep between evidence.md and evals.json, deployed-evidence sentinel on every carrier, SKIP labels canonical, fixture telemetry data pinned
 ```
 
 ## Architecture
@@ -31,14 +33,16 @@ reference files read on demand.
   `reference/`.
 - `skills/validate/reference/*.md` — one topic each: `scope` (what to
   validate), `stacks` (Tier 1/2 playbooks per language), `runtime` (Tier 3
-  surfaces + degradation ladder), `evidence` (verdicts, banned language,
-  regression proof, retry ceiling), `recipe` (persisting verified commands),
-  `report` (output format).
+  surfaces + degradation ladder), `deployed-evidence` (the post-tier phase:
+  applicability gate, source discovery, dimensions, query methodology),
+  `evidence` (verdicts + SKIP taxonomy, banned language, regression proof,
+  retry ceiling), `recipe` (persisting verified commands), `report` (output
+  format).
 - `.github/prompts/validate.prompt.md` — compressed contract for VS Code
   Copilot Chat users, who cannot load CLI plugins.
 - `evals/` — the skill's regression suite: `evals.json` (scenarios +
-  assertions) and `setup-fixtures.mjs` (builds the twenty fixture repos).
-  Re-run the evals after any change to `skills/` content.
+  assertions) and `setup-fixtures.mjs` (builds the twenty-five fixture
+  repos). Re-run the evals after any change to `skills/` content.
 
 ## Key conventions
 
@@ -87,7 +91,7 @@ reference files read on demand.
   surfaces that must be hand-synced in the same commit — SKILL.md (Step 3:
   claims + will/cannot-validate + the nonfunctional not-claimed line +
   plan-only trigger; plus the contract's per-claim verdict bullet and
-  Step 8's report enumeration), report.md (claims table + claim roll-up
+  Step 9's report enumeration), report.md (claims table + claim roll-up
   rule + plan-must-match-report rule + the always-present Not validated
   line), commands/validate.md (the plan-only trigger + the per-claim
   hard-rules bullet, duplicated so the dispatcher stands alone), and
@@ -123,6 +127,32 @@ reference files read on demand.
   commands/validate.md's hard-rules line, and
   .github/prompts/validate.prompt.md item 4. Keep evals 0 and 11–16
   passing.
+- **Change the deployed-evidence rules:** the new
+  `skills/validate/reference/deployed-evidence.md` is the source of truth
+  (applicability gate, source discovery, the ask/provide/waive protocol,
+  dimensions and their status words, query methodology, boundaries).
+  Carriers that must move in the same commit: SKILL.md (the
+  causal-vs-deployed contract bullet, the Step 2 gate decision, the Step 3
+  declaration bullet — status-free wording, eval 10 —, Step 7, and the
+  reference-index row), report.md (Verdict scope line + dimension status
+  table + the claim-classification and status-word bullets + the Deployed
+  evidence appendix placeholder), commands/validate.md (the hard-rules
+  bullet + the plan-only sentence), .github/prompts/validate.prompt.md
+  item 6, recipe.md (the Deployed evidence template section + the
+  production-query clause of "Never run locally"), and runtime.md (the
+  local-vs-deployed pointer). Evals 21–24 and 26–31 guard the phase; keep
+  evals 10 (plan-only stays status-free) and 19 (the escalated deploy
+  runbook is not replaced by this phase) passing. `scripts/check.mjs`
+  requires the literal phrase "deployed evidence" on every carrier.
+- **Change the SKIP taxonomy or the reachability check:** the three SKIP
+  labels are defined in evidence.md's "The four verdicts" and
+  machine-checked everywhere by `scripts/check.mjs` (any `SKIP (…)` must
+  be one of the canonical three). Carriers: runtime.md (ladder rung 4 +
+  the runbook section), report.md (the SKIP-labels bullet), and
+  .github/prompts/validate.prompt.md (the verdicts item). Evals 1, 2, 14,
+  20, 23 guard the labels. Reachability's source of truth is the
+  "Reachability" bullet in scope.md's diff hygiene; carriers: runtime.md's
+  no-caller paragraph and prompt item 3. Eval 25 guards it.
 - **Change the blocked-runtime runbook rule:** the "When a runtime claim
   ends SKIP or BLOCKED" section of `skills/validate/reference/runtime.md`
   is the source of truth for both forms — the 4–8-line short runbook and

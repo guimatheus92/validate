@@ -20,7 +20,16 @@ Choose from the changed-file list, not from imagination:
 | Only docs, comments, CI config, lockfiles | — | Tier 3 = SKIP, reason stated |
 
 An internal function is not a surface — follow its callers upward until you
-reach one, and drive that.
+reach one, and drive that. When the walk finds **no caller at all** —
+nothing calls, imports, routes to, or registers the changed code — that
+absence is the finding (the reachability check in [scope.md](scope.md)):
+say so in the report, and never present a scratch-harness run against dead
+code as proof of live behavior.
+
+Tier 3 proves behavior in a runtime you executed here. Whether the change
+is live in a deployed system, and whether its failure occurs in real data,
+is the deployed-evidence phase — [deployed-evidence.md](deployed-evidence.md)
+when its gate applies.
 
 Drive the specific flow the diff touched, with inputs that hit the changed
 lines. After the happy path, probe one or two adjacent cases (an error path,
@@ -49,8 +58,9 @@ Never claim visual behavior you did not see. When the change is a web UI:
 3. Neither → assert what HTTP can see: fetch the page, check the rendered
    HTML for the expected change.
 4. The claim is genuinely visual (layout, styling) and rungs 1–2 are
-   unavailable → that claim is **SKIP** ("no browser tooling available"),
-   never PASS. Rung 3 evidence proves markup, not pixels.
+   unavailable → that claim is **`SKIP (infeasible)`** ("no browser
+   tooling available"), never PASS. Rung 3 evidence proves markup, not
+   pixels.
 
 The same principle generalizes: each surface has its best evidence, and when
 you can't get it, degrade explicitly and say so — don't quietly substitute
@@ -78,9 +88,11 @@ to prove ends SKIP or BLOCKED for want of environment or tooling, put a
 short runbook in the report so the owner can finish the proof: the
 prerequisites (credentials, environment, data), the exact commands or flow
 to run, the observation that decides pass or fail, and any cleanup. Four
-to eight lines, executable by someone who was not in this session. A SKIP
-that merely scopes the tier out (docs-only change) needs no runbook —
-there is nothing to finish.
+to eight lines, executable by someone who was not in this session. A
+`SKIP (not applicable)` that merely scopes the tier out (docs-only change)
+needs no runbook — there is nothing to finish; `SKIP (infeasible)` and
+BLOCKED carry one, and `SKIP (user-waived)` records the quoted waiver and
+still carries the short form so the owner can finish the proof later.
 
 **Escalate the form when the short version cannot honestly fit** — the
 proof spans more than one system or service, needs a provisioned

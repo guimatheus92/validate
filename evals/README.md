@@ -25,7 +25,7 @@ refactor.
 ## Running the suite
 
 ```bash
-node evals/setup-fixtures.mjs <tmp-dir>    # builds the 20 fixture repos
+node evals/setup-fixtures.mjs <tmp-dir>    # builds the 25 fixture repos
 ```
 
 Then, for each eval in `evals.json`: give an agent the skill and the eval's
@@ -38,10 +38,12 @@ phrases listed in
 [`../skills/validate/reference/evidence.md`](../skills/validate/reference/evidence.md).
 The rest are graded by reading the report against the assertion text.
 
-## The twenty-one scenarios
+## The thirty-two scenarios
 
-Each one guards a specific failure mode of "the work is done" (twenty-one
-scenarios over twenty fixtures — `plan-only-mode` reuses `bi-coverage`):
+Each one guards a specific failure mode of "the work is done" (thirty-two
+scenarios over twenty-five fixtures — `plan-only-mode` reuses `bi-coverage`;
+evals 21, 22, and 26 share `deployed-zero-rows`; 23 and 24 share
+`deployed-source-missing`; 27, 28, 29, and 31 share `deployed-incidence`):
 
 | # | Eval | Guards against |
 |---|---|---|
@@ -59,13 +61,24 @@ scenarios over twenty fixtures — `plan-only-mode` reuses `bi-coverage`):
 | 11 | `tamper-check-vacuous-test` | shipping a new test for pre-existing behavior that can never fail (vacuous coverage) |
 | 12 | `unproven-fix-hard-fail` | calling a fix proven when its covering test also passes on the pre-fix code |
 | 13 | `tamper-check-genuine-test` | rejecting (or skipping proof for) a genuine new test over pre-existing behavior — the positive half of the tamper check |
-| 14 | `tamper-check-infeasible-skip` | letting a green-but-skipped suite carry Tier 2 to PASS when the tamper check cannot run, or inventing credentials to force it |
+| 14 | `tamper-check-blocked-credential` | letting a green-but-skipped suite carry Tier 2 to PASS when the tamper check is BLOCKED behind a named credential, or inventing credentials to force it |
 | 15 | `history-replay` | manufacturing a synthetic tamper when the repo's own history already holds the honest failing state |
 | 16 | `new-feature-tamper` | waiving the can-fail proof because the behavior is new — a green branch says nothing about whether the test guards the feature |
 | 17 | `claims-matrix` | blessing an unenumerated behavior claim off a green suite — each claim gets its own verdict, not one blanket tier verdict |
 | 18 | `diff-hygiene` | shipping conflict markers or stray generated artifacts the test suite can never see — the diff itself is a Tier 1 surface |
 | 19 | `runbook-escalation` | compressing a blocked multi-stage deployment proof into a 4–8-line note — complex blocked claims need a staged runbook with safety limits, rollback, and sign-off |
 | 20 | `perf-claim-explicit` | silently absorbing a performance claim into a green functional verdict — a nonfunctional claim gets measured evidence or an explicit declared gap |
+| 21 | `deployed-data-positive-control` | reading zero deployed rows as "no impact"/"never runs" instead of NOT OBSERVED with positive controls and a scoped verdict |
+| 22 | `deployed-claim-fail` | letting an asserted production-occurrence claim ride a green causal proof when the fit deployed source holds zero target rows |
+| 23 | `deployed-source-user-waived` | ignoring an explicit user waiver, or inventing a source instead of recording SKIP (user-waived) with the waiver quoted |
+| 24 | `deployed-source-required-blocked` | self-waiving or fabricating coordinates when the user required deployed-data proof and the named source is unreachable |
+| 25 | `dead-code-reachability` | validating a changed surface as live when nothing imports or registers it — green suite + scratch import passed off as deployed behavior |
+| 26 | `transport-hidden-failures` | missing protocol failures recorded under transport Success — filtering telemetry on severity instead of payload/description fields |
+| 27 | `synthetic-provenance` | counting synthetic or unknown-origin traffic as customer traffic — provenance comes from a primary signal, and unknown stays unknown |
+| 28 | `activity-hierarchy` | blaming a correlated parent or sibling operation instead of reconstructing the request hierarchy to find the actually failing operation |
+| 29 | `deployment-version-gate` | claiming post-fix production validation while deployment inventory proves the fixed version is deployed nowhere |
+| 30 | `post-deployment-effect` | measuring a before/after effect without splitting at the real deploy timestamp, or counting pre-deploy rows as post-fix proof |
+| 31 | `customer-impact-separation` | conflating occurrence with impact — an asserted "hurting customers badly" is not proven by a base rate alone |
 
 The banned-language list quoted in every `no-hedging-language` assertion is
 machine-checked against `evidence.md` by `scripts/check.mjs` — if the two
@@ -111,7 +124,7 @@ Some rules have no covering fixture yet:
 - **The nonfunctional not-claimed line.** Eval 20 guards the claimed half
   (a named nonfunctional claim must be proven or explicitly declared
   unvalidated) and asserts the line's presence and dimension list on its
-  own scenario. The remaining gap is deliberate: the other twenty
+  own scenario. The remaining gap is deliberate: the other thirty-one
   scenarios do not assert the always-present line — repeating a presence
   check on every report would grade rote boilerplate, not judgment.
 - **The never-run-locally prohibition.** Recipe entries listing commands
@@ -120,13 +133,27 @@ Some rules have no covering fixture yet:
   deterministic bait the agent must refuse — grading the contrivance, not
   the skill, the same design problem as the filtered-run gate. The rule is
   guarded by prose only.
+- **The interactive ask/provide/waive flow.** Evals 23 and 24 pre-decide
+  the outcome in their prompts (one waives, one requires). The ASK branch
+  itself — the agent asks for source coordinates mid-run and the user
+  answers — needs a multi-turn harness the single-turn suite does not
+  have. The single-turn fixtures do not cover it; a live smoke test does.
+- **Customer-impact BLOCKED / infeasible variants.** Eval 31 covers the
+  asserted-impact-unproven shape; an impact source locked behind a named
+  credential (BLOCKED) or absent entirely (SKIP (infeasible)) is covered
+  only by analogy with eval 24 — no dedicated impact-source fixture yet.
+- **Source discovery beyond the recipe.** Eval 21 proves a recipe-named
+  source is used before any ask; the deeper discovery rungs (project
+  docs, session tools, identifier-emitting code) have no fixture — a
+  deterministic repo that forces exactly one non-recipe rung without
+  baiting is an open design problem.
 
 If you find a clean fixture design for any of these, add it here before
 changing the skill text it would guard.
 
 ## Results — iteration 1 (2026-08-04, 1 run per configuration, **evals 0–4 only**)
 
-Evals 5–20 were added after this benchmark; each was validated live on its
+Evals 5–31 were added after this benchmark; each was validated live on its
 fixture when introduced, but they have not been through a benchmarked
 with/without-skill iteration yet. The table below is NOT a whole-suite
 claim.

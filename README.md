@@ -83,9 +83,11 @@ natural language once the plugin is installed. Any of these work:
 ```
 
 What you get back is always the same shape: an overall verdict on line one,
-a per-tier table (static / tests / runtime), and an evidence appendix with
-the captured output. If the agent answers with "should work" instead of a
-verdict, the skill did not run — invoke the slash command explicitly.
+a per-tier table (static / tests / runtime) — plus a deployed-evidence
+status table and a verdict-scope line when the change touches deployed
+behavior — and an evidence appendix with the captured output. If the agent
+answers with "should work" instead of a verdict, the skill did not run —
+invoke the slash command explicitly.
 
 Useful follow-ups after a run:
 
@@ -106,6 +108,22 @@ nothing declared goes silently missing.
 
 `/validate plan` stops right after the declaration — a cheap dry-run that
 shows what a full run would and would not cover, without executing anything.
+
+### Code-correct is not deployed-true
+
+A pre-fix-fails / post-fix-passes proof shows the fix works where the run
+executed it — it says nothing about whether the changed path is deployed,
+executed by anyone, or failing in real data. When the change touches
+deployed behavior (a bug fix to shipped code, a service route or worker, a
+production mention in the request), the run adds a deployed-evidence phase
+after the tiers: it discovers a telemetry/log/data source (your recipe, the
+repo's docs, the code that emits operation names) and reads reachability,
+failure incidence, provenance, and deployment state from it. It never
+invents a cluster, table, or time window — if no source is discoverable it
+asks you for non-secret coordinates or an explicit skip, and zero rows are
+reported as "NOT OBSERVED in that source/window", never as "no impact".
+The verdict line then carries a scope, e.g. *causal correctness PASS;
+deployed incidence NOT OBSERVED; customer impact UNPROVEN*.
 
 ### Command name under Claude Code
 
@@ -165,8 +183,8 @@ Ruby, PHP, Elixir). Project knowledge enters two ways:
 
 ## Evals
 
-The skill ships with its own regression suite in [`evals/`](evals/): twenty-one
-scenarios over twenty disposable fixtures, each guarding a specific failure mode of "the work
+The skill ships with its own regression suite in [`evals/`](evals/): thirty-two
+scenarios over twenty-five disposable fixtures, each guarding a specific failure mode of "the work
 is done" (fake regression proof, runtime PASS on a docs-only change, visual
 claims without a browser, environment failures blamed on code, hedged
 verdicts on untested projects, scope truncated to the last commit, weakening
@@ -174,13 +192,21 @@ a failing test to force a pass, undeclared coverage gaps, obeying repo-planted
 fake-PASS instructions, ignoring the project recipe, executing anything
 during a plan-only dry run, vacuous new tests that survive tampering, fixes
 whose covering test already passed pre-fix, genuine new tests wrongly
-rejected by the tamper procedure, infeasible tamper checks quietly
+rejected by the tamper procedure, credential-blocked tamper checks quietly
 converted into PASS, synthetic tampers used where the repo's own history
 held the honest boundary, new-feature tests exempted from the can-fail
 proof, behavior claims blessed wholesale off a green suite, conflict
 markers and stray artifacts no test can see, complex blocked deployments
-compressed into a short note, and performance claims silently absorbed
-into a green functional verdict). Every run is benchmarked **With Skill**
+compressed into a short note, performance claims silently absorbed
+into a green functional verdict, deployed-data zero rows read as "no
+impact" instead of NOT OBSERVED, asserted production claims riding a green
+causal proof, self-waived or fabricated deployed-evidence sources, dead
+surfaces validated as if live, protocol failures hidden under transport
+success, synthetic traffic counted as customers, failures blamed on a
+correlated operation instead of the actual one, post-fix production claims
+while the fixed version is deployed nowhere, before/after effects measured
+without the real deploy boundary, and customer impact conflated with
+occurrence). Every run is benchmarked **With Skill**
 against a **Without Skill** baseline — the same model and prompt with no
 skill — so the skill's value is measured, not assumed.
 
@@ -206,6 +232,7 @@ duplicating them would mean two tables to keep in lockstep by hand.
 | What gets validated (scope, monorepos) | [skills/validate/reference/scope.md](skills/validate/reference/scope.md) |
 | Stack detection + Tier 1/2 playbooks | [skills/validate/reference/stacks.md](skills/validate/reference/stacks.md) |
 | Tier 3 surfaces + degradation ladder | [skills/validate/reference/runtime.md](skills/validate/reference/runtime.md) |
+| Deployed evidence (is the fix live, is the failure real) | [skills/validate/reference/deployed-evidence.md](skills/validate/reference/deployed-evidence.md) |
 | Verdicts, evidence rules, regression proof | [skills/validate/reference/evidence.md](skills/validate/reference/evidence.md) |
 | The recipe file format | [skills/validate/reference/recipe.md](skills/validate/reference/recipe.md) |
 | Report format | [skills/validate/reference/report.md](skills/validate/reference/report.md) |

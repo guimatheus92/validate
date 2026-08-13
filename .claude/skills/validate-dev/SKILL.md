@@ -1,6 +1,6 @@
 ---
 name: validate-dev
-description: Development runbook for maintaining the validate plugin repo itself (the repo whose root holds commands/validate.md, skills/validate/, and evals/). Use this skill whenever editing any content under skills/, commands/, .github/prompts/, or evals/; whenever changing the coverage-declaration, regression-proof, banned-language, recipe, report, diff-hygiene, or blocked-runtime rules — each lives on several hand-synced surfaces that must move in the same commit; whenever running or grading the eval suite or its With/Without Skill benchmark; and whenever cutting a release. Trigger on prompts like "change the regression-proof rules", "sync the banned-language list", "run the evals", "add a stack playbook", "add a Tier 3 surface", or "cut a release" — even when the prompt does not mention syncing, because the sync map is exactly what is easy to miss.
+description: Development runbook for maintaining the validate plugin repo itself (the repo whose root holds commands/validate.md, skills/validate/, and evals/). Use this skill whenever editing any content under skills/, commands/, .github/prompts/, or evals/; whenever changing the coverage-declaration, regression-proof, banned-language, recipe, report, diff-hygiene, blocked-runtime, deployed-evidence, SKIP-taxonomy, or reachability rules — each lives on several hand-synced surfaces that must move in the same commit; whenever running or grading the eval suite or its With/Without Skill benchmark; and whenever cutting a release. Trigger on prompts like "change the regression-proof rules", "sync the banned-language list", "change the deployed-evidence rules", "run the evals", "add a stack playbook", "add a Tier 3 surface", or "cut a release" — even when the prompt does not mention syncing, because the sync map is exactly what is easy to miss.
 ---
 
 # Developing the validate plugin
@@ -42,7 +42,7 @@ Four surfaces, same commit:
 
 1. `skills/validate/SKILL.md` — Step 3 (claims + will/cannot-validate + the
    nonfunctional not-claimed line + the plan-only trigger), the contract's
-   per-claim verdict bullet, and Step 8's report enumeration
+   per-claim verdict bullet, and Step 9's report enumeration
 2. `skills/validate/reference/report.md` — claims table + claim roll-up
    rule + plan-must-match-report rule + the always-present "Not validated" line
 3. `commands/validate.md` — the plan-only trigger + the per-claim
@@ -110,6 +110,56 @@ Two hand-synced pieces, each same-commit:
 Eval 9 guards recipe reuse; the never-run prohibition is deliberately
 unfixtured (see Known gaps in `evals/README.md`).
 
+### Deployed evidence
+
+Source of truth: `skills/validate/reference/deployed-evidence.md` — the
+applicability gate (TRUE/FALSE/UNKNOWN), source discovery order, the
+ask/provide/waive protocol (never secrets, never self-waived, an explicit
+in-prompt decision consumes the ask), the six dimensions with their status
+words (NOT OBSERVED / NOT MEASURABLE / NO TARGET ROWS / NOT DEPLOYED …),
+the query methodology (identifiers from the emitting code, zero-inclusive
+positive controls, payload-field inspection, correlation-id hierarchy,
+base rates, deployment-state gating), and the boundaries (read-only;
+recipe "Never run locally" wins; plan-only declares without executing; the
+escalated Tier 3 runbook is never replaced). Compressed carriers to move
+in the same commit:
+
+- `skills/validate/SKILL.md` — the causal-vs-deployed contract bullet, the
+  Step 2 gate decision, the Step 3 declaration bullet (status-free
+  wording — eval 10), Step 7, and the reference-index row
+- `skills/validate/reference/report.md` — the Verdict scope line, the
+  dimension status table, the claim-classification and status-word
+  bullets, and the Deployed evidence appendix placeholder
+- `skills/validate/reference/recipe.md` — the Deployed evidence template
+  section + the production-query clause of "Never run locally"
+- `skills/validate/reference/runtime.md` — the local-vs-deployed pointer
+- `commands/validate.md` — the hard-rules bullet + the plan-only sentence
+- `.github/prompts/validate.prompt.md` — item 6
+
+Evals 21–24 and 26–31 guard the phase (zero-rows positive controls,
+asserted-claim FAIL, waiver, required-BLOCKED, hidden protocol failures,
+provenance, hierarchy, version gate, post-deploy effect, impact
+separation); keep evals 10 and 19 passing. `scripts/check.mjs` check 7
+requires the literal phrase "deployed evidence" on every carrier, and
+check 9 pins the fixture telemetry data.
+
+### SKIP taxonomy and reachability
+
+The three SKIP labels — `SKIP (not applicable)` / `SKIP (infeasible)` /
+`SKIP (user-waived)` — are defined in evidence.md's "The four verdicts"
+and machine-checked by `scripts/check.mjs` check 8: any `SKIP (…)` string
+in the carriers or evals.json must be one of the canonical three. Carriers
+to move with a label change: runtime.md (ladder rung 4 + the runbook
+section), report.md (the SKIP-labels bullet), and the VS Code prompt's
+verdicts item. Evals 1, 2, 14, 20, and 23 guard the labels; BLOCKED vs
+infeasible: a named unlockable prerequisite is BLOCKED (eval 14), no path
+at all is infeasible (eval 20).
+
+Reachability's source of truth is the "Reachability" bullet in scope.md's
+diff hygiene (every changed surface has a caller/consumer/registration;
+dead code is a finding). Carriers: runtime.md's no-caller paragraph and
+prompt item 3. Eval 25 guards it.
+
 ### Blocked-runtime runbook
 
 `skills/validate/reference/runtime.md` ("When a runtime claim ends SKIP or
@@ -137,9 +187,11 @@ node scripts/check.mjs
 ```
 
 It proves: manifests in lockstep (real semver), skill frontmatter present,
-no dangling reference links, and the banned-language list in lockstep
-between evidence.md and evals.json. It is the entire local suite — there
-is nothing to build.
+no dangling reference links, the banned-language list in lockstep between
+evidence.md and evals.json, the deployed-evidence sentinel present on
+every carrier, every `SKIP (…)` label canonical, and the fixture telemetry
+JSONL parsing with its semantic pins intact. It is the entire local
+suite — there is nothing to build.
 
 ## Eval runbook
 
