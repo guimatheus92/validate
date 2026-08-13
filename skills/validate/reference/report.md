@@ -27,7 +27,8 @@ impact UNPROVEN>
 <only when the deployed-evidence phase applied or was waived:>
 | Dimension | Status | Source / window | Evidence |
 |---|---|---|---|
-| Reachability | NOT OBSERVED | ops.jsonl / 2026-08-01..07 | appendix — 0 target rows, siblings live |
+| Caller reachability | SKIP (infeasible) | no caller-side source found | appendix — gap named |
+| Service reachability | NOT OBSERVED | ops.jsonl / 2026-08-01..07 | appendix — 0 target rows, siblings live |
 | Failure incidence | NOT MEASURABLE — 0 eligible target operations | same | appendix |
 
 **Not validated**: <each gap declared in the coverage plan, with its reason,
@@ -99,6 +100,13 @@ Rules:
   answered the question; BLOCKED = a defined path with a named missing
   prerequisite; SKIP = one of the three labels. Never trade one for
   another — "no rows" never becomes "no impact".
+- **Caller and service reachability are separate rows.** When the two
+  sides disagree — service rows without caller rows, or the reverse —
+  the disagreement appears in the Deployed evidence appendix AND the
+  Verdict scope line. A missing caller-side source is a qualified row
+  (BLOCKED with the source named, or `SKIP (infeasible)`), never a
+  silent omission — and never a reason to suppress service-side
+  evidence.
 - **The report must match the coverage declaration** (the plan announced
   before execution — see SKILL.md). Every declared
   item has a verdict backed by evidence; every declared gap appears under

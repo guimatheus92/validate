@@ -55,7 +55,13 @@ otherwise apply this compressed contract:
    instead (they authenticate in their own terminal; an explicit decision
    already in their request consumes the ask). Derive query identifiers
    from the emitting code, and read failure status from payload/description
-   fields, not only transport results. A zero-row result counts only
+   fields, not only transport results. Caller first: identify the real
+   deployed producer and read caller-side request telemetry
+   (outgoing/client requests, gateway logs) before interpreting
+   service-side operation rows — reconcile the two sides, classify
+   provenance from a primary signal (an environment column reading
+   production is not one), and when no caller-side source exists, name
+   the gap and proceed on the service side. A zero-row result counts only
    beside a positive control proving the source live, and reads "NOT
    OBSERVED in <source> over <window>" — never "never happens" or "no
    customer impact"; zero eligible operations is "NOT MEASURABLE — 0

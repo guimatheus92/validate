@@ -60,7 +60,8 @@ another:
 
 | Dimension | Statuses | What decides it |
 |---|---|---|
-| Reachability | OBSERVED / NOT OBSERVED | do the changed operations appear in the source at all |
+| Caller reachability | OBSERVED / NOT OBSERVED / BLOCKED / SKIP | did a deployed producer send the affected route/request |
+| Service reachability | OBSERVED / NOT OBSERVED / BLOCKED / SKIP | did the service record the corresponding operation |
 | Failure incidence | MEASURED F/N / NOT MEASURABLE | matching failures over eligible operations, both counted |
 | Provenance | CUSTOMER / SYNTHETIC / TEST / MIXED / UNKNOWN / NO TARGET ROWS | who produced the rows, from a primary signal |
 | Customer impact | PROVEN / UNPROVEN / NO TARGET ROWS | can failures be linked to affected users/tenants |
@@ -69,15 +70,72 @@ another:
 
 Wording is part of the evidence:
 
-- Zero eligible target operations → reachability NOT OBSERVED and
-  incidence **`NOT MEASURABLE — 0 eligible target operations`** — never a
-  0/0 rate.
+- Zero eligible target operations → the queried side's reachability NOT
+  OBSERVED and incidence **`NOT MEASURABLE — 0 eligible target
+  operations`** — never a 0/0 rate.
 - "NOT OBSERVED in <source> over <window>" never becomes "never happens"
   or "no customer impact". The query bounds the claim.
-- NO TARGET ROWS is the provenance/impact status when reachability is not
-  observed — nonexistent rows are not customer, synthetic, or unknown.
+- NO TARGET ROWS is the provenance/impact status only when NEITHER side
+  holds target rows — every source actually queried returned zero, and
+  any side that could not be queried is named as a gap beside it.
+  Service rows without caller rows are never NO TARGET ROWS: they are a
+  cross-source disagreement whose provenance must be classified before
+  the rows count anywhere.
 - NOT DEPLOYED requires deployment inventory positively proving the
   version absent; anything less is UNKNOWN.
+
+## Caller first — prove the producer before trusting the service
+
+Service-side rows show what a service recorded, not who called it. An
+environment column that reads "production" proves neither a customer
+nor a deployed caller — test hosts write into production-named tables.
+Before service-side rows count as eligible deployed traffic, identify
+the real deployed producer of the changed route and look for its own
+outgoing requests.
+
+Source discovery above finds what exists; this order decides which
+discovered source type to query first — the strongest caller-side
+signal at the top:
+
+1. outgoing HTTP/client request telemetry from the producer;
+2. API gateway or ingress access logs;
+3. durable workflow/job telemetry;
+4. client-side request metrics;
+5. service operations/traces.
+
+Caller telemetry is the first source, not a hard stop: after reading
+it, still inspect the service side — for callers you did not predict,
+instrumentation disagreement, and test/synthetic traffic — then compare
+the two. Rows on one side without the other are a cross-source
+disagreement: report it, and classify the rows' provenance before
+counting them anywhere.
+
+- **Caller-reachability evidence records**: the caller role/component
+  and its version field; HTTP method and normalized route family; total
+  and completed request rows; the status breakdown; distinct
+  activities/resources (labeled approximate when an approximate
+  distinct-count function produced them); environment/region/ring;
+  first/last seen; and an explicit zero for the target route quoted
+  beside known-live sibling routes.
+- **Zero caller rows** → Caller reachability `NOT OBSERVED in
+  <source/window>`; Failure incidence `NOT MEASURABLE — 0 eligible
+  target operations`; Customer impact UNPROVEN — pending service-side
+  reconciliation and provenance classification. Still inspect the
+  service side: service rows without caller rows are the disagreement
+  above, not evidence of eligible deployed traffic.
+- **No caller-side source discovered** → the rule degrades; it never
+  blocks the phase. A caller-side source the recipe or docs name but
+  this session cannot reach is BLOCKED with the prerequisite named; no
+  caller-side source in this environment at all is `SKIP (infeasible)`
+  with the gap named ("no outgoing-request telemetry available for
+  <producer>"). Either way, service-side evidence still proceeds, with
+  the caller gap named beside every count it qualifies.
+- **Service-only rows enter no customer denominator** until provenance
+  identifies an eligible deployed caller: TEST or unresolved UNKNOWN
+  rows leave Customer impact UNPROVEN and stay out of the
+  eligible-customer denominator. Failure incidence over the queried
+  source is still measured — the gap is named, never used to suppress
+  the numbers.
 
 ## Query methodology
 
@@ -100,9 +158,15 @@ Wording is part of the evidence:
 - **Base rate, always.** One row is not an incident and zero rows is not
   absence: report matching failures over eligible operations, first/last
   seen, and the environment/version split.
-- **Provenance from a primary signal.** Caller identity, synthetic-runner
-  markers, known test hosts, version fields. A blank user agent is not
-  proof of synthetic traffic — unknown stays UNKNOWN.
+- **Provenance from a primary signal.** Caller role and binary version,
+  deployment inventory, explicit test/synthetic markers, role instance,
+  source or stack paths, known test-only hosts, deterministic test
+  sequences. An environment column reading "production" is NOT such a
+  signal — local and CI runs ingested into a production-named table
+  classify as TEST, not customer. A blank user agent is not proof of
+  synthetic traffic — unknown stays UNKNOWN, and a service row with no
+  corresponding caller telemetry stays TEST or UNKNOWN until a primary
+  signal resolves it.
 - **Deployment state before attribution.** Confirm which version produced
   the rows before crediting or blaming the session's change; confirm the
   fixed version reached the environment before any before/after claim.

@@ -29,7 +29,10 @@ code as proof of live behavior.
 Tier 3 proves behavior in a runtime you executed here. Whether the change
 is live in a deployed system, and whether its failure occurs in real data,
 is the deployed-evidence phase — [deployed-evidence.md](deployed-evidence.md)
-when its gate applies.
+when its gate applies. The caller walk above has a deployed analogue: when
+the gate applies, that phase proves caller reachability — the real deployed
+producer's own request telemetry — before service-side rows count as
+deployed traffic.
 
 Drive the specific flow the diff touched, with inputs that hit the changed
 lines. After the happy path, probe one or two adjacent cases (an error path,

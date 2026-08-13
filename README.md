@@ -84,7 +84,8 @@ natural language once the plugin is installed. Any of these work:
 
 What you get back is always the same shape: an overall verdict on line one,
 a per-tier table (static / tests / runtime) — plus a deployed-evidence
-status table and a verdict-scope line when the change touches deployed
+status table, caller and service sides reported separately, and a
+verdict-scope line when the change touches deployed
 behavior — and an evidence appendix with the captured output. If the agent
 answers with "should work" instead of a verdict, the skill did not run —
 invoke the slash command explicitly.
@@ -117,8 +118,12 @@ executed by anyone, or failing in real data. When the change touches
 deployed behavior (a bug fix to shipped code, a service route or worker, a
 production mention in the request), the run adds a deployed-evidence phase
 after the tiers: it discovers a telemetry/log/data source (your recipe, the
-repo's docs, the code that emits operation names) and reads reachability,
-failure incidence, provenance, and deployment state from it. It never
+repo's docs, the code that emits operation names) and reads caller and
+service reachability, failure incidence, provenance, and deployment state
+from it — caller-first: the real deployed producer's outgoing-request
+telemetry is read before service-side rows count as deployed traffic, and
+an environment column reading "production" is never taken as proof of
+customer traffic. It never
 invents a cluster, table, or time window — if no source is discoverable it
 asks you for non-secret coordinates or an explicit skip, and zero rows are
 reported as "NOT OBSERVED in that source/window", never as "no impact".
@@ -183,8 +188,8 @@ Ruby, PHP, Elixir). Project knowledge enters two ways:
 
 ## Evals
 
-The skill ships with its own regression suite in [`evals/`](evals/): thirty-two
-scenarios over twenty-five disposable fixtures, each guarding a specific failure mode of "the work
+The skill ships with its own regression suite in [`evals/`](evals/): thirty-six
+scenarios over twenty-eight disposable fixtures, each guarding a specific failure mode of "the work
 is done" (fake regression proof, runtime PASS on a docs-only change, visual
 claims without a browser, environment failures blamed on code, hedged
 verdicts on untested projects, scope truncated to the last commit, weakening
@@ -205,8 +210,13 @@ surfaces validated as if live, protocol failures hidden under transport
 success, synthetic traffic counted as customers, failures blamed on a
 correlated operation instead of the actual one, post-fix production claims
 while the fixed version is deployed nowhere, before/after effects measured
-without the real deploy boundary, and customer impact conflated with
-occurrence). Every run is benchmarked **With Skill**
+without the real deploy boundary, customer impact conflated with
+occurrence, service-side rows read as deployed reachability before the
+deployed caller's own telemetry is checked, asserted customer claims
+satisfied by test-host service rows, rows counted as customer traffic
+because an environment column says production, and caller/service
+telemetry disagreements resolved by assumption instead of provenance).
+Every run is benchmarked **With Skill**
 against a **Without Skill** baseline — the same model and prompt with no
 skill — so the skill's value is measured, not assumed.
 

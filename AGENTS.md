@@ -15,7 +15,7 @@ is markdown (a command, a skill, reference docs) plus three JSON manifests.
 The consistency check is the whole local suite:
 
 ```bash
-node scripts/check.mjs   # manifests in lockstep (real semver), frontmatter present, no dangling reference links, banned-language list in lockstep between evidence.md and evals.json, deployed-evidence sentinel on every carrier, SKIP labels canonical, fixture telemetry data pinned
+node scripts/check.mjs   # manifests in lockstep (real semver), frontmatter present, no dangling reference links, banned-language list in lockstep between evidence.md and evals.json, deployed-evidence sentinel on every carrier, caller-first sentinel on its carriers, SKIP labels canonical, fixture telemetry data pinned
 ```
 
 ## Architecture
@@ -34,14 +34,15 @@ reference files read on demand.
 - `skills/validate/reference/*.md` — one topic each: `scope` (what to
   validate), `stacks` (Tier 1/2 playbooks per language), `runtime` (Tier 3
   surfaces + degradation ladder), `deployed-evidence` (the post-tier phase:
-  applicability gate, source discovery, dimensions, query methodology),
+  applicability gate, source discovery, caller-first order, dimensions,
+  query methodology),
   `evidence` (verdicts + SKIP taxonomy, banned language, regression proof,
   retry ceiling), `recipe` (persisting verified commands), `report` (output
   format).
 - `.github/prompts/validate.prompt.md` — compressed contract for VS Code
   Copilot Chat users, who cannot load CLI plugins.
 - `evals/` — the skill's regression suite: `evals.json` (scenarios +
-  assertions) and `setup-fixtures.mjs` (builds the twenty-five fixture
+  assertions) and `setup-fixtures.mjs` (builds the twenty-eight fixture
   repos). Re-run the evals after any change to `skills/` content.
 
 ## Key conventions
@@ -129,21 +130,24 @@ reference files read on demand.
   passing.
 - **Change the deployed-evidence rules:** the new
   `skills/validate/reference/deployed-evidence.md` is the source of truth
-  (applicability gate, source discovery, the ask/provide/waive protocol,
+  (applicability gate, source discovery, the caller-first query order and
+  caller/service reachability split, the ask/provide/waive protocol,
   dimensions and their status words, query methodology, boundaries).
   Carriers that must move in the same commit: SKILL.md (the
   causal-vs-deployed contract bullet, the Step 2 gate decision, the Step 3
   declaration bullet — status-free wording, eval 10 —, Step 7, and the
   reference-index row), report.md (Verdict scope line + dimension status
-  table + the claim-classification and status-word bullets + the Deployed
-  evidence appendix placeholder), commands/validate.md (the hard-rules
-  bullet + the plan-only sentence), .github/prompts/validate.prompt.md
-  item 6, recipe.md (the Deployed evidence template section + the
+  table + the claim-classification, status-word, and caller/service
+  reachability bullets + the Deployed evidence appendix placeholder),
+  commands/validate.md (the hard-rules bullet + the plan-only sentence),
+  .github/prompts/validate.prompt.md item 6, recipe.md (the Deployed
+  evidence template section, the caller-side rule bullet + the
   production-query clause of "Never run locally"), and runtime.md (the
-  local-vs-deployed pointer). Evals 21–24 and 26–31 guard the phase; keep
-  evals 10 (plan-only stays status-free) and 19 (the escalated deploy
-  runbook is not replaced by this phase) passing. `scripts/check.mjs`
-  requires the literal phrase "deployed evidence" on every carrier.
+  local-vs-deployed pointer). Evals 21–24, 26–31, and 32–35 guard the
+  phase; keep evals 10 (plan-only stays status-free) and 19 (the escalated
+  deploy runbook is not replaced by this phase) passing.
+  `scripts/check.mjs` requires the literal phrase "deployed evidence" on
+  every carrier and a caller-first sentinel on its carriers.
 - **Change the SKIP taxonomy or the reachability check:** the three SKIP
   labels are defined in evidence.md's "The four verdicts" and
   machine-checked everywhere by `scripts/check.mjs` (any `SKIP (…)` must

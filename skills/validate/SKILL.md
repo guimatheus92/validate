@@ -177,6 +177,12 @@ UNKNOWN → ask; proceeding without an answer makes the phase BLOCKED with
 "deployment status unknown" named. Never invent a coordinate; never ask
 for a secret.
 
+Caller first: identify the real deployed producer and read its
+caller-side request telemetry before interpreting service-side rows —
+then read the service side too and reconcile the two. No caller-side
+source discovered → a qualified caller-reachability status with the gap
+named, service-side evidence proceeding.
+
 ## Step 8 — record the recipe
 
 If this run discovered anything a future run would need — the working build
@@ -201,7 +207,7 @@ above it, no hedging below it.
 | What range/files to validate, monorepo grouping | [reference/scope.md](reference/scope.md) |
 | Stack detection, Tier 1/2 commands per language | [reference/stacks.md](reference/stacks.md) |
 | Tier 3 surfaces, drive methods, launch discipline, degradation ladder | [reference/runtime.md](reference/runtime.md) |
-| Deployed-evidence gate, source discovery, dimensions, query methodology | [reference/deployed-evidence.md](reference/deployed-evidence.md) |
+| Deployed-evidence gate, source discovery, caller-first order, dimensions, query methodology | [reference/deployed-evidence.md](reference/deployed-evidence.md) |
 | Verdict definitions, evidence rules, banned language, regression proof, retry ceiling | [reference/evidence.md](reference/evidence.md) |
 | Recipe file location, format, update rules | [reference/recipe.md](reference/recipe.md) |
 | Final report template | [reference/report.md](reference/report.md) |

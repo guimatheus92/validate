@@ -46,9 +46,13 @@ description: Verified build/test/run commands for <project name>. Used by /valid
 
 ## Deployed evidence (optional)
 - Applicability: <which changes warrant the phase in this repo>
-- Source: <system>; dataset/table: <name>; default window: <e.g. 30d>
+- Caller source: <outgoing/client request telemetry, gateway logs>; dataset: <name> (optional)
+- Service source: <system>; dataset/table: <name>; default window: <e.g. 30d>
 - Identifier derivation: <file/pattern where operation or metric names are emitted>
-- Positive control: <query proving the source live>
+- Caller route normalization: <raw URL → route family mapping> (optional)
+- Caller positive controls: <known-live sibling route to quote beside a zero> (optional)
+- Service positive controls: <query proving the service source live>
+- Provenance fields: <caller role/version, test markers, source-path columns> (optional)
 - Correlation fields: <ids that join request → operation>
 - Deployment source: <how to read which version is deployed where>
 - Auth: <non-secret instructions — login command, SSO note; never tokens>
@@ -75,6 +79,12 @@ Last verified: <YYYY-MM-DD> against <commit sha>
   project docs — not as executed). Deployed-evidence sources follow the
   same rule: record a source only after a query against it succeeded this
   run.
+- **Record the caller side when one exists.** Caller reachability is
+  proven from the caller-side source before service rows count
+  ([deployed-evidence.md](deployed-evidence.md)) — a recipe that
+  records only a service source leaves every future run re-deriving
+  (or missing) the producer. Optional fields stay omitted when the
+  repo has no such source; do not invent one to fill the template.
 - **"Never run locally" entries are prohibitions for future runs.** A listed
   command is BLOCKED territory, not a dare: a claim only that command could
   prove ends BLOCKED with a runbook, never with the command executed. This

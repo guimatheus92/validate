@@ -78,7 +78,10 @@ and gets a full validation.
   else ask the user for coordinates or an explicit waiver (never for
   secrets). Zero rows reads "NOT OBSERVED in that source/window", never
   "no impact"; local causal proof alone earns at most a scoped PASS.
-  Procedure: the skill's reference/deployed-evidence.md.
+  Caller first: identify the real deployed producer and read its request
+  telemetry before service-side rows — an environment column reading
+  production is not proof of customer traffic; reconcile the two sides
+  or name the gap. Procedure: the skill's reference/deployed-evidence.md.
 - At most 3 fix-and-rerun attempts, then stop and report FAIL with all
   evidence for the human to decide. Missing environment is BLOCKED with
   the missing piece named — never fabricate an env value, credential, or
