@@ -67,6 +67,12 @@ the diff itself, not the code:
 - **The scope gate**: walk the changed-file list — every file is either
   expected for the stated task or flagged in the report. An unexplained
   file is a finding, not a footnote.
+- **Reachability**: every changed function, route, or module has at least
+  one caller, consumer, route registration, or export reference in the
+  repo — grep the symbol, check route tables and DI registrations. A
+  changed surface nothing references is a finding, named in the report
+  with the search capture — and Tier 3 must not validate it as if it were
+  live ([runtime.md](runtime.md)).
 - **Author self-review**: read the full diff with reviewer eyes — leftover
   debug output, commented-out code, TODOs introduced this session, dead
   branches.

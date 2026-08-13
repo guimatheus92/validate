@@ -6,6 +6,10 @@ above it, no hedged commentary below it. The report IS the answer.
 ```markdown
 # Validation: <one-line overall verdict — PASS | FAIL | BLOCKED>
 
+**Verdict scope** (mandatory whenever the deployed-evidence phase applied):
+<e.g. causal correctness PASS; deployed incidence NOT OBSERVED; customer
+impact UNPROVEN>
+
 **Scope**: <range or paths> — <N> files changed
 <changed-file list, or the notable subset with a count for the rest>
 
@@ -19,6 +23,12 @@ above it, no hedged commentary below it. The report IS the answer.
 |---|---|---|
 | negative values no longer dropped by sum() | PASS | Tier 2 regression proof (appendix) |
 | /checkout shows the corrected total | PASS | Tier 3 screenshots (appendix) |
+
+<only when the deployed-evidence phase applied or was waived:>
+| Dimension | Status | Source / window | Evidence |
+|---|---|---|---|
+| Reachability | NOT OBSERVED | ops.jsonl / 2026-08-01..07 | appendix — 0 target rows, siblings live |
+| Failure incidence | NOT MEASURABLE — 0 eligible target operations | same | appendix |
 
 **Not validated**: <each gap declared in the coverage plan, with its reason,
 ending with the nonfunctional dimensions no claim covered (security,
@@ -41,6 +51,10 @@ runner-reported executions>
 ### Tier 3
 <what was driven, the captured output/response/screenshot paths, and what
 each capture shows>
+
+### Deployed evidence
+<only when the phase applied: the queries run, the row counts or excerpts
+quoted, the positive-control counts beside any zero-row result>
 ```
 
 Rules:
@@ -60,7 +74,28 @@ Rules:
 - Every PASS row must point at evidence that exists in the appendix. A row
   that can't is not PASS — fix the verdict, not the appendix.
 - SKIP and BLOCKED rows carry their reason in the "What ran" column
-  ("docs-only change" / "no DATABASE_URL in env — needed to start the app").
+  (`SKIP (not applicable)` — docs-only change / BLOCKED — "no DATABASE_URL
+  in env — needed to start the app"). SKIP always wears one of the three
+  labels from [evidence.md](evidence.md).
+- **Deployed-evidence statuses are evidence statuses, not verdicts.** They
+  never enter the tier roll-up — "every tier is PASS or SKIP" reads
+  exactly as written. They reach the overall verdict only through the
+  claims table, per the classification below.
+- **Classify each deployed item before executing it**
+  ([deployed-evidence.md](deployed-evidence.md)): an **asserted** deployed
+  claim (the user, commits, or work item state a production fact) is a
+  claims-table row — zero target rows in a fit source = FAIL; source
+  unavailable and not waived = BLOCKED. An **explicitly required check**
+  (the user asked a question) is PASS when a fit source answers it
+  conclusively, including a NOT OBSERVED answer. A **supplemental**
+  dimension the validator added is not a claim — blocked or not-observed,
+  it is a declared gap under **Not validated** with a runbook, and the
+  declared-gap rule above already yields the scoped PASS.
+- **The status words are not interchangeable.** NOT OBSERVED = a live
+  source was queried and held zero target rows; UNPROVEN = no source
+  answered the question; BLOCKED = a defined path with a named missing
+  prerequisite; SKIP = one of the three labels. Never trade one for
+  another — "no rows" never becomes "no impact".
 - **The report must match the coverage declaration** (the plan announced
   before execution — see SKILL.md). Every declared
   item has a verdict backed by evidence; every declared gap appears under
