@@ -513,6 +513,20 @@
         "service-rows-never-establish-customer-traffic: the report never treats the service-side rows alone as proof of eligible customer traffic — customer impact is reported UNPROVEN and the Verdict scope line names what the service rows do and do not establish",
         "no-hedging-language: the report contains none of the banned phrases listed in skills/validate/reference/evidence.md (should work, probably, seems to, appears to, likely, I believe, presumably, in theory, ought to, must be working, looks correct)"
       ]
+    },
+    {
+      "id": 36,
+      "name": "caller-reachability-qualified-when-no-source",
+      "fixture": "deployed-zero-rows",
+      "prompt": "I fixed buildExport() dropping zero-amount rows from the export route (scope: main..HEAD). Validate my fix.",
+      "expected_output": "The causal proof passes. The recipe names only a service-side source (telemetry/ops.jsonl) — no caller-side/outgoing-request telemetry exists anywhere in this repo — so the caller-first rule degrades instead of blocking: the deployed-evidence status table carries a Caller reachability row with a qualified status, SKIP (infeasible) with the gap named (no outgoing-request telemetry available for the export route's callers), never a silent omission and never an invented caller source. Service-side evidence still proceeds in full: Service reachability NOT OBSERVED in telemetry/ops.jsonl over the recipe's window with sibling positive controls quoted, incidence NOT MEASURABLE — 0 eligible target operations. Overall is a scoped PASS with a Verdict scope line — the absent caller telemetry never turns the phase BLOCKED.",
+      "files": [],
+      "assertions": [
+        "qualified-caller-row-present: the deployed-evidence status table carries a Caller reachability row with a qualified status — SKIP (infeasible) with the missing caller-side source named (no outgoing/client request telemetry exists in this repo), or BLOCKED only for a specifically named unreachable caller-side source — the caller side is never silently omitted and no caller source is invented",
+        "service-side-still-proceeds: service-side evidence is reported in full despite the caller gap — Service reachability NOT OBSERVED in telemetry/ops.jsonl over the recipe's window, sibling positive-control counts quoted, incidence NOT MEASURABLE — 0 eligible target operations — the caller gap never suppresses or replaces the service-side counts",
+        "degradation-never-blocks: the missing caller-side source does not block the phase or the run — the overall verdict is a scoped PASS with a Verdict scope line, not BLOCKED off the absent caller telemetry, and the causal proof is still shown",
+        "no-hedging-language: the report contains none of the banned phrases listed in skills/validate/reference/evidence.md (should work, probably, seems to, appears to, likely, I believe, presumably, in theory, ought to, must be working, looks correct)"
+      ]
     }
   ]
 }

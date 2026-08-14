@@ -156,39 +156,31 @@ if (!evidenceList) {
 // 7. Carrier sentinels: each compressed rule lives on every carrier that
 //    can run or describe a validation. A carrier edit that drops a rule
 //    regresses silently — evals only catch it when a run happens to load
-//    that carrier. Sentinels: the phrase "deployed evidence" (any case,
-//    hyphen or space) on the core carriers, and the caller-first rule
-//    ("caller first" / "caller-first" / "caller reachability") on the
-//    core carriers plus the rule's own home surfaces.
+//    that carrier. One shared carrier list for every sentinel: the
+//    caller-first rule is a sub-rule of the deployed-evidence phase, so
+//    the parent's tripwire coverage must never be narrower than the
+//    child's. Sentinels: the phrase "deployed evidence" (any case, hyphen
+//    or space) and the caller-first rule ("caller first" / "caller-first"
+//    / "caller reachability").
 {
-  const CORE = [
+  const carriers = [
     'skills/validate/SKILL.md',
     'commands/validate.md',
     '.github/prompts/validate.prompt.md',
     'skills/validate/reference/report.md',
     'AGENTS.md',
     '.claude/skills/validate-dev/SKILL.md',
+    'skills/validate/reference/deployed-evidence.md',
+    'skills/validate/reference/recipe.md',
+    'skills/validate/reference/runtime.md',
+    'README.md',
+    'CHANGELOG.md',
   ];
   const sentinels = [
-    {
-      label: 'deployed-evidence phase',
-      re: /deployed[ -]evidence/i,
-      carriers: CORE,
-    },
-    {
-      label: 'caller-first rule',
-      re: /caller[ -](first|reachability)/i,
-      carriers: [
-        ...CORE,
-        'skills/validate/reference/deployed-evidence.md',
-        'skills/validate/reference/recipe.md',
-        'skills/validate/reference/runtime.md',
-        'README.md',
-        'CHANGELOG.md',
-      ],
-    },
+    { label: 'deployed-evidence phase', re: /deployed[ -]evidence/i },
+    { label: 'caller-first rule', re: /caller[ -](first|reachability)/i },
   ];
-  for (const { label, re, carriers } of sentinels) {
+  for (const { label, re } of sentinels) {
     for (const file of carriers) {
       const text = readText(file);
       if (text !== null && !re.test(text)) {
@@ -246,7 +238,11 @@ if (!evidenceList) {
   const setup = readText('evals/setup-fixtures.mjs') ?? '';
   const columns = ['ts', 'operation', 'transport', 'description', 'duration_ms', 'activity_id', 'request_id', 'parent_id', 'version', 'client'];
   const outgoingColumns = ['ts', 'role', 'version', 'method', 'route', 'status', 'activity_id', 'env', 'region', 'client'];
-  const fixtureRows = (fixture, file = 'telemetry/ops.jsonl', cols = columns) => {
+  // The file→columns mapping is fixed (ops rows always carry the ops
+  // columns, outgoing rows the outgoing ones) — derived here so call
+  // sites cannot pass a mismatched pair.
+  const fixtureRows = (fixture, file = 'telemetry/ops.jsonl') => {
+    const cols = file.endsWith('outgoing.jsonl') ? outgoingColumns : columns;
     const start = setup.indexOf(`'${fixture}',`);
     if (start === -1) { fail(`evals/setup-fixtures.mjs: fixture "${fixture}" not found for JSONL extraction`); return null; }
     const chunk = setup.slice(start, setup.indexOf('\nrepo(', start) === -1 ? undefined : setup.indexOf('\nrepo(', start));
@@ -312,7 +308,7 @@ if (!evidenceList) {
   // service target row must stay test-marked or it becomes countable
   // deployed traffic and evals 32/33 change meaning.
   const crnOps = fixtureRows('caller-route-not-used');
-  const crnOut = fixtureRows('caller-route-not-used', 'telemetry/outgoing.jsonl', outgoingColumns);
+  const crnOut = fixtureRows('caller-route-not-used', 'telemetry/outgoing.jsonl');
   if (crnOps) {
     const target = crnOps.filter((r) => r.operation === 'SearchArchive');
     if (target.length < 2) fail(`caller-route-not-used ops.jsonl: expected at least 2 test-host SearchArchive rows, found ${target.length}`);
@@ -330,24 +326,26 @@ if (!evidenceList) {
   // marked (all three markers), and the customer failure count is pinned at
   // exactly 1 — eval 34 quotes it.
   const ttOps = fixtureRows('test-telemetry-in-production-table');
-  const ttOut = fixtureRows('test-telemetry-in-production-table', 'telemetry/outgoing.jsonl', outgoingColumns);
+  const ttOut = fixtureRows('test-telemetry-in-production-table', 'telemetry/outgoing.jsonl');
   if (ttOps) {
     const redeem = ttOps.filter((r) => r.operation === 'RedeemCode');
     const isTest = (r) => /-test\./.test(r.version) || /^(test|ci)-/.test(r.role_instance ?? '') || (r.source_path ?? '') !== '';
     const testRows = redeem.filter(isTest);
     const genuine = redeem.filter((r) => !isTest(r));
     const is400 = (r) => r.transport === 'Success' && /\b400\b/.test(r.description ?? '');
-    if (testRows.length < 2 || !testRows.every((r) => r.env === 'PROD')) fail('test-telemetry-in-production-table ops.jsonl: expected >=2 test-marked RedeemCode rows whose env column reads PROD');
+    if (testRows.length !== 3 || !testRows.every((r) => r.env === 'PROD')) fail('test-telemetry-in-production-table ops.jsonl: expected EXACTLY 3 test-marked RedeemCode rows, all env PROD — eval 34 quotes the 3-test/4-genuine split');
     if (testRows.some((r) => !(/-test\./.test(r.version) && /^test-/.test(r.role_instance ?? '') && (r.source_path ?? '') !== ''))) {
       fail('test-telemetry-in-production-table ops.jsonl: every test RedeemCode row must carry ALL THREE markers (-test. version, test- role_instance, non-empty source_path) — a half-marked row makes classification ambiguous');
     }
-    if (genuine.length < 3) fail('test-telemetry-in-production-table ops.jsonl: expected >=3 genuine customer RedeemCode rows');
-    if (testRows.filter(is400).length < 2) fail('test-telemetry-in-production-table ops.jsonl: expected >=2 failing (400-under-Success) test rows');
+    if (genuine.length !== 4) fail('test-telemetry-in-production-table ops.jsonl: expected EXACTLY 4 genuine customer RedeemCode rows — eval 34 quotes the 3-test/4-genuine split');
+    if (testRows.filter(is400).length !== 2) fail('test-telemetry-in-production-table ops.jsonl: expected EXACTLY 2 failing (400-under-Success) test rows — eval 34 pins the excluded test-failure count at 2');
     if (genuine.filter(is400).length !== 1) fail('test-telemetry-in-production-table ops.jsonl: expected EXACTLY 1 genuine failing row — eval 34 pins the customer-impact count at 1');
     if (ttOut) {
       const testActs = new Set(testRows.map((r) => r.activity_id));
       if (ttOut.some((r) => testActs.has(r.activity_id))) fail('test-telemetry-in-production-table: a test-marked ops row shares an activity_id with a caller row — test rows must never gain caller corroboration');
-      if (!ttOut.some((r) => r.route === '/codes/redeem')) fail('test-telemetry-in-production-table outgoing.jsonl: expected caller rows for /codes/redeem corroborating the genuine service rows');
+      if (!genuine.every((g) => ttOut.some((o) => o.activity_id === g.activity_id && o.route === '/codes/redeem'))) {
+        fail('test-telemetry-in-production-table: every genuine RedeemCode row must share its activity_id with a /codes/redeem caller row — caller corroboration is what separates genuine from test');
+      }
     }
   }
 
@@ -356,11 +354,21 @@ if (!evidenceList) {
   // carry the exported caller's client string — corroboration would dissolve
   // the disagreement eval 35 grades.
   const csOps = fixtureRows('caller-service-disagreement');
-  const csOut = fixtureRows('caller-service-disagreement', 'telemetry/outgoing.jsonl', outgoingColumns);
+  const csOut = fixtureRows('caller-service-disagreement', 'telemetry/outgoing.jsonl');
   if (csOps) {
     const target = csOps.filter((r) => r.operation === 'SummarizeEvents');
     if (target.length < 3) fail(`caller-service-disagreement ops.jsonl: expected at least 3 SummarizeEvents rows, found ${target.length}`);
     if (target.some((r) => (r.client ?? '').startsWith('console-web'))) fail('caller-service-disagreement ops.jsonl: no SummarizeEvents row may carry the exported caller\'s client (console-web) — corroboration would resolve the disagreement');
+    if (!target.some((r) => (r.client ?? '').startsWith('svc-gateway'))) {
+      fail('caller-service-disagreement ops.jsonl: expected at least one SummarizeEvents row carrying the uncorroborated svc-gateway client — that client is the "another caller or instrumentation gap" open question eval 35 grades');
+    }
+    if (csOut && csOut.some((r) => (r.client ?? '').startsWith('svc-gateway'))) {
+      fail('caller-service-disagreement outgoing.jsonl: the svc-gateway client must appear in NO outgoing row — caller corroboration would dissolve the open question');
+    }
+    const testMarked = target.filter((r) => (r.client ?? '') === '' && /^(test|ci)-/.test(r.role_instance ?? ''));
+    if (testMarked.length !== 1) {
+      fail(`caller-service-disagreement ops.jsonl: expected EXACTLY 1 test-marked SummarizeEvents row (blank client + ci-/test- role_instance), found ${testMarked.length} — eval 35 grades one TEST row with the rest staying UNKNOWN`);
+    }
   }
   if (csOut) {
     if (csOut.some((r) => r.route === '/events/summary')) fail('caller-service-disagreement outgoing.jsonl: expected ZERO /events/summary rows (the disagreement scenario)');

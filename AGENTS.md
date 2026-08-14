@@ -143,7 +143,7 @@ reference files read on demand.
   .github/prompts/validate.prompt.md item 6, recipe.md (the Deployed
   evidence template section, the caller-side rule bullet + the
   production-query clause of "Never run locally"), and runtime.md (the
-  local-vs-deployed pointer). Evals 21–24, 26–31, and 32–35 guard the
+  local-vs-deployed pointer). Evals 21–24, 26–31, and 32–36 guard the
   phase; keep evals 10 (plan-only stays status-free) and 19 (the escalated
   deploy runbook is not replaced by this phase) passing.
   `scripts/check.mjs` requires the literal phrase "deployed evidence" on

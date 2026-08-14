@@ -188,7 +188,7 @@ Ruby, PHP, Elixir). Project knowledge enters two ways:
 
 ## Evals
 
-The skill ships with its own regression suite in [`evals/`](evals/): thirty-six
+The skill ships with its own regression suite in [`evals/`](evals/): thirty-seven
 scenarios over twenty-eight disposable fixtures, each guarding a specific failure mode of "the work
 is done" (fake regression proof, runtime PASS on a docs-only change, visual
 claims without a browser, environment failures blamed on code, hedged
@@ -214,8 +214,10 @@ without the real deploy boundary, customer impact conflated with
 occurrence, service-side rows read as deployed reachability before the
 deployed caller's own telemetry is checked, asserted customer claims
 satisfied by test-host service rows, rows counted as customer traffic
-because an environment column says production, and caller/service
-telemetry disagreements resolved by assumption instead of provenance).
+because an environment column says production, caller/service
+telemetry disagreements resolved by assumption instead of provenance,
+and a missing caller-side source silently omitted instead of carried as
+a qualified caller-reachability row while service evidence proceeds).
 Every run is benchmarked **With Skill**
 against a **Without Skill** baseline — the same model and prompt with no
 skill — so the skill's value is measured, not assumed.

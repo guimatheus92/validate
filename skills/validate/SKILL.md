@@ -76,7 +76,10 @@ anything, which commands constitute Tier 1 and Tier 2 for this project and
 which surface Tier 3 must drive — and decide the deployed-evidence
 applicability gate (TRUE / FALSE / UNKNOWN) from the triggers and
 exclusions in
-[reference/deployed-evidence.md](reference/deployed-evidence.md).
+[reference/deployed-evidence.md](reference/deployed-evidence.md). A TRUE
+gate's strategy is caller-first: note both the caller-side source
+(outgoing/client request telemetry, gateway logs) and the service-side
+source the phase would query, in that order.
 
 ## Step 3 — declare the coverage plan
 
@@ -98,9 +101,12 @@ not cover — in a compact block, one line per item:
   names one. List the ones no claim covers, so their absence is a
   statement, not an oversight.
 - **Deployed evidence**: the gate's value (applicable / not applicable /
-  unknown), the sources discovery would try in order, and any coordinates
-  that appear missing. Declaration only — phrase gaps as facts ("missing
-  coordinates: cluster URL"), never as statuses or verdicts; no query
+  unknown), the sources discovery would try in order — caller-side
+  (outgoing/client request telemetry, gateway logs) before service-side
+  (operations/traces) — and any coordinates that appear missing,
+  including a caller-side source that appears absent. Declaration only —
+  phrase gaps as facts ("missing coordinates: cluster URL"; "no
+  caller-side source found"), never as statuses or verdicts; no query
   runs and no question is asked here.
 
 Why upfront: on many stacks a large part of the work is not locally

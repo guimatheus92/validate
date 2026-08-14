@@ -33,17 +33,20 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   evidence proceeds with the gap named. The recipe template gains
   caller/service source, route-normalization, and provenance fields;
   `scripts/check.mjs` gains a caller-first sentinel.
-- **Caller-first eval coverage.** Four new evals (32–35) on three new
-  fixtures guard the rule: caller reachability proven from the deployed
-  caller's outgoing telemetry before service rows count
-  (`caller-route-not-used`, neutral and asserted-claim variants), an
-  env column reading production never classifying customer traffic
-  while test-host rows stay out of impact counts
-  (`test-telemetry-in-production-table`), and service rows without
-  caller corroboration staying TEST or UNKNOWN with the disagreement
-  reported (`caller-service-disagreement`). `scripts/check.mjs` check 9
-  gains a `telemetry/outgoing.jsonl` extractor and per-fixture semantic
-  pins.
+- **Caller-first eval coverage.** Five new evals (32–36) — four on three
+  new fixtures, one on the existing service-only `deployed-zero-rows` —
+  guard the rule: caller reachability proven from the deployed caller's
+  outgoing telemetry before service rows count (`caller-route-not-used`,
+  neutral and asserted-claim variants), an env column reading production
+  never classifying customer traffic while test-host rows stay out of
+  impact counts (`test-telemetry-in-production-table`), service rows
+  without caller corroboration staying TEST or UNKNOWN with the
+  disagreement reported (`caller-service-disagreement`), and the
+  degradation branch itself
+  (`caller-reachability-qualified-when-no-source`: no caller-side source
+  → a qualified Caller reachability row with the gap named, service
+  evidence proceeding, scoped PASS). `scripts/check.mjs` check 9 gains a
+  `telemetry/outgoing.jsonl` extractor and per-fixture semantic pins.
 
 ## [0.6.0] — 2026-08-13
 

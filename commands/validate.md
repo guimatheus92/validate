@@ -50,7 +50,8 @@ the first whitespace-separated token of `$ARGUMENTS` is exactly `plan`:
 consume that token (the remainder, if any, is the scope), follow the skill
 through its coverage declaration and stop there — print what would and would
 not be validated, including whether the deployed-evidence phase would apply
-and which sources it would try; execute nothing. A scope path or branch that merely
+and which caller-side and service-side sources it would try, caller first;
+execute nothing. A scope path or branch that merely
 contains the word (e.g. `src/planner/`, `feature/plan-b`) is a normal scope
 and gets a full validation.
 

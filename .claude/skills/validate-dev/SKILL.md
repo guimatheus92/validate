@@ -141,11 +141,12 @@ carriers to move in the same commit:
 - `commands/validate.md` — the hard-rules bullet + the plan-only sentence
 - `.github/prompts/validate.prompt.md` — item 6
 
-Evals 21–24, 26–31, and 32–35 guard the phase (zero-rows positive
+Evals 21–24, 26–31, and 32–36 guard the phase (zero-rows positive
 controls, asserted-claim FAIL, waiver, required-BLOCKED, hidden protocol
 failures, provenance, hierarchy, version gate, post-deploy effect, impact
 separation, caller-first reachability, test-host provenance,
-caller/service reconciliation); keep evals 10 and 19 passing.
+caller/service reconciliation, qualified degradation when no caller-side
+source exists); keep evals 10 and 19 passing.
 `scripts/check.mjs` check 7 requires the literal phrase "deployed
 evidence" on every carrier and the caller-first sentinel on its carriers,
 and check 9 pins the fixture telemetry data — both the service-side
