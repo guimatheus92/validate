@@ -25,7 +25,7 @@ refactor.
 ## Running the suite
 
 ```bash
-node evals/setup-fixtures.mjs <tmp-dir>    # builds the 25 fixture repos
+node evals/setup-fixtures.mjs <tmp-dir>    # builds the 28 fixture repos
 ```
 
 Then, for each eval in `evals.json`: give an agent the skill and the eval's
@@ -38,12 +38,13 @@ phrases listed in
 [`../skills/validate/reference/evidence.md`](../skills/validate/reference/evidence.md).
 The rest are graded by reading the report against the assertion text.
 
-## The thirty-two scenarios
+## The thirty-seven scenarios
 
-Each one guards a specific failure mode of "the work is done" (thirty-two
-scenarios over twenty-five fixtures — `plan-only-mode` reuses `bi-coverage`;
-evals 21, 22, and 26 share `deployed-zero-rows`; 23 and 24 share
-`deployed-source-missing`; 27, 28, 29, and 31 share `deployed-incidence`):
+Each one guards a specific failure mode of "the work is done" (thirty-seven
+scenarios over twenty-eight fixtures — `plan-only-mode` reuses `bi-coverage`;
+evals 21, 22, 26, and 36 share `deployed-zero-rows`; 23 and 24 share
+`deployed-source-missing`; 27, 28, 29, and 31 share `deployed-incidence`;
+32 and 33 share `caller-route-not-used`):
 
 | # | Eval | Guards against |
 |---|---|---|
@@ -79,6 +80,11 @@ evals 21, 22, and 26 share `deployed-zero-rows`; 23 and 24 share
 | 29 | `deployment-version-gate` | claiming post-fix production validation while deployment inventory proves the fixed version is deployed nowhere |
 | 30 | `post-deployment-effect` | measuring a before/after effect without splitting at the real deploy timestamp, or counting pre-deploy rows as post-fix proof |
 | 31 | `customer-impact-separation` | conflating occurrence with impact — an asserted "hurting customers badly" is not proven by a base rate alone |
+| 32 | `caller-route-not-used` | reading service-side operation rows as deployed reachability before proving the deployed caller ever sends the route — caller telemetry comes first |
+| 33 | `caller-asserted-claim-fail` | letting test-host service rows satisfy an asserted customer-occurrence claim the caller telemetry contradicts |
+| 34 | `test-telemetry-in-production-table` | classifying rows as customer traffic because an env column says production — test markers beat the environment tag |
+| 35 | `caller-service-disagreement` | resolving a caller/service telemetry disagreement by assumption — unresolved rows stay TEST or UNKNOWN and impact stays UNPROVEN |
+| 36 | `caller-reachability-qualified-when-no-source` | silently omitting the caller side (or blocking the whole phase) when no caller-side source exists — the common degraded case gets a qualified row and service evidence proceeds |
 
 The banned-language list quoted in every `no-hedging-language` assertion is
 machine-checked against `evidence.md` by `scripts/check.mjs` — if the two
@@ -124,7 +130,7 @@ Some rules have no covering fixture yet:
 - **The nonfunctional not-claimed line.** Eval 20 guards the claimed half
   (a named nonfunctional claim must be proven or explicitly declared
   unvalidated) and asserts the line's presence and dimension list on its
-  own scenario. The remaining gap is deliberate: the other thirty-one
+  own scenario. The remaining gap is deliberate: the other thirty-six
   scenarios do not assert the always-present line — repeating a presence
   check on every report would grade rote boilerplate, not judgment.
 - **The never-run-locally prohibition.** Recipe entries listing commands
@@ -147,13 +153,19 @@ Some rules have no covering fixture yet:
   docs, session tools, identifier-emitting code) have no fixture — a
   deterministic repo that forces exactly one non-recipe rung without
   baiting is an open design problem.
+- **The positive caller-corroboration path.** Evals 32–36 cover the
+  unresolved side of caller/service reconciliation (zero caller rows,
+  test contamination, disagreement, no caller source at all). The
+  resolving side — a second caller's exported telemetry arriving and
+  upgrading an UNKNOWN service row to customer — has no fixture; it
+  needs a two-snapshot source the single-turn suite does not model.
 
 If you find a clean fixture design for any of these, add it here before
 changing the skill text it would guard.
 
 ## Results — iteration 1 (2026-08-04, 1 run per configuration, **evals 0–4 only**)
 
-Evals 5–31 were added after this benchmark; each was validated live on its
+Evals 5–36 were added after this benchmark; each was validated live on its
 fixture when introduced, but they have not been through a benchmarked
 with/without-skill iteration yet. The table below is NOT a whole-suite
 claim.

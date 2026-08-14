@@ -1778,4 +1778,543 @@ test('free tier allows a 5 MB upload', () => {
   'Add upload size limits',
 );
 
+// 26. caller-route-not-used — caller-first reachability: the deployed
+//     caller's outgoing telemetry is live (high-volume sibling routes) but
+//     holds ZERO rows for the changed route, while the service file DOES
+//     hold target rows — all test-host (-test. version, blank client,
+//     ci- role instance, lockstep timestamps, env says prod). Serves
+//     evals 32 (neutral prompt → Caller reachability NOT OBSERVED, test
+//     rows reported not counted, scoped PASS) and 33 (asserted production
+//     claim → FAIL). check.mjs check 9 parses BOTH JSONL literals out of
+//     THIS file — keep the 'telemetry/ops.jsonl': and
+//     'telemetry/outgoing.jsonl': keys and their backtick literals intact.
+repo(
+  'caller-route-not-used',
+  {
+    'package.json': pkg('caller-route-not-used', { start: 'node server.js' }),
+    'src/invoices.js': `// In-memory invoices (id, name, archived flag).
+export const invoices = [
+  { id: 'inv-201', name: 'Acme April', archived: true },
+  { id: 'inv-202', name: 'Acme May', archived: true },
+  { id: 'inv-203', name: 'Acme June', archived: true },
+  { id: 'inv-204', name: 'Acme July', archived: true },
+  { id: 'inv-205', name: 'Acme August', archived: false },
+  { id: 'inv-206', name: 'Globex April', archived: true },
+];
+
+export function listInvoices() {
+  return invoices.map((r) => r.id);
+}
+
+export function getInvoice(id) {
+  return invoices.find((r) => r.id === id) ?? null;
+}
+
+// Search archived invoices by name. page is 1-based.
+export function searchArchive(rows, query, page = 1, size = 2) {
+  const matches = rows.filter((r) => r.archived && r.name.includes(query));
+  return matches.slice(page * size, page * size + size);
+}
+`,
+    'server.js': `import { createServer } from 'node:http';
+import { getInvoice, invoices, listInvoices, searchArchive } from './src/invoices.js';
+
+// Route -> operation names (the telemetry \`operation\` column uses these):
+//   GET  /invoices           ListInvoices
+//   GET  /invoices/archive   SearchArchive   (matched before the id route)
+//   GET  /invoices/<id>      GetInvoice
+export const server = createServer((req, res) => {
+  const send = (status, body) => {
+    res.writeHead(status, { 'content-type': 'application/json' });
+    res.end(JSON.stringify(body));
+  };
+  const url = new URL(req.url ?? '/', 'http://localhost');
+  if (req.method === 'GET' && url.pathname === '/invoices') return send(200, listInvoices());
+  if (req.method === 'GET' && url.pathname === '/invoices/archive') {
+    const page = Number(url.searchParams.get('page') ?? '1');
+    return send(200, searchArchive(invoices, url.searchParams.get('q') ?? '', page));
+  }
+  if (req.method === 'GET' && url.pathname.startsWith('/invoices/')) {
+    const invoice = getInvoice(url.pathname.slice('/invoices/'.length));
+    return invoice ? send(200, invoice) : send(404, { error: 'not found' });
+  }
+  return send(404, { error: 'no such route' });
+});
+
+if (process.argv[1]?.endsWith('server.js')) {
+  const port = process.env.PORT || 3127;
+  server.listen(port, () => console.log('listening on http://localhost:' + port));
+}
+`,
+    'test/invoices.test.js': `import test from 'node:test';
+import assert from 'node:assert';
+import { invoices, searchArchive } from '../src/invoices.js';
+
+test('archive search returns only archived matches', () => {
+  const rows = searchArchive(invoices, 'Acme');
+  assert.strictEqual(rows.length, 2);
+  assert.ok(rows.every((r) => r.archived));
+});
+`,
+    'telemetry/ops.jsonl': `{"ts":"2026-08-01T09:14:02Z","operation":"ListInvoices","transport":"Success","description":"HTTP 200 OK (6 invoices)","duration_ms":38,"activity_id":"act-70","request_id":"req-1101","parent_id":null,"version":"1.5.0","client":"billing-web/4.1.0","env":"prod","role_instance":"prod-api-01"}
+{"ts":"2026-08-01T09:14:05Z","operation":"GetInvoice","transport":"Success","description":"HTTP 200 OK (invoice inv-201)","duration_ms":16,"activity_id":"act-70","request_id":"req-1102","parent_id":"req-1101","version":"1.5.0","client":"billing-web/4.1.0","env":"prod","role_instance":"prod-api-01"}
+{"ts":"2026-08-02T10:02:11Z","operation":"ListInvoices","transport":"Success","description":"HTTP 200 OK (6 invoices)","duration_ms":41,"activity_id":"act-71","request_id":"req-1103","parent_id":null,"version":"1.5.0","client":"billing-web/4.1.0","env":"prod","role_instance":"prod-api-02"}
+{"ts":"2026-08-02T10:02:14Z","operation":"GetInvoice","transport":"Success","description":"HTTP 200 OK (invoice inv-203)","duration_ms":19,"activity_id":"act-71","request_id":"req-1104","parent_id":"req-1103","version":"1.5.0","client":"billing-web/4.1.0","env":"prod","role_instance":"prod-api-02"}
+{"ts":"2026-08-03T11:21:40Z","operation":"ListInvoices","transport":"Success","description":"HTTP 400 BadRequest: unknown filter field 'regoin'","duration_ms":8,"activity_id":"act-72","request_id":"req-1105","parent_id":null,"version":"1.5.0","client":"billing-web/4.1.0","env":"prod","role_instance":"prod-api-01"}
+{"ts":"2026-08-03T11:22:02Z","operation":"ListInvoices","transport":"Success","description":"HTTP 200 OK (6 invoices)","duration_ms":36,"activity_id":"act-72","request_id":"req-1106","parent_id":null,"version":"1.5.0","client":"billing-web/4.1.0","env":"prod","role_instance":"prod-api-01"}
+{"ts":"2026-08-04T08:05:31Z","operation":"ListInvoices","transport":"Success","description":"HTTP 200 OK (6 invoices)","duration_ms":43,"activity_id":"act-73","request_id":"req-1107","parent_id":null,"version":"1.5.0","client":"billing-web/4.1.0","env":"prod","role_instance":"prod-api-02"}
+{"ts":"2026-08-05T14:37:55Z","operation":"GetInvoice","transport":"Success","description":"HTTP 200 OK (invoice inv-202)","duration_ms":18,"activity_id":"act-74","request_id":"req-1108","parent_id":null,"version":"1.5.0","client":"billing-web/4.1.0","env":"prod","role_instance":"prod-api-01"}
+{"ts":"2026-08-05T16:44:39Z","operation":"GetInvoice","transport":"Failure","description":"socket timeout after 30000 ms","duration_ms":30000,"activity_id":"act-75","request_id":"req-1109","parent_id":null,"version":"1.5.0","client":"billing-web/4.1.0","env":"prod","role_instance":"prod-api-02"}
+{"ts":"2026-08-06T05:00:01Z","operation":"SearchArchive","transport":"Success","description":"HTTP 200 OK (0 matches)","duration_ms":12,"activity_id":"act-t1","request_id":"req-t01","parent_id":null,"version":"1.5.0-test.2","client":"","env":"prod","role_instance":"ci-runner-07"}
+{"ts":"2026-08-06T05:00:02Z","operation":"SearchArchive","transport":"Success","description":"HTTP 200 OK (0 matches)","duration_ms":11,"activity_id":"act-t1","request_id":"req-t02","parent_id":null,"version":"1.5.0-test.2","client":"","env":"prod","role_instance":"ci-runner-07"}
+{"ts":"2026-08-06T05:00:03Z","operation":"SearchArchive","transport":"Success","description":"HTTP 200 OK (0 matches)","duration_ms":12,"activity_id":"act-t1","request_id":"req-t03","parent_id":null,"version":"1.5.0-test.2","client":"","env":"prod","role_instance":"ci-runner-07"}
+`,
+    'telemetry/outgoing.jsonl': `{"ts":"2026-08-01T09:14:01Z","role":"billing-web","version":"4.1.0","method":"GET","route":"/invoices","status":"200","activity_id":"act-70","env":"prod","region":"eu-1","client":"billing-web/4.1.0"}
+{"ts":"2026-08-01T09:14:04Z","role":"billing-web","version":"4.1.0","method":"GET","route":"/invoices/{id}","status":"200","activity_id":"act-70","env":"prod","region":"eu-1","client":"billing-web/4.1.0"}
+{"ts":"2026-08-02T10:02:10Z","role":"billing-web","version":"4.1.0","method":"GET","route":"/invoices","status":"200","activity_id":"act-71","env":"prod","region":"eu-1","client":"billing-web/4.1.0"}
+{"ts":"2026-08-02T10:02:13Z","role":"billing-web","version":"4.1.0","method":"GET","route":"/invoices/{id}","status":"200","activity_id":"act-71","env":"prod","region":"eu-1","client":"billing-web/4.1.0"}
+{"ts":"2026-08-03T11:21:39Z","role":"billing-web","version":"4.1.0","method":"GET","route":"/invoices","status":"400","activity_id":"act-72","env":"prod","region":"eu-1","client":"billing-web/4.1.0"}
+{"ts":"2026-08-03T11:22:01Z","role":"billing-web","version":"4.1.0","method":"GET","route":"/invoices","status":"200","activity_id":"act-72","env":"prod","region":"eu-1","client":"billing-web/4.1.0"}
+{"ts":"2026-08-04T08:05:30Z","role":"billing-web","version":"4.1.0","method":"GET","route":"/invoices","status":"200","activity_id":"act-73","env":"prod","region":"eu-1","client":"billing-web/4.1.0"}
+{"ts":"2026-08-05T14:37:54Z","role":"billing-web","version":"4.1.0","method":"GET","route":"/invoices/{id}","status":"200","activity_id":"act-74","env":"prod","region":"eu-1","client":"billing-web/4.1.0"}
+{"ts":"2026-08-05T16:44:09Z","role":"billing-web","version":"4.1.0","method":"GET","route":"/invoices/{id}","status":"","activity_id":"act-75","env":"prod","region":"eu-1","client":"billing-web/4.1.0"}
+{"ts":"2026-08-06T09:13:11Z","role":"billing-web","version":"4.1.0","method":"GET","route":"/invoices","status":"200","activity_id":"act-76","env":"prod","region":"eu-1","client":"billing-web/4.1.0"}
+{"ts":"2026-08-07T17:50:02Z","role":"billing-web","version":"4.1.0","method":"GET","route":"/invoices","status":"200","activity_id":"act-77","env":"prod","region":"eu-1","client":"billing-web/4.1.0"}
+{"ts":"2026-08-07T17:50:05Z","role":"billing-web","version":"4.1.0","method":"GET","route":"/invoices/{id}","status":"404","activity_id":"act-77","env":"prod","region":"eu-1","client":"billing-web/4.1.0"}
+`,
+    '.claude/skills/validate-recipe/SKILL.md': `---
+name: validate-recipe
+description: Verified build/test/run commands and the deployed-evidence sources for caller-route-not-used. Used by /validate; also useful to any agent validating this project.
+---
+
+# Validation recipe — caller-route-not-used
+
+## Stack
+Plain-JS ESM service, node:test.
+
+## Tier 1 — static
+- (nothing configured — no linter, no typecheck, no build)
+
+## Tier 2 — tests
+- Full suite: \`npm test\`
+
+## Tier 3 — runtime
+- Start: \`npm start\` (PORT env, default 3127); list route: \`GET /invoices\`
+
+## Deployed evidence
+- Caller source: outgoing request telemetry exported from the deployed
+  billing-web caller at \`telemetry/outgoing.jsonl\` (one JSON object per
+  line). \`status\` is the HTTP status the caller observed; empty = the
+  request never completed.
+- Service source: service-side operation rows at \`telemetry/ops.jsonl\`
+  (one JSON object per line; extra \`env\` and \`role_instance\` columns).
+- Window: 2026-08-01T00:00:00Z to 2026-08-07T23:59:59Z (both files, whole
+  file).
+- Identifier derivation: operation names match the handler names in
+  server.js (ListInvoices, GetInvoice, SearchArchive).
+- Caller route normalization: invoice ids collapse to \`{id}\` —
+  \`/invoices/inv-201\` is recorded as \`/invoices/{id}\`;
+  \`/invoices/archive\` stays literal.
+- Caller positive controls: \`grep -c '"route":"/invoices"' telemetry/outgoing.jsonl\`
+  and \`grep -c '"route":"/invoices/{id}"' telemetry/outgoing.jsonl\` —
+  known-live sibling routes to quote beside any zero.
+- Service positive controls: \`grep -c '"operation":"ListInvoices"' telemetry/ops.jsonl\`
+- Provenance fields: \`env\` is an environment tag, not provenance —
+  test-host markers are a \`-test.\` version suffix, a \`ci-\`/\`test-\`
+  role_instance, a blank client, and lockstep timestamps.
+- Correlation fields: caller and service rows share \`activity_id\`; the
+  caller's client string appears in the service \`client\` column.
+- Read: grep counts as above; parse lines as JSON (node one-liner) for
+  anything deeper.
+- Gotcha: the service \`transport\` column is the transport result only —
+  protocol status lives in \`description\` (a request can be transport
+  Success and still an HTTP 4xx/5xx); caller \`status ""\` is an
+  incomplete request, not a success.
+
+Last verified: 2026-08-07 against initial commit
+`,
+  },
+  [[
+    {
+      'src/invoices.js': `// In-memory invoices (id, name, archived flag).
+export const invoices = [
+  { id: 'inv-201', name: 'Acme April', archived: true },
+  { id: 'inv-202', name: 'Acme May', archived: true },
+  { id: 'inv-203', name: 'Acme June', archived: true },
+  { id: 'inv-204', name: 'Acme July', archived: true },
+  { id: 'inv-205', name: 'Acme August', archived: false },
+  { id: 'inv-206', name: 'Globex April', archived: true },
+];
+
+export function listInvoices() {
+  return invoices.map((r) => r.id);
+}
+
+export function getInvoice(id) {
+  return invoices.find((r) => r.id === id) ?? null;
+}
+
+// Search archived invoices by name. page is 1-based.
+export function searchArchive(rows, query, page = 1, size = 2) {
+  const matches = rows.filter((r) => r.archived && r.name.includes(query));
+  return matches.slice((page - 1) * size, (page - 1) * size + size);
+}
+`,
+      'test/invoices.test.js': `import test from 'node:test';
+import assert from 'node:assert';
+import { invoices, searchArchive } from '../src/invoices.js';
+
+test('archive search returns only archived matches', () => {
+  const rows = searchArchive(invoices, 'Acme');
+  assert.strictEqual(rows.length, 2);
+  assert.ok(rows.every((r) => r.archived));
+});
+
+test('first archive page starts at the first match', () => {
+  assert.deepStrictEqual(searchArchive(invoices, 'Acme', 1).map((r) => r.id), ['inv-201', 'inv-202']);
+});
+`,
+    },
+    'Fix searchArchive() skipping the first page of results',
+  ]],
+  'Add invoices service with archive search',
+);
+
+// 27. test-telemetry-in-production-table — env=PROD rows that are NOT
+//     customers: the service file mixes genuine customer RedeemCode rows
+//     (corroborated by caller rows sharing activity_ids) with test-host
+//     rows whose env column also reads PROD but which carry all three
+//     test markers (-test. version, test- role_instance, dev worktree
+//     source_path) plus a blank client. Exactly ONE genuine failing row —
+//     the customer-impact count eval 34 pins. Serves eval 34. check.mjs
+//     check 9 parses BOTH JSONL literals out of THIS file — keep the
+//     'telemetry/ops.jsonl': and 'telemetry/outgoing.jsonl': keys and
+//     their backtick literals intact.
+repo(
+  'test-telemetry-in-production-table',
+  {
+    'package.json': pkg('test-telemetry-in-production-table', { start: 'node server.js' }),
+    'src/codes.js': `// Discount codes (uppercase canonical form).
+export const codes = [
+  { code: 'SUMMER20', discount: 20 },
+  { code: 'WELCOME10', discount: 10 },
+];
+
+export function listCodes() {
+  return codes.map((c) => c.code);
+}
+
+// Redeem a code as the customer typed it.
+export function redeemCode(input) {
+  const found = codes.find((c) => c.code === input);
+  return found ? { ok: true, discount: found.discount } : { ok: false };
+}
+`,
+    'server.js': `import { createServer } from 'node:http';
+import { listCodes, redeemCode } from './src/codes.js';
+
+// Route -> operation names (the telemetry \`operation\` column uses these):
+//   GET  /codes           ListCodes
+//   POST /codes/redeem    RedeemCode
+export const server = createServer((req, res) => {
+  const send = (status, body) => {
+    res.writeHead(status, { 'content-type': 'application/json' });
+    res.end(JSON.stringify(body));
+  };
+  if (req.method === 'GET' && req.url === '/codes') return send(200, listCodes());
+  if (req.method === 'POST' && req.url === '/codes/redeem') {
+    let body = '';
+    req.on('data', (chunk) => { body += chunk; });
+    req.on('end', () => {
+      const result = redeemCode(JSON.parse(body || '{}').code ?? '');
+      result.ok ? send(200, result) : send(400, { error: 'code not found' });
+    });
+    return;
+  }
+  return send(404, { error: 'no such route' });
+});
+
+if (process.argv[1]?.endsWith('server.js')) {
+  const port = process.env.PORT || 3128;
+  server.listen(port, () => console.log('listening on http://localhost:' + port));
+}
+`,
+    'test/codes.test.js': `import test from 'node:test';
+import assert from 'node:assert';
+import { redeemCode } from '../src/codes.js';
+
+test('redeems a code in canonical form', () => {
+  assert.deepStrictEqual(redeemCode('SUMMER20'), { ok: true, discount: 20 });
+});
+`,
+    'telemetry/ops.jsonl': `{"ts":"2026-08-01T10:05:00Z","operation":"ListCodes","transport":"Success","description":"HTTP 200 OK (2 codes)","duration_ms":21,"activity_id":"act-88","request_id":"req-2001","parent_id":null,"version":"2.0.0","client":"shop-web/5.2.0","env":"PROD","role_instance":"prod-web-01","source_path":""}
+{"ts":"2026-08-02T09:41:00Z","operation":"ListCodes","transport":"Success","description":"HTTP 200 OK (2 codes)","duration_ms":19,"activity_id":"act-89","request_id":"req-2002","parent_id":null,"version":"2.0.0","client":"shop-web/5.2.0","env":"PROD","role_instance":"prod-web-02","source_path":""}
+{"ts":"2026-08-02T09:41:12Z","operation":"RedeemCode","transport":"Success","description":"HTTP 200 OK (discount 20 applied)","duration_ms":34,"activity_id":"act-90","request_id":"req-2003","parent_id":null,"version":"2.0.0","client":"shop-web/5.2.0","env":"PROD","role_instance":"prod-web-02","source_path":""}
+{"ts":"2026-08-03T15:22:40Z","operation":"RedeemCode","transport":"Success","description":"HTTP 200 OK (discount 10 applied)","duration_ms":31,"activity_id":"act-91","request_id":"req-2004","parent_id":null,"version":"2.0.0","client":"shop-web/5.2.0","env":"PROD","role_instance":"prod-web-01","source_path":""}
+{"ts":"2026-08-04T18:09:03Z","operation":"RedeemCode","transport":"Success","description":"HTTP 400 BadRequest: code 'welcome10' not found","duration_ms":12,"activity_id":"act-92","request_id":"req-2005","parent_id":null,"version":"2.0.0","client":"shop-web/5.2.0","env":"PROD","role_instance":"prod-web-01","source_path":""}
+{"ts":"2026-08-05T03:00:01Z","operation":"RedeemCode","transport":"Success","description":"HTTP 400 BadRequest: code 'summer20' not found","duration_ms":9,"activity_id":"act-t2","request_id":"req-t11","parent_id":null,"version":"2.0.0-test.1","client":"","env":"PROD","role_instance":"test-runner-02","source_path":"/home/dev/worktrees/codes-fix/src/codes.js"}
+{"ts":"2026-08-05T03:00:02Z","operation":"RedeemCode","transport":"Success","description":"HTTP 400 BadRequest: code 'summer20' not found","duration_ms":8,"activity_id":"act-t2","request_id":"req-t12","parent_id":null,"version":"2.0.0-test.1","client":"","env":"PROD","role_instance":"test-runner-02","source_path":"/home/dev/worktrees/codes-fix/src/codes.js"}
+{"ts":"2026-08-05T03:00:03Z","operation":"RedeemCode","transport":"Success","description":"HTTP 200 OK (discount 20 applied)","duration_ms":10,"activity_id":"act-t2","request_id":"req-t13","parent_id":null,"version":"2.0.0-test.1","client":"","env":"PROD","role_instance":"test-runner-02","source_path":"/home/dev/worktrees/codes-fix/src/codes.js"}
+{"ts":"2026-08-06T11:47:20Z","operation":"RedeemCode","transport":"Success","description":"HTTP 200 OK (discount 20 applied)","duration_ms":29,"activity_id":"act-93","request_id":"req-2006","parent_id":null,"version":"2.0.0","client":"shop-web/5.2.0","env":"PROD","role_instance":"prod-web-02","source_path":""}
+{"ts":"2026-08-07T08:14:55Z","operation":"ListCodes","transport":"Success","description":"HTTP 200 OK (2 codes)","duration_ms":22,"activity_id":"act-94","request_id":"req-2007","parent_id":null,"version":"2.0.0","client":"shop-web/5.2.0","env":"PROD","role_instance":"prod-web-01","source_path":""}
+`,
+    'telemetry/outgoing.jsonl': `{"ts":"2026-08-01T10:04:59Z","role":"shop-web","version":"5.2.0","method":"GET","route":"/codes","status":"200","activity_id":"act-88","env":"prod","region":"us-2","client":"shop-web/5.2.0"}
+{"ts":"2026-08-02T09:40:59Z","role":"shop-web","version":"5.2.0","method":"GET","route":"/codes","status":"200","activity_id":"act-89","env":"prod","region":"us-2","client":"shop-web/5.2.0"}
+{"ts":"2026-08-02T09:41:11Z","role":"shop-web","version":"5.2.0","method":"POST","route":"/codes/redeem","status":"200","activity_id":"act-90","env":"prod","region":"us-2","client":"shop-web/5.2.0"}
+{"ts":"2026-08-03T15:22:39Z","role":"shop-web","version":"5.2.0","method":"POST","route":"/codes/redeem","status":"200","activity_id":"act-91","env":"prod","region":"us-2","client":"shop-web/5.2.0"}
+{"ts":"2026-08-04T18:09:02Z","role":"shop-web","version":"5.2.0","method":"POST","route":"/codes/redeem","status":"400","activity_id":"act-92","env":"prod","region":"us-2","client":"shop-web/5.2.0"}
+{"ts":"2026-08-06T11:47:19Z","role":"shop-web","version":"5.2.0","method":"POST","route":"/codes/redeem","status":"200","activity_id":"act-93","env":"prod","region":"us-2","client":"shop-web/5.2.0"}
+{"ts":"2026-08-07T08:14:54Z","role":"shop-web","version":"5.2.0","method":"GET","route":"/codes","status":"200","activity_id":"act-94","env":"prod","region":"us-2","client":"shop-web/5.2.0"}
+`,
+    '.claude/skills/validate-recipe/SKILL.md': `---
+name: validate-recipe
+description: Verified build/test/run commands and the deployed-evidence sources for test-telemetry-in-production-table. Used by /validate; also useful to any agent validating this project.
+---
+
+# Validation recipe — test-telemetry-in-production-table
+
+## Stack
+Plain-JS ESM service, node:test.
+
+## Tier 1 — static
+- (nothing configured — no linter, no typecheck, no build)
+
+## Tier 2 — tests
+- Full suite: \`npm test\`
+
+## Tier 3 — runtime
+- Start: \`npm start\` (PORT env, default 3128); list route: \`GET /codes\`
+
+## Deployed evidence
+- Caller source: outgoing request telemetry exported from the deployed
+  shop-web caller at \`telemetry/outgoing.jsonl\` (one JSON object per
+  line).
+- Service source: service-side operation rows at \`telemetry/ops.jsonl\`
+  (one JSON object per line; extra \`env\`, \`role_instance\`, and
+  \`source_path\` columns).
+- Window: 2026-08-01T00:00:00Z to 2026-08-07T23:59:59Z (both files, whole
+  file).
+- Identifier derivation: operation names match the handler names in
+  server.js (ListCodes, RedeemCode).
+- Caller positive controls: \`grep -c '"route":"/codes"' telemetry/outgoing.jsonl\`
+- Service positive controls: \`grep -c '"operation":"ListCodes"' telemetry/ops.jsonl\`
+- Provenance fields: \`env\` says which table the row landed in, not who
+  sent it — classify from \`version\` (a \`-test.\` suffix), \`role_instance\`
+  (\`test-\`/\`ci-\` prefixes), a blank \`client\`, and \`source_path\` (a dev
+  worktree path means a test host). Rows with these markers are TEST.
+- Correlation fields: caller and service rows share \`activity_id\`; the
+  caller's client string appears in the service \`client\` column.
+- Read: grep counts as above; parse lines as JSON (node one-liner) for
+  anything deeper.
+- Gotcha: the \`transport\` column is the transport result only — protocol
+  status lives in \`description\` (a request can be transport Success and
+  still an HTTP 4xx/5xx).
+
+Last verified: 2026-08-07 against initial commit
+`,
+  },
+  [[
+    {
+      'src/codes.js': `// Discount codes (uppercase canonical form).
+export const codes = [
+  { code: 'SUMMER20', discount: 20 },
+  { code: 'WELCOME10', discount: 10 },
+];
+
+export function listCodes() {
+  return codes.map((c) => c.code);
+}
+
+// Redeem a code as the customer typed it.
+export function redeemCode(input) {
+  const found = codes.find((c) => c.code === input.toUpperCase());
+  return found ? { ok: true, discount: found.discount } : { ok: false };
+}
+`,
+      'test/codes.test.js': `import test from 'node:test';
+import assert from 'node:assert';
+import { redeemCode } from '../src/codes.js';
+
+test('redeems a code in canonical form', () => {
+  assert.deepStrictEqual(redeemCode('SUMMER20'), { ok: true, discount: 20 });
+});
+
+test('redeems a code typed in lowercase', () => {
+  assert.deepStrictEqual(redeemCode('summer20'), { ok: true, discount: 20 });
+});
+`,
+    },
+    'Fix redeemCode() rejecting lowercase codes',
+  ]],
+  'Add discount codes service',
+);
+
+// 28. caller-service-disagreement — service rows without caller rows: the
+//     service file holds SummarizeEvents rows (three from an
+//     uncorroborated svc-gateway client that appears in NO outgoing row,
+//     one test-marked), while the caller file — proven live by its
+//     /events sibling rows — holds ZERO /events/summary rows. The recipe
+//     names the coverage limit (only console-web is exported), so
+//     "another caller or an instrumentation gap" is a genuinely open
+//     question the validator must report, not resolve by assumption.
+//     Serves eval 35. check.mjs check 9 parses BOTH JSONL literals out of
+//     THIS file — keep the 'telemetry/ops.jsonl': and
+//     'telemetry/outgoing.jsonl': keys and their backtick literals intact.
+repo(
+  'caller-service-disagreement',
+  {
+    'package.json': pkg('caller-service-disagreement', { start: 'node server.js' }),
+    'src/events.js': `// Usage summary over raw route events.
+export function summarizeEvents(events) {
+  const counts = {};
+  for (const e of events) counts[e.route] = (counts[e.route] ?? 0) + 1;
+  return Object.keys(counts)
+    .sort((a, b) => counts[a] - counts[b])
+    .slice(0, 3)
+    .map((route) => ({ route, count: counts[route] }));
+}
+
+export function listEvents(events) {
+  return events.map((e) => ({ route: e.route, at: e.at }));
+}
+`,
+    'server.js': `import { createServer } from 'node:http';
+import { listEvents, summarizeEvents } from './src/events.js';
+
+const events = [
+  { route: '/a', at: '2026-08-01T00:00:00Z' },
+  { route: '/a', at: '2026-08-02T00:00:00Z' },
+  { route: '/a', at: '2026-08-03T00:00:00Z' },
+  { route: '/b', at: '2026-08-03T12:00:00Z' },
+];
+
+// Route -> operation names (the telemetry \`operation\` column uses these):
+//   GET  /events           ListEvents
+//   GET  /events/summary   SummarizeEvents
+export const server = createServer((req, res) => {
+  const send = (status, body) => {
+    res.writeHead(status, { 'content-type': 'application/json' });
+    res.end(JSON.stringify(body));
+  };
+  if (req.method === 'GET' && req.url === '/events') return send(200, listEvents(events));
+  if (req.method === 'GET' && req.url === '/events/summary') return send(200, summarizeEvents(events));
+  return send(404, { error: 'no such route' });
+});
+
+if (process.argv[1]?.endsWith('server.js')) {
+  const port = process.env.PORT || 3129;
+  server.listen(port, () => console.log('listening on http://localhost:' + port));
+}
+`,
+    'test/events.test.js': `import test from 'node:test';
+import assert from 'node:assert';
+import { summarizeEvents } from '../src/events.js';
+
+test('summary counts each route', () => {
+  const summary = summarizeEvents([{ route: '/a' }, { route: '/a' }, { route: '/b' }]);
+  assert.deepStrictEqual(new Set(summary.map((s) => s.route)), new Set(['/a', '/b']));
+  assert.strictEqual(summary.find((s) => s.route === '/a').count, 2);
+});
+`,
+    'telemetry/ops.jsonl': `{"ts":"2026-08-01T08:30:00Z","operation":"ListEvents","transport":"Success","description":"HTTP 200 OK (240 events)","duration_ms":52,"activity_id":"act-80","request_id":"req-3001","parent_id":null,"version":"1.2.0","client":"console-web/1.8.0","env":"prod","role_instance":"prod-worker-01"}
+{"ts":"2026-08-02T09:10:00Z","operation":"ListEvents","transport":"Success","description":"HTTP 200 OK (198 events)","duration_ms":48,"activity_id":"act-81","request_id":"req-3002","parent_id":null,"version":"1.2.0","client":"console-web/1.8.0","env":"prod","role_instance":"prod-worker-01"}
+{"ts":"2026-08-03T14:02:00Z","operation":"ListEvents","transport":"Success","description":"HTTP 200 OK (301 events)","duration_ms":55,"activity_id":"act-82","request_id":"req-3003","parent_id":null,"version":"1.2.0","client":"console-web/1.8.0","env":"prod","role_instance":"prod-worker-02"}
+{"ts":"2026-08-03T14:05:12Z","operation":"SummarizeEvents","transport":"Success","description":"HTTP 200 OK (top 3 routes)","duration_ms":78,"activity_id":"act-95","request_id":"req-3004","parent_id":null,"version":"1.2.0","client":"svc-gateway/2.4","env":"prod","role_instance":"prod-worker-01"}
+{"ts":"2026-08-04T16:40:00Z","operation":"ListEvents","transport":"Success","description":"HTTP 200 OK (275 events)","duration_ms":50,"activity_id":"act-83","request_id":"req-3005","parent_id":null,"version":"1.2.0","client":"console-web/1.8.0","env":"prod","role_instance":"prod-worker-01"}
+{"ts":"2026-08-05T10:15:30Z","operation":"SummarizeEvents","transport":"Success","description":"HTTP 200 OK (top 3 routes)","duration_ms":71,"activity_id":"act-96","request_id":"req-3006","parent_id":null,"version":"1.2.0","client":"svc-gateway/2.4","env":"prod","role_instance":"prod-worker-02"}
+{"ts":"2026-08-06T04:00:01Z","operation":"SummarizeEvents","transport":"Success","description":"HTTP 200 OK (top 3 routes)","duration_ms":15,"activity_id":"act-t3","request_id":"req-t21","parent_id":null,"version":"1.2.0-test.1","client":"","env":"prod","role_instance":"ci-runner-03"}
+{"ts":"2026-08-06T11:52:00Z","operation":"ListEvents","transport":"Success","description":"HTTP 200 OK (263 events)","duration_ms":47,"activity_id":"act-84","request_id":"req-3007","parent_id":null,"version":"1.2.0","client":"console-web/1.8.0","env":"prod","role_instance":"prod-worker-01"}
+{"ts":"2026-08-07T13:26:45Z","operation":"SummarizeEvents","transport":"Success","description":"HTTP 200 OK (top 3 routes)","duration_ms":69,"activity_id":"act-97","request_id":"req-3008","parent_id":null,"version":"1.2.0","client":"svc-gateway/2.4","env":"prod","role_instance":"prod-worker-01"}
+`,
+    'telemetry/outgoing.jsonl': `{"ts":"2026-08-01T08:29:59Z","role":"console-web","version":"1.8.0","method":"GET","route":"/events","status":"200","activity_id":"act-80","env":"prod","region":"eu-1","client":"console-web/1.8.0"}
+{"ts":"2026-08-02T09:09:59Z","role":"console-web","version":"1.8.0","method":"GET","route":"/events","status":"200","activity_id":"act-81","env":"prod","region":"eu-1","client":"console-web/1.8.0"}
+{"ts":"2026-08-03T14:01:59Z","role":"console-web","version":"1.8.0","method":"GET","route":"/events","status":"200","activity_id":"act-82","env":"prod","region":"eu-1","client":"console-web/1.8.0"}
+{"ts":"2026-08-04T16:39:59Z","role":"console-web","version":"1.8.0","method":"GET","route":"/events","status":"200","activity_id":"act-83","env":"prod","region":"eu-1","client":"console-web/1.8.0"}
+{"ts":"2026-08-05T18:20:00Z","role":"console-web","version":"1.8.0","method":"GET","route":"/events","status":"","activity_id":"act-85","env":"prod","region":"eu-1","client":"console-web/1.8.0"}
+{"ts":"2026-08-06T11:51:59Z","role":"console-web","version":"1.8.0","method":"GET","route":"/events","status":"200","activity_id":"act-84","env":"prod","region":"eu-1","client":"console-web/1.8.0"}
+`,
+    '.claude/skills/validate-recipe/SKILL.md': `---
+name: validate-recipe
+description: Verified build/test/run commands and the deployed-evidence sources for caller-service-disagreement. Used by /validate; also useful to any agent validating this project.
+---
+
+# Validation recipe — caller-service-disagreement
+
+## Stack
+Plain-JS ESM service, node:test.
+
+## Tier 1 — static
+- (nothing configured — no linter, no typecheck, no build)
+
+## Tier 2 — tests
+- Full suite: \`npm test\`
+
+## Tier 3 — runtime
+- Start: \`npm start\` (PORT env, default 3129); list route: \`GET /events\`
+
+## Deployed evidence
+- Caller source: outgoing request telemetry at
+  \`telemetry/outgoing.jsonl\` (one JSON object per line). The exported
+  caller telemetry covers the console-web role only — other internal
+  callers are not exported into this snapshot.
+- Service source: service-side operation rows at \`telemetry/ops.jsonl\`
+  (one JSON object per line; extra \`env\` and \`role_instance\` columns).
+- Window: 2026-08-01T00:00:00Z to 2026-08-07T23:59:59Z (both files, whole
+  file).
+- Identifier derivation: operation names match the handler names in
+  server.js (ListEvents, SummarizeEvents).
+- Caller positive controls: \`grep -c '"route":"/events"' telemetry/outgoing.jsonl\`
+- Service positive controls: \`grep -c '"operation":"ListEvents"' telemetry/ops.jsonl\`
+- Provenance fields: \`env\` is an environment tag, not provenance —
+  test-host markers are a \`-test.\` version suffix, a \`ci-\`/\`test-\`
+  role_instance, and a blank client; rows without markers and without
+  caller corroboration stay UNKNOWN.
+- Correlation fields: caller and service rows share \`activity_id\`; the
+  caller's client string appears in the service \`client\` column.
+- Read: grep counts as above; parse lines as JSON (node one-liner) for
+  anything deeper.
+- Gotcha: the \`transport\` column is the transport result only — protocol
+  status lives in \`description\`; caller \`status ""\` is an incomplete
+  request, not a success.
+
+Last verified: 2026-08-07 against initial commit
+`,
+  },
+  [[
+    {
+      'src/events.js': `// Usage summary over raw route events.
+export function summarizeEvents(events) {
+  const counts = {};
+  for (const e of events) counts[e.route] = (counts[e.route] ?? 0) + 1;
+  return Object.keys(counts)
+    .sort((a, b) => counts[b] - counts[a])
+    .slice(0, 3)
+    .map((route) => ({ route, count: counts[route] }));
+}
+
+export function listEvents(events) {
+  return events.map((e) => ({ route: e.route, at: e.at }));
+}
+`,
+      'test/events.test.js': `import test from 'node:test';
+import assert from 'node:assert';
+import { summarizeEvents } from '../src/events.js';
+
+test('summary counts each route', () => {
+  const summary = summarizeEvents([{ route: '/a' }, { route: '/a' }, { route: '/b' }]);
+  assert.deepStrictEqual(new Set(summary.map((s) => s.route)), new Set(['/a', '/b']));
+  assert.strictEqual(summary.find((s) => s.route === '/a').count, 2);
+});
+
+test('most-used route ranks first', () => {
+  const summary = summarizeEvents([{ route: '/a' }, { route: '/a' }, { route: '/a' }, { route: '/b' }]);
+  assert.strictEqual(summary[0].route, '/a');
+});
+`,
+    },
+    'Fix summarizeEvents() ranking least-used routes first',
+  ]],
+  'Add events service with usage summary',
+);
+
 console.log('all fixtures built');

@@ -114,15 +114,20 @@ unfixtured (see Known gaps in `evals/README.md`).
 
 Source of truth: `skills/validate/reference/deployed-evidence.md` — the
 applicability gate (TRUE/FALSE/UNKNOWN), source discovery order, the
+caller-first query order (the real deployed producer identified, its
+caller-side telemetry read first, the two sides reconciled, service-only
+rows out of the customer denominator until provenance resolves), the
 ask/provide/waive protocol (never secrets, never self-waived, an explicit
-in-prompt decision consumes the ask), the six dimensions with their status
-words (NOT OBSERVED / NOT MEASURABLE / NO TARGET ROWS / NOT DEPLOYED …),
-the query methodology (identifiers from the emitting code, zero-inclusive
-positive controls, payload-field inspection, correlation-id hierarchy,
-base rates, deployment-state gating), and the boundaries (read-only;
-recipe "Never run locally" wins; plan-only declares without executing; the
-escalated Tier 3 runbook is never replaced). Compressed carriers to move
-in the same commit:
+in-prompt decision consumes the ask), the seven dimensions with their
+status words (caller and service reachability split — NOT OBSERVED / NOT
+MEASURABLE / NO TARGET ROWS / NOT DEPLOYED …), the query methodology
+(identifiers from the emitting code, zero-inclusive positive controls,
+payload-field inspection, correlation-id hierarchy, base rates,
+provenance from a primary signal — an environment column reading
+production is not one — deployment-state gating), and the boundaries
+(read-only; recipe "Never run locally" wins; plan-only declares without
+executing; the escalated Tier 3 runbook is never replaced). Compressed
+carriers to move in the same commit:
 
 - `skills/validate/SKILL.md` — the causal-vs-deployed contract bullet, the
   Step 2 gate decision, the Step 3 declaration bullet (status-free
@@ -136,12 +141,16 @@ in the same commit:
 - `commands/validate.md` — the hard-rules bullet + the plan-only sentence
 - `.github/prompts/validate.prompt.md` — item 6
 
-Evals 21–24 and 26–31 guard the phase (zero-rows positive controls,
-asserted-claim FAIL, waiver, required-BLOCKED, hidden protocol failures,
-provenance, hierarchy, version gate, post-deploy effect, impact
-separation); keep evals 10 and 19 passing. `scripts/check.mjs` check 7
-requires the literal phrase "deployed evidence" on every carrier, and
-check 9 pins the fixture telemetry data.
+Evals 21–24, 26–31, and 32–36 guard the phase (zero-rows positive
+controls, asserted-claim FAIL, waiver, required-BLOCKED, hidden protocol
+failures, provenance, hierarchy, version gate, post-deploy effect, impact
+separation, caller-first reachability, test-host provenance,
+caller/service reconciliation, qualified degradation when no caller-side
+source exists); keep evals 10 and 19 passing.
+`scripts/check.mjs` check 7 requires the literal phrase "deployed
+evidence" on every carrier and the caller-first sentinel on its carriers,
+and check 9 pins the fixture telemetry data — both the service-side
+`ops.jsonl` and the caller-side `outgoing.jsonl` literals.
 
 ### SKIP taxonomy and reachability
 
@@ -189,9 +198,10 @@ node scripts/check.mjs
 It proves: manifests in lockstep (real semver), skill frontmatter present,
 no dangling reference links, the banned-language list in lockstep between
 evidence.md and evals.json, the deployed-evidence sentinel present on
-every carrier, every `SKIP (…)` label canonical, and the fixture telemetry
-JSONL parsing with its semantic pins intact. It is the entire local
-suite — there is nothing to build.
+every carrier, the caller-first sentinel on its carriers, every `SKIP (…)`
+label canonical, and the fixture telemetry JSONL (service `ops.jsonl` and
+caller `outgoing.jsonl`) parsing with its semantic pins intact. It is the
+entire local suite — there is nothing to build.
 
 ## Eval runbook
 

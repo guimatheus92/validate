@@ -452,6 +452,81 @@
         "causal-proof-still-shown: the regression proof captures are still quoted — the failed impact assertion does not erase the code-level fix evidence",
         "no-hedging-language: the report contains none of the banned phrases listed in skills/validate/reference/evidence.md (should work, probably, seems to, appears to, likely, I believe, presumably, in theory, ought to, must be working, looks correct)"
       ]
+    },
+    {
+      "id": 32,
+      "name": "caller-route-not-used",
+      "fixture": "caller-route-not-used",
+      "prompt": "I fixed searchArchive() skipping the first page of results (scope: main..HEAD). Validate my fix.",
+      "expected_output": "The causal proof passes (covering test fails on a worktree at main, passes fixed). The recipe's Deployed evidence section names BOTH sources — caller outgoing telemetry at telemetry/outgoing.jsonl and service operations at telemetry/ops.jsonl — so the caller source is read first: it holds high-volume sibling-route rows (/invoices, /invoices/{id}) but ZERO rows for the target route /invoices/archive. Caller reachability is NOT OBSERVED over the recipe's window and incidence is NOT MEASURABLE — 0 eligible target operations (never a 0/0 rate, never 'the route is never used'). The service file's SearchArchive rows are still inspected, classified TEST from their markers (the -test. version, the ci- role instance, the blank client, the lockstep timestamps), and never counted as eligible deployed traffic or customer impact; the caller/service disagreement is reported explicitly. Overall is a scoped PASS with a Verdict scope line.",
+      "files": [],
+      "assertions": [
+        "caller-source-read-first: the deployed-evidence phase reads the recipe's caller source (telemetry/outgoing.jsonl) and states Caller reachability from it before any service-side row is used as reachability evidence — sibling-route counts (/invoices, /invoices/{id}) are quoted from the caller file as positive controls proving the caller source live",
+        "caller-not-observed-incidence-not-measurable: the target route /invoices/archive is reported NOT OBSERVED in telemetry/outgoing.jsonl over the recipe's window (source and window both named), and incidence as NOT MEASURABLE — 0 eligible target operations — never a 0/0 rate, never 'no impact' or 'the route is never used'",
+        "service-test-rows-reported-not-counted: the SearchArchive rows in telemetry/ops.jsonl are inspected and reported, classified TEST from their markers (the -test. version, the ci- role instance, the blank client, the lockstep timestamps) — and never counted as eligible deployed traffic or customer impact",
+        "caller-service-disagreement-reported: the report explicitly states the disagreement — service-side SearchArchive rows exist while the live caller source holds zero target-route rows — rather than letting either source silently win",
+        "scoped-pass-with-verdict-scope: the overall verdict is PASS and carries a Verdict scope line stating what the deployed evidence does and does not establish — caller reachability NOT OBSERVED, not disproven; service rows TEST, not customer traffic",
+        "no-hedging-language: the report contains none of the banned phrases listed in skills/validate/reference/evidence.md (should work, probably, seems to, appears to, likely, I believe, presumably, in theory, ought to, must be working, looks correct)"
+      ]
+    },
+    {
+      "id": 33,
+      "name": "caller-asserted-claim-fail",
+      "fixture": "caller-route-not-used",
+      "prompt": "Customers are hitting this bug in production — the archive search drops the first page of results. I fixed it on this branch (scope: main..HEAD). Validate the work.",
+      "expected_output": "The causal proof still passes, but the prompt asserts a production-occurrence claim, and the recipe's fit sources contradict it: the caller source (telemetry/outgoing.jsonl) holds ZERO /invoices/archive rows over the window, and the only SearchArchive rows in telemetry/ops.jsonl are test-host rows (-test. version, ci- role instance, blank client), which cannot satisfy a customer-occurrence claim. The asserted claim gets its own verdict, FAIL, and the overall verdict is FAIL — the green suite and causal proof do not carry it. The FAIL is worded as NOT OBSERVED in the named sources over the named window with sibling positive controls quoted from the caller file, never as proof the bug never occurred.",
+      "files": [],
+      "assertions": [
+        "production-claim-enumerated: the asserted claim that customers are hitting the bug in production appears as its own claim with its own verdict, checked against BOTH recipe-named sources (telemetry/outgoing.jsonl and telemetry/ops.jsonl over the recipe's window) — not silently absorbed into the tier verdicts",
+        "test-rows-cannot-carry-the-claim: with zero target-route rows in the caller source and only test-marked SearchArchive rows in the service file, the claim's verdict is FAIL and the overall verdict is FAIL — the report states that test-host rows cannot satisfy a customer-occurrence claim, and never lets the green suite or causal proof carry it",
+        "absence-still-not-claimed: the finding is worded as NOT OBSERVED in the named sources over the named window, with sibling positive-control counts quoted from the caller file — the report never asserts the bug NEVER occurred or that the route is unused everywhere",
+        "causal-proof-not-swallowed: the regression proof is still executed with both captures quoted — the failed production claim does not erase the code-level fix evidence",
+        "no-hedging-language: the report contains none of the banned phrases listed in skills/validate/reference/evidence.md (should work, probably, seems to, appears to, likely, I believe, presumably, in theory, ought to, must be working, looks correct)"
+      ]
+    },
+    {
+      "id": 34,
+      "name": "test-telemetry-in-production-table",
+      "fixture": "test-telemetry-in-production-table",
+      "prompt": "I fixed redeemCode() rejecting lowercase codes (scope: main..HEAD). Check the deployed data — how much of the RedeemCode traffic in the snapshot is real customers versus our own test runs? Everything in that table is tagged production.",
+      "expected_output": "The recipe names both sources and the primary provenance markers. The RedeemCode rows are split with counts quoted: 3 test rows whose env column reads PROD but which carry explicit test markers (version 2.0.0-test.1, role_instance test-runner-02, a dev worktree source_path, a blank client) — including the 2 failing 400s that reproduce the bug — and 4 genuine customer rows (including 1 genuine 400) corroborated by matching caller rows in telemetry/outgoing.jsonl. env=PROD alone is never used to classify a row as customer traffic; the 2 test failures are excluded from customer-impact counts and the 1 genuine failure is counted separately. The explicitly required check is PASS because it ran against fit sources and answered conclusively.",
+      "files": [],
+      "assertions": [
+        "test-rows-classified-test: the RedeemCode rows carrying explicit test markers (version 2.0.0-test.1, role_instance test-runner-02, the dev worktree source_path) are classified TEST with their count quoted — even though their env column reads PROD",
+        "env-column-not-provenance: the report states that env=PROD alone never classifies a row as customer traffic — classification comes from the recipe's primary provenance markers (version / role_instance / client / source_path), not from the environment tag",
+        "test-failures-excluded-from-impact: the two failing test rows (HTTP 400 under transport Success) are excluded from customer-impact counts — the customer-side failure count quotes only the one genuine 400",
+        "genuine-rows-counted-separately: the genuine customer rows are counted separately with their number quoted, corroborated by matching caller rows in telemetry/outgoing.jsonl (shared activity_ids / client string) — not lumped with the test rows into one traffic total",
+        "no-hedging-language: the report contains none of the banned phrases listed in skills/validate/reference/evidence.md (should work, probably, seems to, appears to, likely, I believe, presumably, in theory, ought to, must be working, looks correct)"
+      ]
+    },
+    {
+      "id": 35,
+      "name": "caller-service-disagreement",
+      "fixture": "caller-service-disagreement",
+      "prompt": "I fixed summarizeEvents() ranking the least-used routes first instead of the most-used (scope: main..HEAD). Validate the work.",
+      "expected_output": "The causal proof passes. The recipe names both sources: telemetry/ops.jsonl holds SummarizeEvents rows, but the caller source telemetry/outgoing.jsonl — proven live by its sibling /events rows — holds ZERO /events/summary rows. The report states the caller/service disagreement explicitly, names the open explanations (another caller the exported outgoing telemetry does not cover — the svc-gateway/2.4 client string appears in no outgoing row — or an instrumentation/coverage gap) instead of assuming one, keeps the SummarizeEvents rows TEST or UNKNOWN until primary evidence resolves them, and never lets service rows alone establish eligible customer traffic: customer impact stays UNPROVEN and the scoped verdict's Verdict scope line says so.",
+      "files": [],
+      "assertions": [
+        "disagreement-reported-explicitly: the report states that telemetry/ops.jsonl holds SummarizeEvents rows while the live caller source (sibling /events counts quoted from telemetry/outgoing.jsonl) holds zero /events/summary rows — an explicit caller/service disagreement, never silently absorbed",
+        "gap-investigated-not-assumed: the report names the candidate explanations as open questions — another caller the exported outgoing telemetry does not cover (the svc-gateway/2.4 client appears in no outgoing row) or an instrumentation/coverage gap — rather than assuming test traffic, assuming customer traffic, or picking one explanation without evidence",
+        "rows-stay-test-or-unknown: the SummarizeEvents rows are classified TEST where marked (the blank-client ci-runner row) and UNKNOWN otherwise, and stay out of customer-impact counts — provenance is never upgraded from the client string or the env column",
+        "service-rows-never-establish-customer-traffic: the report never treats the service-side rows alone as proof of eligible customer traffic — customer impact is reported UNPROVEN and the Verdict scope line names what the service rows do and do not establish",
+        "no-hedging-language: the report contains none of the banned phrases listed in skills/validate/reference/evidence.md (should work, probably, seems to, appears to, likely, I believe, presumably, in theory, ought to, must be working, looks correct)"
+      ]
+    },
+    {
+      "id": 36,
+      "name": "caller-reachability-qualified-when-no-source",
+      "fixture": "deployed-zero-rows",
+      "prompt": "I fixed buildExport() dropping zero-amount rows from the export route (scope: main..HEAD). Validate my fix.",
+      "expected_output": "The causal proof passes. The recipe names only a service-side source (telemetry/ops.jsonl) — no caller-side/outgoing-request telemetry exists anywhere in this repo — so the caller-first rule degrades instead of blocking: the deployed-evidence status table carries a Caller reachability row with a qualified status, SKIP (infeasible) with the gap named (no outgoing-request telemetry available for the export route's callers), never a silent omission and never an invented caller source. Service-side evidence still proceeds in full: Service reachability NOT OBSERVED in telemetry/ops.jsonl over the recipe's window with sibling positive controls quoted, incidence NOT MEASURABLE — 0 eligible target operations. Overall is a scoped PASS with a Verdict scope line — the absent caller telemetry never turns the phase BLOCKED.",
+      "files": [],
+      "assertions": [
+        "qualified-caller-row-present: the deployed-evidence status table carries a Caller reachability row with a qualified status — SKIP (infeasible) with the missing caller-side source named (no outgoing/client request telemetry exists in this repo), or BLOCKED only for a specifically named unreachable caller-side source — the caller side is never silently omitted and no caller source is invented",
+        "service-side-still-proceeds: service-side evidence is reported in full despite the caller gap — Service reachability NOT OBSERVED in telemetry/ops.jsonl over the recipe's window, sibling positive-control counts quoted, incidence NOT MEASURABLE — 0 eligible target operations — the caller gap never suppresses or replaces the service-side counts",
+        "degradation-never-blocks: the missing caller-side source does not block the phase or the run — the overall verdict is a scoped PASS with a Verdict scope line, not BLOCKED off the absent caller telemetry, and the causal proof is still shown",
+        "no-hedging-language: the report contains none of the banned phrases listed in skills/validate/reference/evidence.md (should work, probably, seems to, appears to, likely, I believe, presumably, in theory, ought to, must be working, looks correct)"
+      ]
     }
   ]
 }

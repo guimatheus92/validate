@@ -7,6 +7,47 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.7.0] — 2026-08-13
+
+- **Caller-first deployed evidence.** The phase now proves deployed
+  caller reachability before service-side rows count as eligible
+  deployed traffic: identify the real deployed producer, query the
+  strongest caller-side source first (outgoing/client request telemetry
+  → gateway/ingress logs → durable workflow telemetry → client-side
+  metrics → service operations), then still read the service side and
+  reconcile — rows on one side without the other are a cross-source
+  disagreement, surfaced in the evidence appendix and the Verdict scope
+  line. Reachability splits into two dimensions (caller and service),
+  and NO TARGET ROWS now requires zero rows on every queried side.
+- **An environment column is not provenance.** "Production" in an
+  environment field proves neither a customer nor a deployed caller —
+  local/CI rows ingested into production-named tables classify as TEST,
+  and a service row without corresponding caller telemetry stays TEST
+  or UNKNOWN — out of the eligible-customer denominator, customer
+  impact UNPROVEN — until a primary signal (caller role, binary
+  version, deployment inventory, test markers, host/source paths)
+  resolves it.
+- **Degrades cleanly without a caller-side source.** No caller
+  telemetry in the environment → caller reachability lands BLOCKED
+  (named source unreachable) or `SKIP (infeasible)`, and service-side
+  evidence proceeds with the gap named. The recipe template gains
+  caller/service source, route-normalization, and provenance fields;
+  `scripts/check.mjs` gains a caller-first sentinel.
+- **Caller-first eval coverage.** Five new evals (32–36) — four on three
+  new fixtures, one on the existing service-only `deployed-zero-rows` —
+  guard the rule: caller reachability proven from the deployed caller's
+  outgoing telemetry before service rows count (`caller-route-not-used`,
+  neutral and asserted-claim variants), an env column reading production
+  never classifying customer traffic while test-host rows stay out of
+  impact counts (`test-telemetry-in-production-table`), service rows
+  without caller corroboration staying TEST or UNKNOWN with the
+  disagreement reported (`caller-service-disagreement`), and the
+  degradation branch itself
+  (`caller-reachability-qualified-when-no-source`: no caller-side source
+  → a qualified Caller reachability row with the gap named, service
+  evidence proceeding, scoped PASS). `scripts/check.mjs` check 9 gains a
+  `telemetry/outgoing.jsonl` extractor and per-fixture semantic pins.
+
 ## [0.6.0] — 2026-08-13
 
 - **Deployed-evidence phase.** After the three tiers, when the change
