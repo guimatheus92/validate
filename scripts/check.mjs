@@ -176,12 +176,29 @@ if (!evidenceList) {
     'README.md',
     'CHANGELOG.md',
   ];
-  const sentinels = [
-    { label: 'deployed-evidence phase', re: /deployed[ -]evidence/i },
-    { label: 'caller-first rule', re: /caller[ -](first|reachability)/i },
+  // Each sentinel names the carriers it applies to: caller-first is a sub-rule
+  // of the deployed-evidence phase and shares that list, but the retry ceiling
+  // lives on a different (overlapping) set — it has nothing to say in
+  // deployed-evidence.md, recipe.md, or runtime.md, and it DOES live in
+  // evidence.md, which is not a deployed-evidence carrier at all.
+  const ceilingCarriers = [
+    'skills/validate/reference/evidence.md',
+    'skills/validate/SKILL.md',
+    'skills/validate/reference/report.md',
+    'commands/validate.md',
+    '.github/prompts/validate.prompt.md',
+    'README.md',
+    'AGENTS.md',
+    '.claude/skills/validate-dev/SKILL.md',
+    'CHANGELOG.md',
   ];
-  for (const { label, re } of sentinels) {
-    for (const file of carriers) {
+  const sentinels = [
+    { label: 'deployed-evidence phase', re: /deployed[ -]evidence/i, files: carriers },
+    { label: 'caller-first rule', re: /caller[ -](first|reachability)/i, files: carriers },
+    { label: 'retry ceiling', re: /fix-and-rerun|fix attempts|retry[ -]ceiling/i, files: ceilingCarriers },
+  ];
+  for (const { label, re, files } of sentinels) {
+    for (const file of files) {
       const text = readText(file);
       if (text !== null && !re.test(text)) {
         fail(`${file}: no mention of the ${label} (expected a match for ${re})`);
@@ -373,6 +390,25 @@ if (!evidenceList) {
   if (csOut) {
     if (csOut.some((r) => r.route === '/events/summary')) fail('caller-service-disagreement outgoing.jsonl: expected ZERO /events/summary rows (the disagreement scenario)');
     if (csOut.filter((r) => r.route === '/events').length < 3) fail('caller-service-disagreement outgoing.jsonl: expected at least 3 /events sibling rows proving the caller live');
+  }
+}
+
+// 10. Report-label lockstep: "Fix-and-rerun attempts used" is a verbatim
+//     string in exactly the sense check 8 exists for — report.md's template
+//     emits it, the VS Code prompt names it, and an eval assertion grades a
+//     real report against it. Rename it in one place and the suite would still
+//     pass while grading a line the skill no longer prints.
+{
+  const label = 'Fix-and-rerun attempts used';
+  for (const file of [
+    'skills/validate/reference/report.md',
+    '.github/prompts/validate.prompt.md',
+    'evals/evals.json',
+  ]) {
+    const text = readText(file) ?? '';
+    if (!text.includes(label)) {
+      fail(`${file}: missing the verbatim report label "${label}" — report.md emits it, the prompt names it, and evals/evals.json grades it; the three must agree`);
+    }
   }
 }
 

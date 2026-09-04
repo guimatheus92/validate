@@ -88,11 +88,16 @@ and gets a full validation.
   rerun spends an attempt when it changes an assertion or the code under
   validation to turn a failing check green (repairing a weak proof
   included) — relocating a fixture that a change already validated this run
-  made inert does not, as long as no assertion is loosened, and one
-  self-review batch counts once, not once per finding. One declared
-  `attempt 4 (consequential)` is allowed when the last round strictly
-  reduced the red checks, the rest is a diagnosed consequence of a
-  validated change, and only fixtures/setup or docs are touched (skill's
-  reference/evidence.md). Missing environment is BLOCKED with the missing
+  made inert does not, as long as no assertion is loosened, removed, or
+  skipped, the input keeps its strength, and the relocation is declared in
+  the report with its diagnosis and diff (undeclared, it spends an
+  attempt). One self-review batch — the findings of one run of a review,
+  lint, or audit tool driven against this diff as the Tier 3 exercise —
+  counts once, not once per finding. One `attempt 4 (consequential)` is
+  allowed when the last round strictly reduced the red checks, the rest is
+  a diagnosed consequence of a validated change, and only fixtures/setup or
+  docs are touched; it must be labeled as such and carry its diagnosis and
+  diff — an undeclared fourth round makes the report itself FAIL, and there
+  is no attempt 5 (skill's reference/evidence.md). Missing environment is BLOCKED with the missing
   piece named — never fabricate an env value, credential, or stub to make a
   check run.

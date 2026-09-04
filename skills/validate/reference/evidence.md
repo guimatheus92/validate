@@ -93,9 +93,30 @@ fixture, setup, or harness wiring that an intentional behavior change
 loosened, removed, or skipped. What moves is where the setup lives or how
 it reaches the code; what the test demands of the result is unchanged. A
 validated change that stops an old fixture from exercising its path is a
-mechanical consequence, not a defect to repair. Loosen an assertion under
-cover of a relocation and it is a disguised FAIL from the list below, never
-a free round.
+mechanical consequence, not a defect to repair.
+
+The exemption is earned, not asserted. Every relocation is **declared in
+the report** — which validated change made what inert, and the diff applied
+— beside the captures that prove it: the failing capture before the move,
+the passing capture after, and the proof of the change that caused the
+inertness. An undeclared relocation is an undeclared fix and spends an
+attempt like any other; an exemption you cannot show, you do not have.
+
+Two ways to lose it, each a disguised FAIL from the list below rather than
+a free round:
+
+- **Loosening under cover of a relocation** — an assertion softened,
+  removed, or skipped while the seed moves.
+- **Weakening the input** — a fixture narrowed to an easier case (an
+  edge-case seed swapped for a trivial one) turns a red check green with
+  every assertion byte-identical. A relocated fixture must still drive the
+  same path with input of equivalent strength, and the report says what the
+  test still proves.
+
+Nor is the carve-out a loop: a relocation that does not green its check was
+a wrong diagnosis, and the next round spends an attempt. Rounds of "adjust
+the harness and see" are the convergence this ceiling exists to stop,
+whatever they touch.
 
 **One batch, one attempt.** When a Tier 3 runtime exercise is itself an
 analysis that emits findings about this change — the session's own review,
@@ -115,7 +136,17 @@ available once per run, and only when all three hold:
    a change **already validated in this run**, not a newly discovered
    defect;
 3. the correction touches **only test fixtures, setup, or documentation** —
-   never the code under validation.
+   never the code under validation. An assertion may be updated to the value
+   the validated change makes correct; it may never be loosened, removed, or
+   skipped.
+
+**The carve-out applies first.** A correction that changes no assertion is a
+relocation: it spends nothing and is therefore never a fourth round at all.
+`attempt 4 (consequential)` exists for the case the carve-out excludes — a
+fixture whose assertion must be *updated* to the value the validated change
+makes correct. Read that way the two never compete for the same round, and
+the honest agent is never graded FAIL for taking the free path the contract
+gave it.
 
 Declare it, or it is not allowed: the report labels the round
 `attempt 4 (consequential)` and carries both the diagnosis (which validated

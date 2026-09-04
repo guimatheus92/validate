@@ -165,13 +165,15 @@ These hold everywhere, including your final message:
   changes what is asserted, or what the code under validation does, to turn a
   failing check green — repairing a weak proof included. It does not when you
   relocate or adjust a fixture, setup, or harness that a change you already
-  validated this run made inert, and no assertion is loosened, removed, or
-  skipped. One self-review batch is one attempt, not one per finding. After 3,
-  stop and report FAIL with everything you captured; the single exception is a
-  declared `attempt 4 (consequential)` — allowed only when the last round
-  strictly reduced the red checks, the remaining failure is a diagnosed
-  consequence of a validated change, and the fix touches only test
-  fixtures/setup or docs ([reference/evidence.md](reference/evidence.md)).
+  validated this run made inert, no assertion is loosened, removed, or
+  skipped, the input keeps its strength, and you declare the relocation in
+  the report with its diagnosis and diff — undeclared, it spends an attempt.
+  One self-review batch — the findings of a single run of a review, lint, or
+  audit tool driven against this diff as the Tier 3 exercise — is one
+  attempt, not one per finding. After 3, stop and report FAIL with everything
+  you captured; the single exception is a declared `attempt 4
+  (consequential)`, under the three conditions in
+  [reference/evidence.md](reference/evidence.md).
 - **Never weaken a check to pass it.** Loosening an assertion, skipping or
   deleting a failing test, widening a lint ignore — each of those is a FAIL
   wearing a disguise, and you report it as FAIL.

@@ -1,6 +1,6 @@
 ---
 name: validate-dev
-description: Development runbook for maintaining the validate plugin repo itself (the repo whose root holds commands/validate.md, skills/validate/, and evals/). Use this skill whenever editing any content under skills/, commands/, .github/prompts/, or evals/; whenever changing the coverage-declaration, regression-proof, banned-language, recipe, report, diff-hygiene, blocked-runtime, deployed-evidence, SKIP-taxonomy, or reachability rules — each lives on several hand-synced surfaces that must move in the same commit; whenever running or grading the eval suite or its With/Without Skill benchmark; and whenever cutting a release. Trigger on prompts like "change the regression-proof rules", "sync the banned-language list", "change the deployed-evidence rules", "run the evals", "add a stack playbook", "add a Tier 3 surface", or "cut a release" — even when the prompt does not mention syncing, because the sync map is exactly what is easy to miss.
+description: Development runbook for maintaining the validate plugin repo itself (the repo whose root holds commands/validate.md, skills/validate/, and evals/). Use this skill whenever editing any content under skills/, commands/, .github/prompts/, or evals/; whenever changing the coverage-declaration, regression-proof, retry-ceiling/fix-and-rerun, banned-language, recipe, report, diff-hygiene, blocked-runtime, deployed-evidence, SKIP-taxonomy, or reachability rules — each lives on several hand-synced surfaces that must move in the same commit; whenever running or grading the eval suite or its With/Without Skill benchmark; and whenever cutting a release. Trigger on prompts like "change the regression-proof rules", "change the retry ceiling rules", "sync the banned-language list", "change the deployed-evidence rules", "run the evals", "add a stack playbook", "add a Tier 3 surface", or "cut a release" — even when the prompt does not mention syncing, because the sync map is exactly what is easy to miss.
 ---
 
 # Developing the validate plugin
@@ -218,9 +218,22 @@ Compressed carriers to move in the same commit:
 - `README.md` — the user-facing summary sentence
 
 Eval 37 (`fixture-relocation-not-an-attempt`) guards the carve-out; evals
-6, 11, 12 and 17 guard that the ceiling still binds where it should. The
-`attempt 4 (consequential)` half is deliberately unfixtured — see Known
+6, 11, 12 and 17 guard that the ceiling still binds where it should, and
+eval 6 also pins the `Fix-and-rerun attempts used` line itself.
+`scripts/check.mjs` enforces two halves mechanically: a retry-ceiling
+sentinel across the nine carriers above (check 7, which now carries a
+per-sentinel carrier list — the ceiling lives in `evidence.md` and NOT in
+`deployed-evidence.md`/`recipe.md`/`runtime.md`, so it cannot share the
+deployed-evidence list) and verbatim lockstep on the report label across
+`report.md`, the VS Code prompt, and `evals.json` (check 10). The
+`attempt 4 (consequential)` path, proof-repair accounting, the one-batch
+rule, and relocation-as-cover-for-weakening stay unfixtured — see Known
 gaps in `evals/README.md`.
+
+Fixture and scenario counts are their own drift surface, on four carriers:
+`evals/README.md` (the roster intro), `AGENTS.md`, `README.md`, and
+`CONTRIBUTING.md`. No check guards prose counts; prefer wording that needs
+no arithmetic.
 
 ### Version lockstep
 

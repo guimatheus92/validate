@@ -42,8 +42,9 @@ Verdicts are **PASS / FAIL / BLOCKED / SKIP**, per tier and overall. Every
 PASS points at evidence captured this run: quoted output, exit codes,
 response bodies, screenshots. Hedging ("should work", "probably", "seems
 to") is banned from the report. After 3 failed fix attempts the run stops
-and hands the decision to you instead of looping — and every report states
-how many attempts it spent.
+and hands the decision to you instead of looping — one extra round only when
+the remaining failure is a declared consequence of a change it already proved
+— and every report states how many attempts it spent.
 
 ## Install
 

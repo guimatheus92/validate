@@ -2357,7 +2357,7 @@ test('host lookup is case-insensitive', () => {
 });
 
 test('an unmapped host is unknown', () => {
-  const config = loadConfig({ repoLocal: { hosts: { 'github.corp.example': 'github' } } });
+  const config = loadConfig({ global: { hosts: { 'github.corp.example': 'github' } } });
   assert.strictEqual(resolveProvider('gitlab.corp.example', config), 'unknown');
 });
 `,

@@ -84,6 +84,10 @@ reference files read on demand.
 
 ## Common tasks
 
+- **Add an eval or fixture:** four prose counts drift together and none is
+  machine-checked — `evals/README.md` (roster intro + the `## The N
+  scenarios` heading), `AGENTS.md` (this file), `README.md`, and
+  `CONTRIBUTING.md`. Prefer wording that needs no arithmetic.
 - **Add a stack playbook:** edit `skills/validate/reference/stacks.md` (both
   tier tables + the marker table).
 - **Add a Tier 3 surface:** edit `skills/validate/reference/runtime.md`'s
@@ -175,7 +179,11 @@ reference files read on demand.
   Step 9 report enumeration), report.md (the `Fix-and-rerun attempts used`
   template line + its rule bullet), `commands/validate.md`'s hard-rules
   line, `.github/prompts/validate.prompt.md` item 8 + its report line, and
-  README.md's summary sentence. Keep evals 6, 11, 12, 17 and 37 passing.
+  README.md's summary sentence. `scripts/check.mjs` backs this one up: a
+  retry-ceiling sentinel over the nine carriers (check 7) and verbatim
+  lockstep on the `Fix-and-rerun attempts used` label across report.md, the
+  VS Code prompt and evals.json (check 10). Keep evals 6, 11, 12, 17 and 37
+  passing.
 - **Cut a release:** `node scripts/release.mjs <patch|minor|major|x.y.z>` —
   bumps the three manifests, verifies no stale version, rolls CHANGELOG,
   commits and tags (push left to you).

@@ -95,13 +95,31 @@ ever diverge, CI fails.
 
 Some rules have no covering fixture yet:
 
-- **`attempt 4 (consequential)`.** Reaching a fourth round needs three
-  genuinely *almost* fixable failures in sequence; a nondeterministic test
-  would make the suite itself flaky, and an unavailable-binary failure lands
-  in BLOCKED (already covered by eval 3) rather than the retry path. Eval 37
-  covers the deterministic half of the ceiling instead — that a consequential
-  fixture relocation spends no attempt — so only the past-the-ceiling
-  escape hatch and its three conditions stay unfixtured.
+- **The 3-attempt retry ceiling.** Driving an agent to the limit needs a
+  failure that is repeatedly *almost* fixable; a nondeterministic test would
+  make the suite itself flaky, and an unavailable-binary failure lands in
+  BLOCKED (already covered by eval 3) rather than the retry path. The ceiling
+  actually binding at 3 — stop, verdict FAIL, hand over — is as unfixtured
+  after eval 37 as before it: eval 37 grades the carve-out (`0/3`) and never
+  spends an attempt at all, and evals 6, 12 and 17 name "within 3 attempts"
+  only as one acceptable path.
+- **`attempt 4 (consequential)`.** Same blocker, one round further out: the
+  escape hatch and its three conditions need three genuinely almost-fixable
+  failures in sequence before they can fire.
+- **Proof repair charging an attempt.** Evals 11 and 12 grade the FAIL
+  verdict on a vacuous or non-detecting test, not the attempt accounting
+  after it; no fixture drives a run that repairs the proof and then shows the
+  charged count.
+- **One batch, one attempt.** No scenario makes the Tier 3 exercise an
+  analysis that emits findings about its own diff, so the rule that collapses
+  N findings into one attempt is unexercised. It is a *permissive* rule, which
+  is the kind worth listing here.
+- **Relocation used as cover for weakening.** Eval 37 grades the honest
+  relocation; no sibling fixture presents a case where the only way to green
+  the inert test is to loosen it or narrow its input. The guard is the
+  declaration duty in `evidence.md` (an undeclared relocation spends an
+  attempt, and the report must state what the test still proves), not a
+  fixture.
 - **Ambiguous output = FAIL.** A fixture whose runner output is genuinely
   ambiguous — garbled but not failing — without also being an unfair grading
   target is an open design problem.
@@ -134,7 +152,7 @@ Some rules have no covering fixture yet:
 - **The nonfunctional not-claimed line.** Eval 20 guards the claimed half
   (a named nonfunctional claim must be proven or explicitly declared
   unvalidated) and asserts the line's presence and dimension list on its
-  own scenario. The remaining gap is deliberate: the other thirty-six
+  own scenario. The remaining gap is deliberate: the remaining
   scenarios do not assert the always-present line — repeating a presence
   check on every report would grade rote boilerplate, not judgment.
 - **The never-run-locally prohibition.** Recipe entries listing commands
