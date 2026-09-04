@@ -7,6 +7,44 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.8.0] — 2026-09-04
+
+- **The retry ceiling counts self-repair, not consequences.** An attempt is
+  now defined by what the rerun changes: a fix-and-rerun spends one when it
+  alters what is asserted, or what the code under validation does, to turn a
+  failing check green — repairing a weak proof (a covering test that passes
+  pre-fix, a test that survives tampering) included. Relocating or adjusting
+  a fixture, setup, or harness that an intentional behavior change *already
+  validated in the same run* rendered inert spends nothing, provided no
+  assertion is loosened, removed, or skipped. Assertion changed → counts;
+  only where the setup lives changed → does not. Loosening one under cover
+  of a relocation stays a disguised FAIL.
+- **Self-review findings count per batch, not per finding.** When the Tier 3
+  runtime exercise is itself an analysis emitting findings about this very
+  diff — the session's own review, lint, or audit tool — one run's findings
+  are one batch and one attempt. Findings the batch's own new code provokes
+  are the next batch.
+- **`attempt 4 (consequential)`.** One round past the ceiling, available
+  once per run, and only when the previous round strictly reduced the set of
+  red checks, the remaining failure is diagnosed as a direct consequence of
+  a change validated this run rather than a new defect, and the correction
+  touches only test fixtures, setup, or documentation. It must be declared
+  in the report with its diagnosis and diff; undeclared, the report itself
+  is FAIL. There is no attempt 5.
+- **Every report states its budget.** A `Fix-and-rerun attempts used` line
+  is now part of the report template and is never omitted, even at `0/3` —
+  a green report says whether it was green on the first run or arrived after
+  repair.
+- **A guarding eval and the sync-map entry it never had.** New fixture `fixture-relocation` and
+  eval 37 (`fixture-relocation-not-an-attempt`) guard the carve-out: a
+  validated hardening strips repo-local host remapping, a pre-existing
+  test's seed goes inert, and the honest repair moves the seed without
+  touching an assertion or spending an attempt. The `attempt 4
+  (consequential)` half stays a documented Known gap. The ceiling also gains
+  the sync-map entry it never had, in `AGENTS.md` and the `validate-dev`
+  skill — it had been written once and left un-mapped, which is how it drifted
+  out of step with the rest of the contract.
+
 - **The relocation carve-out must be declared and shown.** A consequential
   relocation is no longer silent: the report names which validated change made
   what inert, carries the diff and the before/after captures, and states what
@@ -51,44 +89,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   6 pins the `Fix-and-rerun attempts used` line on a run that legitimately
   reaches a non-zero count. `CONTRIBUTING.md`'s fixture count and a stale
   scenario count in `evals/README.md` are corrected.
-
-## [0.8.0] — 2026-09-04
-
-- **The retry ceiling counts self-repair, not consequences.** An attempt is
-  now defined by what the rerun changes: a fix-and-rerun spends one when it
-  alters what is asserted, or what the code under validation does, to turn a
-  failing check green — repairing a weak proof (a covering test that passes
-  pre-fix, a test that survives tampering) included. Relocating or adjusting
-  a fixture, setup, or harness that an intentional behavior change *already
-  validated in the same run* rendered inert spends nothing, provided no
-  assertion is loosened, removed, or skipped. Assertion changed → counts;
-  only where the setup lives changed → does not. Loosening one under cover
-  of a relocation stays a disguised FAIL.
-- **Self-review findings count per batch, not per finding.** When the Tier 3
-  runtime exercise is itself an analysis emitting findings about this very
-  diff — the session's own review, lint, or audit tool — one run's findings
-  are one batch and one attempt. Findings the batch's own new code provokes
-  are the next batch.
-- **`attempt 4 (consequential)`.** One round past the ceiling, available
-  once per run, and only when the previous round strictly reduced the set of
-  red checks, the remaining failure is diagnosed as a direct consequence of
-  a change validated this run rather than a new defect, and the correction
-  touches only test fixtures, setup, or documentation. It must be declared
-  in the report with its diagnosis and diff; undeclared, the report itself
-  is FAIL. There is no attempt 5.
-- **Every report states its budget.** A `Fix-and-rerun attempts used` line
-  is now part of the report template and is never omitted, even at `0/3` —
-  a green report says whether it was green on the first run or arrived after
-  repair.
-- **A guarding eval and the sync-map entry it never had.** New fixture `fixture-relocation` and
-  eval 37 (`fixture-relocation-not-an-attempt`) guard the carve-out: a
-  validated hardening strips repo-local host remapping, a pre-existing
-  test's seed goes inert, and the honest repair moves the seed without
-  touching an assertion or spending an attempt. The `attempt 4
-  (consequential)` half stays a documented Known gap. The ceiling also gains
-  the sync-map entry it never had, in `AGENTS.md` and the `validate-dev`
-  skill — it had been written once and left un-mapped, which is how it drifted
-  out of step with the rest of the contract.
 
 ## [0.7.0] — 2026-08-13
 
