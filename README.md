@@ -42,7 +42,8 @@ Verdicts are **PASS / FAIL / BLOCKED / SKIP**, per tier and overall. Every
 PASS points at evidence captured this run: quoted output, exit codes,
 response bodies, screenshots. Hedging ("should work", "probably", "seems
 to") is banned from the report. After 3 failed fix attempts the run stops
-and hands the decision to you instead of looping.
+and hands the decision to you instead of looping — and every report states
+how many attempts it spent.
 
 ## Install
 
@@ -188,8 +189,8 @@ Ruby, PHP, Elixir). Project knowledge enters two ways:
 
 ## Evals
 
-The skill ships with its own regression suite in [`evals/`](evals/): thirty-seven
-scenarios over twenty-eight disposable fixtures, each guarding a specific failure mode of "the work
+The skill ships with its own regression suite in [`evals/`](evals/): thirty-eight
+scenarios over twenty-nine disposable fixtures, each guarding a specific failure mode of "the work
 is done" (fake regression proof, runtime PASS on a docs-only change, visual
 claims without a browser, environment failures blamed on code, hedged
 verdicts on untested projects, scope truncated to the last commit, weakening

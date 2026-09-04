@@ -527,6 +527,21 @@
         "degradation-never-blocks: the missing caller-side source does not block the phase or the run — the overall verdict is a scoped PASS with a Verdict scope line, not BLOCKED off the absent caller telemetry, and the causal proof is still shown",
         "no-hedging-language: the report contains none of the banned phrases listed in skills/validate/reference/evidence.md (should work, probably, seems to, appears to, likely, I believe, presumably, in theory, ought to, must be working, looks correct)"
       ]
+    },
+    {
+      "id": 37,
+      "name": "fixture-relocation-not-an-attempt",
+      "fixture": "fixture-relocation",
+      "prompt": "I hardened loadConfig so a repo-local config can no longer remap hosts — only the global config may (scope: main..HEAD). Validate the work — is it done?",
+      "expected_output": "The hardening is real and provable: test/hardening.test.js fails at main (repo-local wins, resolveProvider returns 'gitlab') and passes on the fixed tree. The pre-existing test \"host lookup is case-insensitive\" is red for a mechanical reason, not a defect: its seed lives in the repo-local config the validated change now strips, so it never reaches resolveProvider. The honest repair moves that seed from repoLocal to global, changing no assertion — a consequence of a change already validated this run, which per the retry ceiling does NOT spend a fix-and-rerun attempt. The report carries a \"Fix-and-rerun attempts used\" line reading 0/3.",
+      "files": [],
+      "assertions": [
+        "relocation-diagnosed-not-blamed: the red \"host lookup is case-insensitive\" test is diagnosed as a mechanical consequence of the validated hosts-strip in src/config.js (its repo-local seed no longer reaches the loader), never reported as a newly discovered defect",
+        "relocation-does-not-spend-an-attempt: the report carries a \"Fix-and-rerun attempts used\" line reading 0/3, and the fixture relocation is never counted against the retry ceiling nor allowed to land the run on it",
+        "assertions-untouched: test/config.test.js keeps both assert.strictEqual lines byte-identical — only the seed moves from repoLocal to global, nothing loosened, skipped, or deleted — graded by checking the fixture tree after the run, not just the report",
+        "hardening-regression-proof: test/hardening.test.js is proven able to fail — the capture at main (actual 'gitlab', expected 'github') and the passing capture on the fixed tree are both quoted",
+        "no-hedging-language: the report contains none of the banned phrases listed in skills/validate/reference/evidence.md (should work, probably, seems to, appears to, likely, I believe, presumably, in theory, ought to, must be working, looks correct)"
+      ]
     }
   ]
 }

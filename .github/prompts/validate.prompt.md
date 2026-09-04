@@ -83,7 +83,15 @@ otherwise apply this compressed contract:
    `SKIP (user-waived)` — the last only from the user's own words, quoted;
    never self-waived.
 8. **Honesty**: never weaken a check to pass it. At most 3 fix-and-rerun
-   attempts, then stop and report FAIL. Banned in your conclusions: "should
+   attempts, then stop and report FAIL — a rerun counts when it changes an
+   assertion or the code under validation to turn a failing check green
+   (repairing a weak proof included); relocating a fixture that a change
+   already validated this run made inert does not, provided no assertion is
+   loosened, removed, or skipped, and one self-review batch counts once, not
+   once per finding. One declared `attempt 4 (consequential)` is allowed
+   when the last round strictly reduced the red checks, the remaining
+   failure is a diagnosed consequence of a validated change, and only test
+   fixtures/setup or docs are touched. Banned in your conclusions: "should
    work", "probably", "seems to", "appears to", "likely", "I believe", …
    (canonical list: `skills/validate/reference/evidence.md`).
 
@@ -91,5 +99,6 @@ Report: overall verdict, per-tier table (Tier | Verdict | What ran |
 Evidence), a claims table (Claim | Verdict | Evidence — one row per declared
 claim), a deployed-evidence status table and a Verdict scope line when that
 phase ran, a "Not validated" line matching the declared gaps and naming the
-nonfunctional dimensions no claim covered, then the evidence appendix with
-captures quoted.
+nonfunctional dimensions no claim covered, a "Fix-and-rerun attempts used"
+line (always present, even at 0/3), then the evidence appendix with captures
+quoted.

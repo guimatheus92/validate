@@ -84,6 +84,15 @@ and gets a full validation.
   production is not proof of customer traffic; reconcile the two sides
   or name the gap. Procedure: the skill's reference/deployed-evidence.md.
 - At most 3 fix-and-rerun attempts, then stop and report FAIL with all
-  evidence for the human to decide. Missing environment is BLOCKED with
-  the missing piece named — never fabricate an env value, credential, or
-  stub to make a check run.
+  evidence for the human to decide; the report always states the count. A
+  rerun spends an attempt when it changes an assertion or the code under
+  validation to turn a failing check green (repairing a weak proof
+  included) — relocating a fixture that a change already validated this run
+  made inert does not, as long as no assertion is loosened, and one
+  self-review batch counts once, not once per finding. One declared
+  `attempt 4 (consequential)` is allowed when the last round strictly
+  reduced the red checks, the rest is a diagnosed consequence of a
+  validated change, and only fixtures/setup or docs are touched (skill's
+  reference/evidence.md). Missing environment is BLOCKED with the missing
+  piece named — never fabricate an env value, credential, or stub to make a
+  check run.

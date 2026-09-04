@@ -42,7 +42,7 @@ reference files read on demand.
 - `.github/prompts/validate.prompt.md` — compressed contract for VS Code
   Copilot Chat users, who cannot load CLI plugins.
 - `evals/` — the skill's regression suite: `evals.json` (scenarios +
-  assertions) and `setup-fixtures.mjs` (builds the twenty-eight fixture
+  assertions) and `setup-fixtures.mjs` (builds the twenty-nine fixture
   repos). Re-run the evals after any change to `skills/` content.
 
 ## Key conventions
@@ -165,6 +165,17 @@ reference files read on demand.
   surfaces in the report (Next step vs Tier 3 evidence vs its own
   `## Runbook` section). Move both files in the same commit and keep
   eval 3 (short form stays short) and eval 19 (escalation) passing.
+- **Change the retry-ceiling rules:** the "## The retry ceiling" section of
+  `skills/validate/reference/evidence.md` is the source of truth (what
+  spends an attempt — including proof repair —, the fixture-relocation
+  carve-out, the one-batch rule for self-review findings, and the single
+  `attempt 4 (consequential)` with its three conditions), together with the
+  two proof-repair pointers inside the regression-proof modes. Compressed
+  carriers that must move in the same commit: SKILL.md (the Iron rule + the
+  Step 9 report enumeration), report.md (the `Fix-and-rerun attempts used`
+  template line + its rule bullet), `commands/validate.md`'s hard-rules
+  line, `.github/prompts/validate.prompt.md` item 8 + its report line, and
+  README.md's summary sentence. Keep evals 6, 11, 12, 17 and 37 passing.
 - **Cut a release:** `node scripts/release.mjs <patch|minor|major|x.y.z>` —
   bumps the three manifests, verifies no stale version, rolls CHANGELOG,
   commits and tags (push left to you).

@@ -25,7 +25,7 @@ refactor.
 ## Running the suite
 
 ```bash
-node evals/setup-fixtures.mjs <tmp-dir>    # builds the 28 fixture repos
+node evals/setup-fixtures.mjs <tmp-dir>    # builds the 29 fixture repos
 ```
 
 Then, for each eval in `evals.json`: give an agent the skill and the eval's
@@ -38,10 +38,10 @@ phrases listed in
 [`../skills/validate/reference/evidence.md`](../skills/validate/reference/evidence.md).
 The rest are graded by reading the report against the assertion text.
 
-## The thirty-seven scenarios
+## The thirty-eight scenarios
 
-Each one guards a specific failure mode of "the work is done" (thirty-seven
-scenarios over twenty-eight fixtures — `plan-only-mode` reuses `bi-coverage`;
+Each one guards a specific failure mode of "the work is done" (thirty-eight
+scenarios over twenty-nine fixtures — `plan-only-mode` reuses `bi-coverage`;
 evals 21, 22, 26, and 36 share `deployed-zero-rows`; 23 and 24 share
 `deployed-source-missing`; 27, 28, 29, and 31 share `deployed-incidence`;
 32 and 33 share `caller-route-not-used`):
@@ -85,6 +85,7 @@ evals 21, 22, 26, and 36 share `deployed-zero-rows`; 23 and 24 share
 | 34 | `test-telemetry-in-production-table` | classifying rows as customer traffic because an env column says production — test markers beat the environment tag |
 | 35 | `caller-service-disagreement` | resolving a caller/service telemetry disagreement by assumption — unresolved rows stay TEST or UNKNOWN and impact stays UNPROVEN |
 | 36 | `caller-reachability-qualified-when-no-source` | silently omitting the caller side (or blocking the whole phase) when no caller-side source exists — the common degraded case gets a qualified row and service evidence proceeds |
+| 37 | `fixture-relocation-not-an-attempt` | spending a fix-and-rerun attempt on — or hard-failing over — a test fixture that a change already validated this run made inert; relocating the seed changes no assertion and costs no attempt |
 
 The banned-language list quoted in every `no-hedging-language` assertion is
 machine-checked against `evidence.md` by `scripts/check.mjs` — if the two
@@ -94,10 +95,13 @@ ever diverge, CI fails.
 
 Some rules have no covering fixture yet:
 
-- **The 3-attempt retry ceiling.** Driving an agent to the limit needs a
-  failure that is repeatedly *almost* fixable; a nondeterministic test would
-  make the suite itself flaky, and an unavailable-binary failure lands in
-  BLOCKED (already covered by eval 3) rather than the retry path.
+- **`attempt 4 (consequential)`.** Reaching a fourth round needs three
+  genuinely *almost* fixable failures in sequence; a nondeterministic test
+  would make the suite itself flaky, and an unavailable-binary failure lands
+  in BLOCKED (already covered by eval 3) rather than the retry path. Eval 37
+  covers the deterministic half of the ceiling instead — that a consequential
+  fixture relocation spends no attempt — so only the past-the-ceiling
+  escape hatch and its three conditions stay unfixtured.
 - **Ambiguous output = FAIL.** A fixture whose runner output is genuinely
   ambiguous — garbled but not failing — without also being an unfair grading
   target is an open design problem.

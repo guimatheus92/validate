@@ -180,6 +180,48 @@ form surfaces (Next step vs Tier 3 evidence vs its own `## Runbook`
 section). Same commit; eval 3 guards the short form staying short, eval 19
 guards the escalation.
 
+### Retry ceiling
+
+Source of truth: the "## The retry ceiling" section of
+`skills/validate/reference/evidence.md`. It defines four things, and a
+carrier that carries only the number `3` has already drifted:
+
+- **what spends an attempt** — a rerun that changes what is asserted or
+  what the code under validation does, to turn a failing check green;
+  repairing a weak proof (a covering test that passes pre-fix, a test that
+  survives tampering) spends one too, which is why the two pointers inside
+  the regression-proof modes must move with this section;
+- **what does not** — relocating or adjusting a fixture, setup, or harness
+  that an intentional behavior change already validated in the same run
+  rendered inert, provided no assertion is loosened, removed, or skipped.
+  Assertion changed → counts; only where the setup lives changed → does
+  not;
+- **one batch, one attempt** — findings emitted by a self-review the
+  validation itself ran (a review/lint/audit tool driven against this very
+  diff as the Tier 3 exercise) are one batch per run, never one attempt
+  per finding;
+- **`attempt 4 (consequential)`** — one extra round past the ceiling, only
+  when the previous round strictly reduced the red checks, the remaining
+  failure is a diagnosed consequence of a validated change rather than a
+  new defect, and the fix touches only test fixtures/setup or docs. It must
+  be declared with its diagnosis and diff; undeclared, the report itself is
+  FAIL. There is no attempt 5.
+
+Compressed carriers to move in the same commit:
+
+- `skills/validate/SKILL.md` — the Iron rule and the Step 9 report
+  enumeration
+- `skills/validate/reference/report.md` — the `Fix-and-rerun attempts used`
+  template line and its rule bullet (always present, even at `0/3`)
+- `commands/validate.md` — the hard-rules line
+- `.github/prompts/validate.prompt.md` — item 8 and the report line
+- `README.md` — the user-facing summary sentence
+
+Eval 37 (`fixture-relocation-not-an-attempt`) guards the carve-out; evals
+6, 11, 12 and 17 guard that the ceiling still binds where it should. The
+`attempt 4 (consequential)` half is deliberately unfixtured — see Known
+gaps in `evals/README.md`.
+
 ### Version lockstep
 
 `plugin.json`, `.claude-plugin/plugin.json` (byte-identical to root), and

@@ -36,6 +36,9 @@ ending with the nonfunctional dimensions no claim covered (security,
 performance, scale, compatibility, reliability, deployment) — this line is
 never omitted>
 
+**Fix-and-rerun attempts used**: <n>/3<, plus attempt 4 (consequential) —
+<which validated change made what inert, and the diff applied>>
+
 ## Evidence
 
 ### Tier 1
@@ -119,6 +122,16 @@ Rules:
   FAIL, never silently absent. A nonfunctional claim (faster, safer, scales
   further) follows the same rule: measured evidence or an explicit
   SKIP/BLOCKED reason, never a verdict from reasoning alone.
+- **Fix-and-rerun attempts used is always present**, even at `0/3` — the
+  reader learns whether a green report was green on the first run or arrived
+  after repair. Count per [evidence.md](evidence.md)'s retry ceiling: a rerun
+  that changes an assertion or the code under validation counts (repairing a
+  weak proof included); relocating a fixture that a change validated this run
+  made inert does not, as long as no assertion is loosened, removed, or
+  skipped; one self-review batch counts once, not once per finding. A fourth
+  round appears only as the labeled `attempt 4 (consequential)` carrying its
+  diagnosis and diff — an undeclared fourth round makes the report itself
+  FAIL.
 - On FAIL or BLOCKED, end with a short **Next step** line: the exact failing
   command or missing prerequisite, and the decision the human needs to make.
 - A runtime claim that ends SKIP or BLOCKED for want of environment or
