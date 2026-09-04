@@ -25,7 +25,7 @@ refactor.
 ## Running the suite
 
 ```bash
-node evals/setup-fixtures.mjs <tmp-dir>    # builds the 28 fixture repos
+node evals/setup-fixtures.mjs <tmp-dir>    # builds the 29 fixture repos
 ```
 
 Then, for each eval in `evals.json`: give an agent the skill and the eval's
@@ -38,10 +38,10 @@ phrases listed in
 [`../skills/validate/reference/evidence.md`](../skills/validate/reference/evidence.md).
 The rest are graded by reading the report against the assertion text.
 
-## The thirty-seven scenarios
+## The thirty-eight scenarios
 
-Each one guards a specific failure mode of "the work is done" (thirty-seven
-scenarios over twenty-eight fixtures — `plan-only-mode` reuses `bi-coverage`;
+Each one guards a specific failure mode of "the work is done" (thirty-eight
+scenarios over twenty-nine fixtures — `plan-only-mode` reuses `bi-coverage`;
 evals 21, 22, 26, and 36 share `deployed-zero-rows`; 23 and 24 share
 `deployed-source-missing`; 27, 28, 29, and 31 share `deployed-incidence`;
 32 and 33 share `caller-route-not-used`):
@@ -85,6 +85,7 @@ evals 21, 22, 26, and 36 share `deployed-zero-rows`; 23 and 24 share
 | 34 | `test-telemetry-in-production-table` | classifying rows as customer traffic because an env column says production — test markers beat the environment tag |
 | 35 | `caller-service-disagreement` | resolving a caller/service telemetry disagreement by assumption — unresolved rows stay TEST or UNKNOWN and impact stays UNPROVEN |
 | 36 | `caller-reachability-qualified-when-no-source` | silently omitting the caller side (or blocking the whole phase) when no caller-side source exists — the common degraded case gets a qualified row and service evidence proceeds |
+| 37 | `fixture-relocation-not-an-attempt` | spending a fix-and-rerun attempt on — or hard-failing over — a test fixture that a change already validated this run made inert; relocating the seed changes no assertion and costs no attempt |
 
 The banned-language list quoted in every `no-hedging-language` assertion is
 machine-checked against `evidence.md` by `scripts/check.mjs` — if the two
@@ -97,7 +98,28 @@ Some rules have no covering fixture yet:
 - **The 3-attempt retry ceiling.** Driving an agent to the limit needs a
   failure that is repeatedly *almost* fixable; a nondeterministic test would
   make the suite itself flaky, and an unavailable-binary failure lands in
-  BLOCKED (already covered by eval 3) rather than the retry path.
+  BLOCKED (already covered by eval 3) rather than the retry path. The ceiling
+  actually binding at 3 — stop, verdict FAIL, hand over — is as unfixtured
+  after eval 37 as before it: eval 37 grades the carve-out (`0/3`) and never
+  spends an attempt at all, and evals 6, 12 and 17 name "within 3 attempts"
+  only as one acceptable path.
+- **`attempt 4 (consequential)`.** Same blocker, one round further out: the
+  escape hatch and its three conditions need three genuinely almost-fixable
+  failures in sequence before they can fire.
+- **Proof repair charging an attempt.** Evals 11 and 12 grade the FAIL
+  verdict on a vacuous or non-detecting test, not the attempt accounting
+  after it; no fixture drives a run that repairs the proof and then shows the
+  charged count.
+- **One batch, one attempt.** No scenario makes the Tier 3 exercise an
+  analysis that emits findings about its own diff, so the rule that collapses
+  N findings into one attempt is unexercised. It is a *permissive* rule, which
+  is the kind worth listing here.
+- **Relocation used as cover for weakening.** Eval 37 grades the honest
+  relocation; no sibling fixture presents a case where the only way to green
+  the inert test is to loosen it or narrow its input. The guard is the
+  declaration duty in `evidence.md` (an undeclared relocation spends an
+  attempt, and the report must state what the test still proves), not a
+  fixture.
 - **Ambiguous output = FAIL.** A fixture whose runner output is genuinely
   ambiguous — garbled but not failing — without also being an unfair grading
   target is an open design problem.
@@ -130,7 +152,7 @@ Some rules have no covering fixture yet:
 - **The nonfunctional not-claimed line.** Eval 20 guards the claimed half
   (a named nonfunctional claim must be proven or explicitly declared
   unvalidated) and asserts the line's presence and dimension list on its
-  own scenario. The remaining gap is deliberate: the other thirty-six
+  own scenario. The remaining gap is deliberate: the remaining
   scenarios do not assert the always-present line — repeating a presence
   check on every report would grade rote boilerplate, not judgment.
 - **The never-run-locally prohibition.** Recipe entries listing commands

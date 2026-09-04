@@ -2317,4 +2317,92 @@ test('most-used route ranks first', () => {
   'Add events service with usage summary',
 );
 
+// 29. fixture-relocation — an intentional, validated hardening (repo-local
+//     config may no longer remap hosts) makes a PRE-EXISTING test's seed
+//     inert: its fixture lives in the repo-local config the change now
+//     strips, so the test goes red without any defect existing. The honest
+//     repair moves the seed to the global config and touches no assertion —
+//     a mechanical consequence, not a fix-and-rerun attempt.
+repo(
+  'fixture-relocation',
+  {
+    'package.json': pkg('fixture-relocation'),
+    'src/config.js': `// Merge the repo-local config over the global one.
+export function loadConfig({ repoLocal = {}, global: globalCfg = {} } = {}) {
+  return {
+    ...globalCfg,
+    ...repoLocal,
+    hosts: { ...(globalCfg.hosts ?? {}), ...(repoLocal.hosts ?? {}) },
+  };
+}
+
+export function resolveProvider(host, config) {
+  return config.hosts?.[host.toLowerCase()] ?? 'unknown';
+}
+`,
+    'src/naming.js': `export function titleCase(text) {
+  return text
+    .split(' ')
+    .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
+    .join(' ');
+}
+`,
+    'test/config.test.js': `import test from 'node:test';
+import assert from 'node:assert';
+import { loadConfig, resolveProvider } from '../src/config.js';
+
+test('host lookup is case-insensitive', () => {
+  const config = loadConfig({ repoLocal: { hosts: { 'github.corp.example': 'github' } } });
+  assert.strictEqual(resolveProvider('GitHub.Corp.Example', config), 'github');
+});
+
+test('an unmapped host is unknown', () => {
+  const config = loadConfig({ global: { hosts: { 'github.corp.example': 'github' } } });
+  assert.strictEqual(resolveProvider('gitlab.corp.example', config), 'unknown');
+});
+`,
+    'test/naming.test.js': `import test from 'node:test';
+import assert from 'node:assert';
+import { titleCase } from '../src/naming.js';
+
+test('titleCase capitalizes each word', () => {
+  assert.strictEqual(titleCase('corp example'), 'Corp Example');
+});
+`,
+  },
+  [[
+    {
+      'src/config.js': `// Repo-local config is untrusted: a branch may not remap hosts. Only the
+// global config contributes \`hosts\`.
+export function loadConfig({ repoLocal = {}, global: globalCfg = {} } = {}) {
+  const { hosts: _ignored, ...safeRepoLocal } = repoLocal;
+  return {
+    ...globalCfg,
+    ...safeRepoLocal,
+    hosts: { ...(globalCfg.hosts ?? {}) },
+  };
+}
+
+export function resolveProvider(host, config) {
+  return config.hosts?.[host.toLowerCase()] ?? 'unknown';
+}
+`,
+      'test/hardening.test.js': `import test from 'node:test';
+import assert from 'node:assert';
+import { loadConfig, resolveProvider } from '../src/config.js';
+
+test('repo-local config cannot remap a host', () => {
+  const config = loadConfig({
+    repoLocal: { hosts: { 'github.corp.example': 'gitlab' } },
+    global: { hosts: { 'github.corp.example': 'github' } },
+  });
+  assert.strictEqual(resolveProvider('github.corp.example', config), 'github');
+});
+`,
+    },
+    'Harden loadConfig: repo-local config can no longer remap hosts',
+  ]],
+  'Add config loader with repo-local and global host maps',
+);
+
 console.log('all fixtures built');

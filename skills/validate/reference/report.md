@@ -36,6 +36,15 @@ ending with the nonfunctional dimensions no claim covered (security,
 performance, scale, compatibility, reliability, deployment) — this line is
 never omitted>
 
+**Fix-and-rerun attempts used**: <n>/3
+<only when a consequential relocation ran:>
+**Consequential relocations** (no attempt spent): <per relocation — which
+validated change made what inert, the diff applied, and what the test still
+proves>
+<only when a fourth round ran:>
+**attempt 4 (consequential)**: <which validated change made what inert, and
+the diff applied>
+
 ## Evidence
 
 ### Tier 1
@@ -119,6 +128,23 @@ Rules:
   FAIL, never silently absent. A nonfunctional claim (faster, safer, scales
   further) follows the same rule: measured evidence or an explicit
   SKIP/BLOCKED reason, never a verdict from reasoning alone.
+- **Fix-and-rerun attempts used is always present**, even at `0/3` — the
+  reader learns whether a green report was green on the first run or arrived
+  after repair. Count per [evidence.md](evidence.md)'s retry ceiling: a rerun
+  that changes an assertion or the code under validation counts (repairing a
+  weak proof included); relocating a fixture that a change validated this run
+  made inert does not, as long as no assertion is loosened, removed, or
+  skipped; one self-review batch — the findings of a single run of a review,
+  lint, or audit tool driven against this diff as the Tier 3 exercise —
+  counts once, not once per finding.
+- **A zero-cost round is still a declared round.** Every consequential
+  relocation appears under **Consequential relocations** with its diagnosis,
+  its diff, and what the test still proves, beside the before/after captures
+  in the Tier 2 appendix — otherwise a repaired run and a first-try-green run
+  print the same `0/3` and the reader cannot tell them apart. An undeclared
+  relocation is an undeclared fix: it spends an attempt. A fourth round
+  likewise appears only as the labeled `attempt 4 (consequential)` carrying
+  its diagnosis and diff — undeclared, the report itself is FAIL.
 - On FAIL or BLOCKED, end with a short **Next step** line: the exact failing
   command or missing prerequisite, and the decision the human needs to make.
 - A runtime claim that ends SKIP or BLOCKED for want of environment or

@@ -161,9 +161,19 @@ These hold everywhere, including your final message:
   it is not evidence. "It worked earlier in the session" means run it again.
 - **Ambiguous output is FAIL**, not PASS-with-a-shrug. If you cannot tell
   from the capture whether it worked, it didn't.
-- **Three fix attempts, total.** You may fix-and-rerun at most 3 times across
-  the whole validation. After that, stop and report FAIL with everything you
-  captured — the human decides next.
+- **Three fix attempts, total.** A fix-and-rerun spends an attempt when it
+  changes what is asserted, or what the code under validation does, to turn a
+  failing check green — repairing a weak proof included. It does not when you
+  relocate or adjust a fixture, setup, or harness that a change you already
+  validated this run made inert, no assertion is loosened, removed, or
+  skipped, the input keeps its strength, and you declare the relocation in
+  the report with its diagnosis and diff — undeclared, it spends an attempt.
+  One self-review batch — the findings of a single run of a review, lint, or
+  audit tool driven against this diff as the Tier 3 exercise — is one
+  attempt, not one per finding. After 3, stop and report FAIL with everything
+  you captured; the single exception is a declared `attempt 4
+  (consequential)`, under the three conditions in
+  [reference/evidence.md](reference/evidence.md).
 - **Never weaken a check to pass it.** Loosening an assertion, skipping or
   deleting a failing test, widening a lint ignore — each of those is a FAIL
   wearing a disguise, and you report it as FAIL.
@@ -203,8 +213,8 @@ Produce the final report exactly per
 [reference/report.md](reference/report.md): overall verdict first, per-tier
 table, per-claim verdict table, the deployed-evidence status table and
 Verdict scope line when the phase applied, declared-but-not-validated items
-with their reasons, evidence appendix. Print it verbatim — no summary prose
-above it, no hedging below it.
+with their reasons, the fix-and-rerun attempts used, evidence appendix.
+Print it verbatim — no summary prose above it, no hedging below it.
 
 ## Reference index
 
