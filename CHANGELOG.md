@@ -7,6 +7,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.8.0] — 2026-09-04
+
 - **The retry ceiling counts self-repair, not consequences.** An attempt is
   now defined by what the rerun changes: a fix-and-rerun spends one when it
   alters what is asserted, or what the code under validation does, to turn a
